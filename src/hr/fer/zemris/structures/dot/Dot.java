@@ -10,6 +10,10 @@ public class Dot {
 		this.values = new double[numOfArguments];
 		this.id = id;
 	}
+	public int getId()
+	{
+		return this.id;
+	}
 	public double getValue(int pos)
 	{
 		return this.values[pos];

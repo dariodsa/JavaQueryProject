@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
+import hr.fer.zemris.exceptions.InvalidStructureType;
 import hr.fer.zemris.exceptions.NumOfDotArguments;
 import hr.fer.zemris.structures.BinaryTree;
 import hr.fer.zemris.structures.BucketStructure;
@@ -29,6 +30,11 @@ public class Program
 	
 	private List<Dot> dots;
 	
+	private final double minValue = -180.0;
+	private final double maxValue = 180.0;
+	private final int numOfBuckets = 7000000; 
+	
+	private Structure[] S;
 	
 	public Program(int numOfDots, int numOfArguments, Path dotsPath, int structureType, double queryFactor, double changeFactor, int problemType) throws FileNotFoundException
 	{
@@ -41,31 +47,37 @@ public class Program
 		this.problemType = problemType;
 		
 		this.dots = new ArrayList<>();
+		this.S = new Structure[this.numOfArguments];
 		
 		if(!Files.exists(dotsPath))
 			throw new FileNotFoundException(dotsPath.toString());
 		
 	}
-	public void run() throws IOException, NumOfDotArguments
+	public void run() throws IOException, NumOfDotArguments, InvalidStructureType
 	{
 		initDots();
+		initStructure();
 		
-		Structure S = null;
-		switch (structureType) {
-		case 1:
-			S = new BucketStructure(minValue, maxValue, numOfBuckets);
-			break;
-		case 2:
-			S = new BinaryTree();
-			break;
-		default:
-			break;
-		}
-		
+		//set dots in their starting position
 		for(int i=0, len=dots.size(); i<len; ++i)
 		{
-			S.
+			double[] value = dots.get(i).getValues();
+			
+			for(int j=0, len2 = value.length; j<len2; ++j)
+				S[i].add(value[j], dots.get(i).getId());
 		}
+		
+	}
+	private void initStructure() throws InvalidStructureType {
+		
+		if(structureType==1)
+			for(int i=0;i<numOfArguments;++i)
+				S[i] = new BucketStructure(minValue, maxValue, numOfBuckets);
+		else if(structureType==2)
+			for(int i=0;i<numOfArguments;++i)
+				S[i] = new BinaryTree();
+		else 
+			throw new InvalidStructureType(structureType);
 		
 	}
 	private void initDots() throws IOException, NumOfDotArguments

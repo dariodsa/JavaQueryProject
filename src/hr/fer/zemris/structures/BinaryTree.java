@@ -14,10 +14,25 @@ public class BinaryTree extends TreeMap<Double, List<Integer>> implements Struct
 	{
 		super();
 	}
-	public void addOrUpdate(double oldValue, double newValue, Integer dot)
+	public void update(double oldValue, double newValue, Integer dot)
 	{
-		delete(oldValue,dot);
+		delete(oldValue, dot);
 		
+		add(newValue, dot);
+	}
+	
+	private void delete(double oldValue, Integer dot) 
+	{
+		if(!this.containsKey(oldValue))
+			return;
+		List<Integer> list = new ArrayList<>(this.get(oldValue));
+		list.remove(dot);
+		this.remove(oldValue);
+		
+		this.put(oldValue, list);	
+	}
+	public void add(double newValue, Integer dot)
+	{
 		List<Integer> tempList = new ArrayList<>();
 		tempList.add(dot);
 		
@@ -26,20 +41,11 @@ public class BinaryTree extends TreeMap<Double, List<Integer>> implements Struct
 			List<Integer> list = new ArrayList<>(this.get(newValue));
 			list.add(dot);
 			
-			this.remove(newValue);
+			this.remove(dot);
 			this.put(newValue, list);
 		}
 		else
 			this.put(newValue, tempList);
-	}
-	
-	private void delete(double oldValue, Integer dot) 
-	{
-		List<Integer> list = new ArrayList<>(this.get(oldValue));
-		list.remove(dot);
-		this.remove(oldValue);
-		
-		this.put(oldValue, list);	
 	}
 	public List<Integer> query(double min, double max)
 	{

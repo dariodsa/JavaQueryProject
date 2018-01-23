@@ -36,7 +36,13 @@ public class BucketStructure implements Structure{
 		return (int)(Math.abs(value - this.minValue) / sizePerBucket);
 	}
 	@Override
-	public void addOrUpdate(double oldValue, double newValue, Integer dot) 
+	public void add(double newValue, Integer dot)
+	{
+		int newBucket = getBucket(newValue);
+		this.buckets[newBucket].add(dot);
+	}
+	@Override
+	public void update(double oldValue, double newValue, Integer dot) 
 	{
 		int oldBucket = getBucket(oldValue);
 		int newBucket = getBucket(newValue);
