@@ -10,6 +10,7 @@ import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
+import hr.fer.zemris.exceptions.DimmensionException;
 import hr.fer.zemris.exceptions.InvalidStructureType;
 import hr.fer.zemris.exceptions.NumOfDotArguments;
 import hr.fer.zemris.structures.BinaryTree;
@@ -20,7 +21,7 @@ import hr.fer.zemris.structures.dot.Functions;
 
 public class Program 
 {
-	private int numOfDots;
+	
 	private int numOfArguments;
 	private int problemType;
 	private int structureType;
@@ -43,9 +44,8 @@ public class Program
 	
 	private Structure[] S;
 	
-	public Program(int numOfDots, int numOfArguments, Path dotsPath, int structureType, double queryFactor, double changeFactor, int problemType) throws FileNotFoundException
+	public Program(int numOfArguments, Path dotsPath, int structureType, double queryFactor, double changeFactor, int problemType) throws FileNotFoundException
 	{
-		this.numOfDots = numOfDots;
 		this.numOfArguments = numOfArguments;
 		this.dotsPath = dotsPath;
 		this.structureType = structureType;
@@ -70,7 +70,7 @@ public class Program
 			throw new FileNotFoundException(dotsPath.toString());
 		
 	}
-	public void run() throws IOException, NumOfDotArguments, InvalidStructureType
+	public void run() throws IOException, NumOfDotArguments, InvalidStructureType, DimmensionException
 	{
 		initDots();
 		
@@ -83,7 +83,7 @@ public class Program
 		long timeStarting = System.currentTimeMillis();
 		while(iter-->=0)
 		{
-			System.out.printf("Iterations remaining %d %n",iter);
+			System.out.printf("Iterations remaining %d %n",iter+1);
 			double randValue = rand.nextDouble();
 			if(randValue<changeFactor)
 				updatePosition();
@@ -143,13 +143,14 @@ public class Program
 		}
 		System.out.println("Dots are loaded.");
 	}
-	private void updatePosition()
+	private void updatePosition() throws DimmensionException
 	{
 		for(int i=0, len=dots.size(); i<len; ++i)
 		{
 			for(int j=0; j<numOfArguments; ++j)
 			{
 				double newValue = dots.get(i).getValue(j) + CHANGE_RATE * rand.nextGaussian();
+				
 				S[j].update(dots.get(i).getValue(j), newValue, dots.get(i).getId());
 			}
 		}

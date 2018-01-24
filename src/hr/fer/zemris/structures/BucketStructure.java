@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import hr.fer.zemris.exceptions.DimmensionException;
 import hr.fer.zemris.structures.dot.Dot;
 
 public class BucketStructure implements Structure{
@@ -42,8 +43,10 @@ public class BucketStructure implements Structure{
 		this.buckets[newBucket].add(dot);
 	}
 	@Override
-	public void update(double oldValue, double newValue, Integer dot) 
+	public void update(double oldValue, double newValue, Integer dot) throws DimmensionException 
 	{
+		if(!(minValue <= newValue && newValue <= maxValue))
+			throw new DimmensionException(newValue, minValue, maxValue); 
 		int oldBucket = getBucket(oldValue);
 		int newBucket = getBucket(newValue);
 		
@@ -52,8 +55,10 @@ public class BucketStructure implements Structure{
 	}
 
 	@Override
-	public List<Integer> query(double min, double max) 
+	public List<Integer> query(double min, double max) throws IllegalArgumentException 
 	{
+		if(max<min)
+			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
 		int firstBucket = getBucket(min);
 		int lastBucket = getBucket(max);
 		List<Integer> result = new ArrayList<>();

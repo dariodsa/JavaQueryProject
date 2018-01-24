@@ -20,7 +20,7 @@ public class Window extends JFrame{
 		setVisible(true);
 		Constants.init();
 	}
-	public void init()
+	public void initGUI()
 	{
 		comboStructure = new JComboBox<>(Constants.structureName);
 		

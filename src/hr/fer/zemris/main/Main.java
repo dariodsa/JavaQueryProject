@@ -13,9 +13,8 @@ import javax.swing.SwingUtilities;
 
 public class Main {
 
-	private static final int NUM_OF_ARG = 7;
+	private static final int NUM_OF_ARG = 6;
 	
-	private static int numOfDots;
 	private static Path dotsPath;
 	private static double queryFactor;
 	private static double changeFactor;
@@ -30,56 +29,58 @@ public class Main {
 		if(args.length != NUM_OF_ARG)
 		{
 			if(args[0].compareTo("--help")==0)
-				printHelp();
+				System.out.println(showHelp());
 			else 
 				System.out.println("Expected num of arguments to be "+NUM_OF_ARG);
 		}
 		
-		numOfDots = Integer.parseInt(args[0]);
-		dotsPath = Paths.get(args[1]);
-		numOfArgumentsPerDot = Integer.parseInt(args[2]);
+		dotsPath = Paths.get(args[0]);
+		numOfArgumentsPerDot = Integer.parseInt(args[1]);
 		
-		structureType = Integer.parseInt(args[3]);
+		structureType = Integer.parseInt(args[2]);
 		
 		queryFactor = Double.parseDouble(args[3]); 
 		changeFactor = Double.parseDouble(args[4]);
 		
-		problemType = Integer.parseInt(args[4]);
+		problemType = Integer.parseInt(args[5]);
 		
-		try {
-			SwingUtilities.invokeAndWait(
-					()->
-					{
-						Window frame = new Window(100,100);
-						frame.init();
-					}
-			);
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//runGUI();
 		
 		Program program;
 		try {
-			program = new Program(numOfDots, numOfArgumentsPerDot, dotsPath, structureType, queryFactor, changeFactor, problemType);
-			//program.run();
+			program = new Program(numOfArgumentsPerDot, dotsPath, structureType, queryFactor, changeFactor, problemType);
+			program.run();
 		
 		} catch (Exception ex) 
 		{
 			System.err.println(ex.getMessage());
 			ex.printStackTrace();
 		}
-		
-		
-		
+	
 	}
-	private static void printHelp()
+	private static void runGUI()
 	{
-		System.out.println("You should pass this arguments to the program.");
-		System.out.println("");
+		try {
+			SwingUtilities.invokeAndWait(
+					()->
+					{
+						Window frame = new Window(100,100);
+						frame.initGUI();
+					}
+			);
+		} catch (InvocationTargetException e) {
+			
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+	}
+	private static String showHelp()
+	{
+		/*System.out.println("You should pass this arguments to the program.");
+		System.out.println("");*/
+		return "";
 	}
 
 }

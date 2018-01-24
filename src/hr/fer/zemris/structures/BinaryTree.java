@@ -27,7 +27,6 @@ public class BinaryTree extends TreeMap<Double, List<Integer>> implements Struct
 			return;
 		List<Integer> list = new ArrayList<>(this.get(oldValue));
 		list.remove(dot);
-		this.remove(oldValue);
 		
 		this.put(oldValue, list);	
 	}
@@ -47,8 +46,10 @@ public class BinaryTree extends TreeMap<Double, List<Integer>> implements Struct
 		else
 			this.put(newValue, tempList);
 	}
-	public List<Integer> query(double min, double max)
+	public List<Integer> query(double min, double max) throws IllegalArgumentException
 	{
+		if(max<min)
+			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
 		SortedMap<Double,List<Integer>> sortedMap = this.subMap(min, max);
 		Collection<List<Integer>> list = sortedMap.values();
 		
