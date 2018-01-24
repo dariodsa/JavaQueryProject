@@ -35,4 +35,12 @@ public class Dot {
 		}
 		return false;
 	}
+	@Override
+	public Dot clone()
+	{
+		Dot clone = new Dot(this.values.length,this.id);
+		for(int i=0;i<this.values.length;++i)
+			clone.setValue(i, getValue(i));
+		return clone;
+	}
 }

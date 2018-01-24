@@ -24,6 +24,8 @@ public class Main {
 
 	private static int structureType;
 	
+	private static Window frame;
+	
 	public static void main(String[] args) 
 	{
 		if(args.length != NUM_OF_ARG)
@@ -44,12 +46,18 @@ public class Main {
 		
 		problemType = Integer.parseInt(args[5]);
 		
-		//runGUI();
+		runGUI();
 		
 		Program program;
 		try {
 			program = new Program(numOfArgumentsPerDot, dotsPath, structureType, queryFactor, changeFactor, problemType);
+			
+			SwingUtilities.invokeAndWait(()->
+			{
+				frame.picture.updatePicture(program.getDots());
+			});
 			program.run();
+			
 		
 		} catch (Exception ex) 
 		{
@@ -64,7 +72,7 @@ public class Main {
 			SwingUtilities.invokeAndWait(
 					()->
 					{
-						Window frame = new Window(100,100);
+						frame = new Window(800,500);
 						frame.initGUI();
 					}
 			);

@@ -37,14 +37,14 @@ public class Program
 	private final double[] maxValue;
 	private final int numOfBuckets = 70000; 
 	
-	private final double CHANGE_RATE = 0.5;
+	private final double CHANGE_RATE = 0.01;
 	private final int ITERATIONS = 5;
 	
 	private Random rand = new Random();
 	
 	private Structure[] S;
 	
-	public Program(int numOfArguments, Path dotsPath, int structureType, double queryFactor, double changeFactor, int problemType) throws FileNotFoundException
+	public Program(int numOfArguments, Path dotsPath, int structureType, double queryFactor, double changeFactor, int problemType) throws IOException, NumOfDotArguments, InvalidStructureType
 	{
 		this.numOfArguments = numOfArguments;
 		this.dotsPath = dotsPath;
@@ -69,15 +69,14 @@ public class Program
 		if(!Files.exists(dotsPath))
 			throw new FileNotFoundException(dotsPath.toString());
 		
-	}
-	public void run() throws IOException, NumOfDotArguments, InvalidStructureType, DimmensionException
-	{
 		initDots();
-		
 		initStructure();
-		
 		//set dots in their starting position
 		setDotsPosition();
+	}
+	public void run() throws DimmensionException
+	{
+		
 		
 		int iter = ITERATIONS;
 		long timeStarting = System.currentTimeMillis();
@@ -134,11 +133,11 @@ public class Program
 				throw new NumOfDotArguments(numOfLine);
 			double[] values = new double[strValues.length];
 			int iter = 0;
+			Dot dot = new Dot(numOfArguments , numOfLine-1);
 			for(String strValue : strValues)
 			{
-				values[iter++] = Double.parseDouble(strValue);
+				dot.setValue(iter++, Double.parseDouble(strValue));
 			}
-			Dot dot = new Dot(numOfArguments , numOfLine-1);
 			dots.add(dot);
 		}
 		System.out.println("Dots are loaded.");
@@ -172,5 +171,9 @@ public class Program
 			for(int i=1;i<numOfArguments;++i)
 				finalList = Functions.intersection(finalList, result[i]);
 		}
+	}
+	public List<Dot> getDots()
+	{
+		return this.dots;
 	}
 }
