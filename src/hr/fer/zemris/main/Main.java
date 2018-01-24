@@ -1,8 +1,15 @@
 package hr.fer.zemris.main;
 
 import java.io.FileNotFoundException;
+
+import hr.fer.zemris.graphics.*;
+
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 public class Main {
 
@@ -39,11 +46,26 @@ public class Main {
 		
 		problemType = Integer.parseInt(args[4]);
 		
+		try {
+			SwingUtilities.invokeAndWait(
+					()->
+					{
+						Window frame = new Window(100,100);
+						frame.init();
+					}
+			);
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		Program program;
 		try {
 			program = new Program(numOfDots, numOfArgumentsPerDot, dotsPath, structureType, queryFactor, changeFactor, problemType);
-			program.run();
+			//program.run();
 		
 		} catch (Exception ex) 
 		{

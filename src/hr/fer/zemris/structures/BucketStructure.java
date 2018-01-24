@@ -70,6 +70,7 @@ public class BucketStructure implements Structure{
 	{
 		for(int i=0; i<numOfBuckets; ++i)
 		{
+			//System.out.printf("%d %d %n",i,numOfBuckets);
 			this.buckets[i] = new ArrayList<>();
 		}
 	}

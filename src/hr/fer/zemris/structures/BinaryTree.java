@@ -41,7 +41,7 @@ public class BinaryTree extends TreeMap<Double, List<Integer>> implements Struct
 			List<Integer> list = new ArrayList<>(this.get(newValue));
 			list.add(dot);
 			
-			this.remove(dot);
+			//this.remove(newValue);
 			this.put(newValue, list);
 		}
 		else
