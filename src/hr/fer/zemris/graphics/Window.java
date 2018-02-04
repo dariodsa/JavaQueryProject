@@ -1,5 +1,6 @@
 package hr.fer.zemris.graphics;
 
+import hr.fer.zemris.graphics.component.IpTable;
 import hr.fer.zemris.graphics.component.PPicture;
 import hr.fer.zemris.graphics.constants.Constants;
 import hr.fer.zemris.graphics.constants.StructureType;
@@ -35,10 +36,9 @@ public class Window extends JFrame{
 		
 		tabs.addTab("Postavke", getDataTab());
 		tabs.addTab("Slika", getPictureTab());
+		tabs.addTab("Radilice", getComputersInfo());
 		
 		add(tabs);
-		
-		
 	}
 	private JComponent getDataTab() {
 		
@@ -53,6 +53,13 @@ public class Window extends JFrame{
 		picture = new PPicture(getWidth(),getHeight());
 		//panel.add(new JButton("Button2"));
 		panel.add(picture);
+		return panel;
+	}
+	private JComponent getComputersInfo()
+	{
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setSize(getWidth(),getHeight());
+		panel.add(new IpTable());
 		return panel;
 	}
 }

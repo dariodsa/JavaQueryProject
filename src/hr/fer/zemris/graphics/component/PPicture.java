@@ -26,7 +26,7 @@ public class PPicture extends JPanel {
 		setVisible(true);
 		repaint();
 		add(new JButton("mirko"));
-		setSize(width, height);
+		//setSize(width, height);
 		this.width = width;
 		this.height = height;
 	}
@@ -48,7 +48,9 @@ public class PPicture extends JPanel {
 		//g.clearRect(0, 0, width, height);
 		super.paintComponent(g);
 		g.setColor(Color.RED);
-		System.out.println(dots.size() + " "+width+ " "+height);
+		this.height = getSize().height;
+		this.width  = getSize().width;
+		System.out.println("Dots num: "+dots.size());
 		for(Dot D : dots)
         {
         	int y = getPixel(-90, 90, height, -D.getValue(0));

@@ -56,7 +56,7 @@ public class Main {
 			{
 				frame.picture.updatePicture(program.getDots());
 			});
-			program.run();
+			//program.run();
 			
 		
 		} catch (Exception ex) 
@@ -72,7 +72,7 @@ public class Main {
 			SwingUtilities.invokeAndWait(
 					()->
 					{
-						frame = new Window(800,500);
+						frame = new Window(1300,700);
 						frame.initGUI();
 					}
 			);

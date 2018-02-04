@@ -161,7 +161,7 @@ public class Program
 			List<Integer>[] result = new ArrayList[numOfArguments];
 			for(int i=0;i<numOfArguments;++i)
 			{
-				double diff = Math.abs(maxValue[i]-minValue[i] - 50);
+				double diff = Math.abs(maxValue[i]-minValue[i] - 15);
 				double min = rand.nextDouble()*diff + minValue[i];
 				double max = min + 15;
 				result[i] = new ArrayList<>();
