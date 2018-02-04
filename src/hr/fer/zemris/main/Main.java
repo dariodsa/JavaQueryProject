@@ -1,10 +1,14 @@
 package hr.fer.zemris.main;
 
-import java.io.FileNotFoundException;
+import java.io.*;
 
 import hr.fer.zemris.graphics.*;
+import hr.fer.zemris.network.Network;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -44,13 +48,14 @@ public class Main {
 		queryFactor = Double.parseDouble(args[3]); 
 		changeFactor = Double.parseDouble(args[4]);
 		
-		problemType = Integer.parseInt(args[5]);
 		
-		runGUI();
+		
+		if(args[5].length()==1)
+			runGUI();
 		
 		Program program;
 		try {
-			program = new Program(numOfArgumentsPerDot, dotsPath, structureType, queryFactor, changeFactor, problemType);
+			program = new Program(numOfArgumentsPerDot, dotsPath, structureType, queryFactor, changeFactor);
 			
 			SwingUtilities.invokeAndWait(()->
 			{
@@ -64,7 +69,34 @@ public class Main {
 			System.err.println(ex.getMessage());
 			ex.printStackTrace();
 		}
-	
+		
+		
+		/*Thread T = new Thread(
+				()->{
+					Socket echoSocket;
+					try {
+						
+						InetAddress host = InetAddress.getLocalHost();
+						System.out.println(host.getHostName());
+						//echoSocket = new Socket(host.getHostName(),2001);
+						for(int i=0; i<1500;i++){
+							echoSocket = new Socket(host.getHostName(),2001);
+						OutputStream out = new BufferedOutputStream(echoSocket.getOutputStream());
+					    //    new PrintWriter(echoSocket.getOutputStream(), true);
+						out.write(1500-i);
+						out.flush();
+						out.close();
+						System.out.println("42");
+						
+						}
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				});
+		T.start();
+		Network.socketTest(2001);*/
+		
 	}
 	private static void runGUI()
 	{
@@ -72,7 +104,7 @@ public class Main {
 			SwingUtilities.invokeAndWait(
 					()->
 					{
-						frame = new Window(1300,700);
+						frame = new Window(700,400);
 						frame.initGUI();
 					}
 			);

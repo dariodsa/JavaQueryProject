@@ -4,16 +4,13 @@ import hr.fer.zemris.exceptions.ComputerIsNotFound;
 import hr.fer.zemris.exceptions.DuplicateComputerName;
 import hr.fer.zemris.exceptions.InvalidIpAddress;
 import hr.fer.zemris.graphics.component.ip.*;
-import hr.fer.zemris.graphics.constants.GraphicsConstants;
 import hr.fer.zemris.network.*;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.LayoutManager;
 import java.io.IOException;
 
 import javax.swing.*;
-import javax.swing.table.*;
 
 public class IpTable extends JPanel {
 
@@ -43,6 +40,7 @@ public class IpTable extends JPanel {
 		
 		
 		table = new DataTable();
+		
 		JScrollPane pane = new JScrollPane(table);
 		
 		add(btnAddIp,BorderLayout.NORTH);
@@ -81,8 +79,11 @@ public class IpTable extends JPanel {
 				table.model.addRow(new RowItem(
 						addNewComputer.computerName.getText(),
 						addNewComputer.ipAddress.getText(),
+						"",
+						"7654",
 						new JButton("ok")));
-				update(getGraphics());
+				
+				table.repaint();
 			} catch (InvalidIpAddress | DuplicateComputerName | ComputerIsNotFound e) {
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}

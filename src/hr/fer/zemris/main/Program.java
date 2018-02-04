@@ -23,7 +23,6 @@ public class Program
 {
 	
 	private int numOfArguments;
-	private int problemType;
 	private int structureType;
 	
 	private double changeFactor;
@@ -44,14 +43,13 @@ public class Program
 	
 	private Structure[] S;
 	
-	public Program(int numOfArguments, Path dotsPath, int structureType, double queryFactor, double changeFactor, int problemType) throws IOException, NumOfDotArguments, InvalidStructureType
+	public Program(int numOfArguments, Path dotsPath, int structureType, double queryFactor, double changeFactor) throws IOException, NumOfDotArguments, InvalidStructureType
 	{
 		this.numOfArguments = numOfArguments;
 		this.dotsPath = dotsPath;
 		this.structureType = structureType;
 		this.queryFactor = queryFactor;
 		this.changeFactor = changeFactor;
-		this.problemType = problemType;
 		
 		this.dots = new ArrayList<>();
 		

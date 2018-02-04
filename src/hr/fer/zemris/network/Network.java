@@ -1,6 +1,9 @@
 package hr.fer.zemris.network;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.net.*;
 
 public class Network {
@@ -31,6 +34,24 @@ public class Network {
 			}
 		}
 		return null;
+	}
+	public static void socketTest(int port)
+	{
+		try{
+		ServerSocket serverSocket = new ServerSocket(port);
+		while(true)
+		{
+			System.out.println("Waiting for client request");
+			Socket clientSocket = serverSocket.accept();
+			InputStream ois = new BufferedInputStream(clientSocket.getInputStream());
+			int message = (int)ois.read();
+			System.out.println("I see ... "+message);
+			if(message==0) break;
+		}
+		System.out.println("Shutting down Socket server!!");
+        serverSocket.close();
+		}
+		catch(Exception e){}
 	}
 	
 }
