@@ -1,42 +1,41 @@
 package hr.fer.zemris.graphics;
 
+import hr.fer.zemris.exceptions.DotFileIsNotSet;
+import hr.fer.zemris.exceptions.DotFileNotFound;
+import hr.fer.zemris.exceptions.MinMaxValuesAreNotSet;
 import hr.fer.zemris.graphics.component.IpTable;
 import hr.fer.zemris.graphics.component.MultiValueChoose;
 import hr.fer.zemris.graphics.component.PPicture;
 import hr.fer.zemris.graphics.constants.Constants;
 import hr.fer.zemris.graphics.constants.StructureType;
+import hr.fer.zemris.structures.Parametars;
+import hr.fer.zemris.thread.MasterMethod;
 
-
-
-
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 
 import java.nio.file.Paths;
 
-
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileSystemView;
 
 public class Window extends JFrame{
 	
 	private JSlider moveFactor;
 	private JSlider queryFactor;
 	private JTextField bucketNumber;
+	JButton minMaxValue = new JButton("temp"); //todo remove
 	private Path dotFile;
 	private JButton fileButton;
 	private JLabel moveFactorValue;
 	private JLabel queryFactorValue;
 	private JComboBox<String> structureType;
+	
+	private Values V = new Values();
+	private int numOfComponent = 0;
 	
 	public PPicture picture;
 	
@@ -57,6 +56,7 @@ public class Window extends JFrame{
 		moveFactor  = new JSlider(0,100);
 		queryFactor = new JSlider(0,100);
 		bucketNumber = new JTextField(3);
+		bucketNumber.setText("100");
 		bucketNumber.addKeyListener(new KeyListener() {
 			
 			public void keyTyped(KeyEvent e) {}
@@ -91,7 +91,7 @@ public class Window extends JFrame{
 		
 		add(tabs);
 	}
-	private JComponent getDataTab() {
+	private JComponent getDataTab(){
 		
 		JPanel panel = new JPanel(new BorderLayout());
 		
@@ -110,20 +110,43 @@ public class Window extends JFrame{
 				dotFile = Paths.get(fc.getSelectedFile().getPath());
 				JOptionPane.showMessageDialog(this, "File loaded.");
 				fileButton.setText(dotFile.getFileName().toString());
+				try {
+					numOfComponent = Files.readAllLines(dotFile).get(0).split(",").length;
+					minMaxValue.setEnabled(true);
+				}
+				 catch (Exception e1) {
+					 JOptionPane.showMessageDialog(this,new DotFileNotFound(fc.getSelectedFile().getAbsolutePath()).getMessage());
+				}
+				
+				
 			}
 		});
 		rightFactors.add(groupComponents(
 				new JLabel("Dot's file: "),
 				fileButton
 				));
-		JButton t = new JButton("temp"); //todo remove
-		t.addActionListener((e)->{
-			JPanel M = new MultiValueChoose("naziv", "poruka", 2);
-			JOptionPane.showConfirmDialog(this, M);
+		
+		minMaxValue.setEnabled(false);
+		minMaxValue.addActionListener((e)->{
+			MultiValueChoose M = new MultiValueChoose("naziv", "poruka", numOfComponent);
+			int result = JOptionPane.showConfirmDialog(this, M);
+			if(result == JOptionPane.YES_OPTION)
+			{
+				double[] minValues; 
+				double[] maxValues;
+				try {
+					minValues = M.getMinValue();
+					maxValues = M.getMaxValue();
+					V.setMinMaxValue(minValues, maxValues);
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(this, e1.getMessage());
+				}
+				
+			}
 		});
 		rightFactors.add(groupComponents(
 				new JLabel("Dots size: "),
-				t
+				minMaxValue
 				));
 		rightFactors.add(groupComponents(
 				new JLabel("QueryFactor"),
@@ -140,9 +163,17 @@ public class Window extends JFrame{
 				new JLabel("Number of buckets"),
 				bucketNumber));
 		JButton btnOk = new JButton("Run");
+		btnOk.addActionListener((e)->{btnOkClick();});
 		rightFactors.add(btnOk);
 		
 		panel.add(rightFactors,BorderLayout.EAST);
+		
+		JTextArea logOutput = new JTextArea("mirko\n%n mirko\n%n  mirko\n a"); //todo issue with panel size, need to change main layout manager
+		logOutput.setEditable(false);
+		logOutput.setVisible(true);
+		JScrollPane js = new JScrollPane(logOutput);
+		js.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		panel.add(js,BorderLayout.SOUTH);
 		return panel;
 	}
 	private JComponent getPictureTab() {
@@ -168,5 +199,60 @@ public class Window extends JFrame{
 		for(int i=0;i<components.length;++i)
 			panel.add(components[i]);
 		return panel;
+	}
+	private void checkInputErrors() throws DotFileIsNotSet, MinMaxValuesAreNotSet
+	{
+		if(dotFile == null)
+			throw new DotFileIsNotSet();
+		if(V.maxValues == null || V.minValues == null)
+			throw new MinMaxValuesAreNotSet();
+		
+	}
+	private void btnOkClick()
+	{
+		try {
+			checkInputErrors();
+			
+			JOptionPane.showMessageDialog(this,
+					"Dohvati potrebne podatke i pošalji ih preko metode u glavnu master metodu koja ce svime upravljati"
+					);
+			JOptionPane.showMessageDialog(this,
+					"Dohvati radilice sa popisa i pokreni connection"
+					);
+			JOptionPane.showMessageDialog(this,
+					"Dohvati radilice sa popisa i pokreni connection"
+					);
+			Parametars parametars = new Parametars(
+					structureType.getSelectedIndex(),
+					((double)queryFactor.getValue())/100.0,
+					((double)moveFactor.getValue())/100.0,
+					V.minValues,
+					V.maxValues,
+					Integer.parseInt(bucketNumber.getText())
+					);
+			
+			MasterMethod masterMethod = new MasterMethod(
+					parametars,null,dotFile
+					);
+			Thread masterThread = new Thread(()->{
+				masterMethod.run();
+			});
+			masterThread.run();
+		}
+		catch(Exception ex){JOptionPane.showMessageDialog(this,ex.getMessage());}
+	}
+	class Values
+	{
+		double[] minValues;
+		double[] maxValues;
+		public Values(){}
+		public void setMinMaxValue(double[] minValues, double[] maxValues){
+			this.minValues = new double[minValues.length];
+			this.maxValues = new double[maxValues.length];
+			for(int i=0;i<minValues.length;++i){
+				this.minValues[i] = minValues[i];
+				this.maxValues[i] = maxValues[i];
+			}
+		}
 	}
 }
