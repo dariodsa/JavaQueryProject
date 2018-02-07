@@ -32,6 +32,7 @@ public class Main {
 	
 	public static void main(String[] args) 
 	{
+		int port = 4564;
 		if(args.length != NUM_OF_ARG)
 		{
 			if(args[0].compareTo("--help")==0)
@@ -70,32 +71,34 @@ public class Main {
 			ex.printStackTrace();
 		}
 		
-		
-		/*Thread T = new Thread(
+		/*
+		Thread T = new Thread(
 				()->{
 					Socket echoSocket;
 					try {
 						
 						InetAddress host = InetAddress.getLocalHost();
 						System.out.println(host.getHostName());
-						//echoSocket = new Socket(host.getHostName(),2001);
-						for(int i=0; i<1500;i++){
-							echoSocket = new Socket(host.getHostName(),2001);
-						OutputStream out = new BufferedOutputStream(echoSocket.getOutputStream());
-					    //    new PrintWriter(echoSocket.getOutputStream(), true);
-						out.write(1500-i);
-						out.flush();
+						
+						int N = 1005;
+						for(int i=0; i<N;i++){
+							echoSocket = new Socket(host.getHostName(),port);
+							DataOutputStream out = new DataOutputStream(echoSocket.getOutputStream());
+						out.writeInt(N-i);
+						//out.flush();
 						out.close();
-						System.out.println("42");
+						System.out.println(N-i);
 						
 						}
+						
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					
 				});
 		T.start();
-		Network.socketTest(2001);*/
+		Network.socketTest(port);*/
 		
 	}
 	private static void runGUI()

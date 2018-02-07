@@ -1,13 +1,13 @@
 package hr.fer.zemris.network;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
+import hr.fer.zemris.structures.dot.Dot;
+
+import java.io.*;
 import java.net.*;
 
 public class Network {
 
+	private static Socket echoSocket;
 	public static boolean checkIsReachable(String ipAdress) throws IOException
 	{
 		InetAddress inet = InetAddress.getByName(ipAdress);
@@ -35,23 +35,32 @@ public class Network {
 		}
 		return null;
 	}
+	public static void sendObject(InetAddress address, int port, Object dot) throws IOException
+	{
+		echoSocket = new Socket(address, port);
+		ObjectOutputStream oos = new ObjectOutputStream(echoSocket.getOutputStream());
+		oos.writeObject(dot);
+		oos.close();
+	}
 	public static void socketTest(int port)
 	{
 		try{
 		ServerSocket serverSocket = new ServerSocket(port);
+		
 		while(true)
 		{
 			System.out.println("Waiting for client request");
 			Socket clientSocket = serverSocket.accept();
-			InputStream ois = new BufferedInputStream(clientSocket.getInputStream());
-			int message = (int)ois.read();
+			DataInputStream ois = new DataInputStream(clientSocket.getInputStream());
+			int message = (int)ois.readInt();
+			ois.close();
 			System.out.println("I see ... "+message);
 			if(message==0) break;
 		}
 		System.out.println("Shutting down Socket server!!");
         serverSocket.close();
 		}
-		catch(Exception e){}
+		catch(Exception e){System.out.println(e.getMessage());}
 	}
 	
 }

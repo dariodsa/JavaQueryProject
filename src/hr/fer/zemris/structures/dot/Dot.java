@@ -26,6 +26,10 @@ public class Dot {
 	{
 		return this.values;
 	}
+	public int getNumOfComponents()
+	{
+		return this.values.length;
+	}
 	@Override
 	public boolean equals(Object o)
 	{

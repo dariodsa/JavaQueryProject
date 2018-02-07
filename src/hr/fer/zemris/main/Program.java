@@ -67,7 +67,7 @@ public class Program
 		if(!Files.exists(dotsPath))
 			throw new FileNotFoundException(dotsPath.toString());
 		
-		initDots();
+		initDots(this.dotsPath);
 		initStructure();
 		//set dots in their starting position
 		setDotsPosition();
@@ -118,7 +118,7 @@ public class Program
 		
 		System.out.println("Structures are ready.");
 	}
-	private void initDots() throws IOException, NumOfDotArguments
+	private void initDots(Path dotsPath) throws IOException, NumOfDotArguments
 	{
 		List<String> lines = Files.readAllLines(dotsPath);
 		int numOfLine = 0;
