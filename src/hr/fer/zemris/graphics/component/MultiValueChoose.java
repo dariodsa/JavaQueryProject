@@ -1,5 +1,7 @@
 package hr.fer.zemris.graphics.component;
 
+import hr.fer.zemris.exceptions.MultiValueFormatException;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
@@ -9,8 +11,11 @@ public class MultiValueChoose extends JPanel {
 	
 	private JTextField[] minValue;
 	private JTextField[] maxValue;
+	private int numOfComponents;
+	
 	public MultiValueChoose(String title, String message, int numOfComponents)
 	{
+		this.numOfComponents = numOfComponents;
 		minValue = new JTextField[numOfComponents];
 		maxValue = new JTextField[numOfComponents];
 		
@@ -21,14 +26,50 @@ public class MultiValueChoose extends JPanel {
 		{
 			JPanel paneltemp = new JPanel();
 			paneltemp.setLayout(new BorderLayout());
+			minValue[i] = new JTextField(5);
+			maxValue[i] = new JTextField(5);
 			paneltemp.add(groupComponents(
-					new JLabel("Min value: "), new JTextField(5)),
+					new JLabel("Min value: "), minValue[i]),
 					BorderLayout.WEST);
 			paneltemp.add(groupComponents(
-					new JLabel("Max value: "), new JTextField(5)),
+					new JLabel("Max value: "), maxValue[i]),
 					BorderLayout.EAST);
 			add(paneltemp);
 		}
+	}
+	public double[] getMinValue()  throws MultiValueFormatException
+	{
+		double[] arr = new double[numOfComponents];
+		for(int i=0;i<numOfComponents;++i)
+		{
+			try{
+				arr[i] = Double.parseDouble(minValue[i].getText());
+			}
+			catch(NumberFormatException ex){
+				throw new MultiValueFormatException(String.format("Number format is wrong.%n%s%nPlease enter your input again.",minValue[i].getText()));
+			}
+			catch(NullPointerException ex){
+				throw new MultiValueFormatException("You left some of the textboxes empty.%nPlease enter your input again.");
+			}
+		}
+		return arr;
+	}
+	public double[] getMaxValue()  throws MultiValueFormatException
+	{
+		double[] arr = new double[numOfComponents];
+		for(int i=0;i<numOfComponents;++i)
+		{
+			try{
+				arr[i] = Double.parseDouble(maxValue[i].getText());
+			}
+			catch(NumberFormatException ex){
+				throw new MultiValueFormatException(String.format("Number format is wrong.%n%s%nPlease enter your input again.",minValue[i].getText()));
+			}
+			catch(NullPointerException ex){
+				throw new MultiValueFormatException("You left some of the textboxes empty.%nPlease enter your input again.");
+			}
+		}
+		return arr;
 	}
 	private JPanel groupComponents(JComponent... components)
 	{
