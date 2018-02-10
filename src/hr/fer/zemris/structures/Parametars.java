@@ -1,6 +1,8 @@
 package hr.fer.zemris.structures;
 
-public class Parametars {
+import java.io.Serializable;
+
+public class Parametars implements Serializable{
 	
 	public int structureType;
 	public int bucketSize;

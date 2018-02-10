@@ -7,7 +7,7 @@ import java.net.*;
 
 public class Network {
 
-	private static Socket echoSocket;
+	
 	public static boolean checkIsReachable(String ipAdress) throws IOException
 	{
 		InetAddress inet = InetAddress.getByName(ipAdress);
@@ -35,12 +35,24 @@ public class Network {
 		}
 		return null;
 	}
-	public static void sendObject(InetAddress address, int port, Object dot) throws IOException
+	public static void sendResponse(InetAddress address, int port, int responseId) throws IOException
 	{
-		echoSocket = new Socket(address, port);
+		System.out.println(address.getHostAddress().toString()+" "+port);
+		Socket echoSocket = new Socket(address, port);
+		ObjectOutputStream os = new ObjectOutputStream(echoSocket.getOutputStream());
+		os.writeInt(responseId);
+		os.close();
+		echoSocket.close();
+	}
+	public static void sendObject(InetAddress address, int port, int responseId, Object dot) throws IOException
+	{
+		System.out.println(address.getHostAddress().toString()+" "+port);
+		Socket echoSocket = new Socket(address, port);
 		ObjectOutputStream oos = new ObjectOutputStream(echoSocket.getOutputStream());
+		oos.writeInt(responseId);
 		oos.writeObject(dot);
 		oos.close();
+		echoSocket.close();
 	}
 	public static void socketTest(int port)
 	{

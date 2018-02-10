@@ -1,16 +1,18 @@
 package hr.fer.zemris.structures.dot;
 
-public class Dot {
+import java.io.Serializable;
+
+public class Dot implements Serializable{
 	
-	private int id;
+	private long id;
 	private double[] values;
 	
-	public Dot(int numOfArguments, int id)
+	public Dot(int numOfArguments, long id)
 	{
 		this.values = new double[numOfArguments];
 		this.id = id;
 	}
-	public int getId()
+	public long getId()
 	{
 		return this.id;
 	}

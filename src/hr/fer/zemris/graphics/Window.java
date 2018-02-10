@@ -10,6 +10,7 @@ import hr.fer.zemris.graphics.constants.Constants;
 import hr.fer.zemris.graphics.constants.StructureType;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.thread.MasterMethod;
+import hr.fer.zemris.thread.workers.MainWorker;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -213,15 +214,8 @@ public class Window extends JFrame{
 		try {
 			checkInputErrors();
 			
-			JOptionPane.showMessageDialog(this,
-					"Dohvati potrebne podatke i pošalji ih preko metode u glavnu master metodu koja ce svime upravljati"
-					);
-			JOptionPane.showMessageDialog(this,
-					"Dohvati radilice sa popisa i pokreni connection"
-					);
-			JOptionPane.showMessageDialog(this,
-					"Dohvati radilice sa popisa i pokreni connection"
-					);
+			
+			
 			Parametars parametars = new Parametars(
 					structureType.getSelectedIndex(),
 					((double)queryFactor.getValue())/100.0,
@@ -230,14 +224,22 @@ public class Window extends JFrame{
 					V.maxValues,
 					Integer.parseInt(bucketNumber.getText())
 					);
-			
+			String[] adrese = new String[] {"192.168.1.4"};
 			MasterMethod masterMethod = new MasterMethod(
-					parametars,null,dotFile
+					parametars, adrese,dotFile, new PrintWriter(System.out),3456
 					);
-			Thread masterThread = new Thread(()->{
-				masterMethod.run();
+			Thread workerThread = new Thread(()-> {
+				MainWorker main = new MainWorker(8965,3456);
+				main.run();
 			});
-			masterThread.run();
+			Thread masterThread = new Thread(()->{
+				try {
+					masterMethod.run();
+				} catch (Exception e) {e.printStackTrace();}
+			});
+			workerThread.start();
+			masterThread.start();
+			masterThread.join();
 		}
 		catch(Exception ex){JOptionPane.showMessageDialog(this,ex.getMessage());}
 	}

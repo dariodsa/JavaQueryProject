@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -30,37 +32,22 @@ public class Main {
 	
 	private static Window frame;
 	
+	//static ArrayDeque<Integer> DQ = new ArrayDeque<>();
+	
 	public static void main(String[] args) 
 	{
 		int port = 4564;
-		if(args.length != NUM_OF_ARG)
-		{
-			if(args[0].compareTo("--help")==0)
-				System.out.println(showHelp());
-			else 
-				System.out.println("Expected num of arguments to be "+NUM_OF_ARG);
-		}
 		
-		dotsPath = Paths.get(args[0]);
-		numOfArgumentsPerDot = Integer.parseInt(args[1]);
-		
-		structureType = Integer.parseInt(args[2]);
-		
-		queryFactor = Double.parseDouble(args[3]); 
-		changeFactor = Double.parseDouble(args[4]);
-		
-		
-		
-		if(args[5].length()==1)
+		if(args[0].length()==1)
 			runGUI();
 		
 		Program program;
 		try {
-			program = new Program(numOfArgumentsPerDot, dotsPath, structureType, queryFactor, changeFactor);
+			//program = new Program(numOfArgumentsPerDot, dotsPath, structureType, queryFactor, changeFactor);
 			
 			SwingUtilities.invokeAndWait(()->
 			{
-				frame.picture.updatePicture(program.getDots());
+				//frame.picture.updatePicture(program.getDots());
 			});
 			//program.run();
 			

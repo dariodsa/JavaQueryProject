@@ -6,6 +6,7 @@ import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.dot.Dot;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.*;
@@ -17,19 +18,21 @@ import javax.swing.JOptionPane;
 
 public class MasterMethod {
 	
-	private final int PORT = 7654;
+	private final int PORT = 8965;
 	
 	private Parametars parametars;
 	private String[] workersAddress;
 	private InetAddress[] workers;
 	
+	private int portMaster;
 	private int numOfComponents;
 	private Path dotsPath;
 	private PrintWriter logOutput;
 	
 	public MasterMethod(Parametars parametars,
-			String[] workers, Path dotsPath, PrintWriter logOutput) throws IOException, NumOfDotArguments{
+			String[] workers, Path dotsPath, PrintWriter logOutput, int portMaster) throws IOException, NumOfDotArguments{
 		
+		this.portMaster = portMaster;
 		this.parametars = parametars;
 		this.workersAddress = workers;
 		this.numOfComponents = parametars.minValues.length;
@@ -37,6 +40,7 @@ public class MasterMethod {
 		this.logOutput = logOutput;
 	}
 	public void run() throws IOException, NumOfDotArguments {
+		System.out.println("Usao  ....");
 		try {
 			initConnection();
 			
@@ -47,35 +51,50 @@ public class MasterMethod {
 			e.printStackTrace();
 			return;
 		}
+		ServerSocket serverSocket = new ServerSocket(portMaster);
 		initParametars();
+		int workersLeft = workers.length;
+		while(workersLeft > 0)
+		{
+			Socket client = serverSocket.accept();
+			int br = new ObjectInputStream(client.getInputStream()).readInt();
+			System.out.println("Br "+br);
+			if(br == 1)
+				--workersLeft;
+		}
+		serverSocket.close();
+		logOutput.println("All workers recieved parametars.");
+		logOutput.println("Sending dots to the workers");
 		initDots(dotsPath);
 	}
 	private void initParametars() throws IOException 
 	{
 		for(int i=0;i<workers.length;++i)
 		{
-			Network.sendObject(workers[i], PORT, parametars);
+			Network.sendObject(workers[i], PORT, 1, parametars);
 		}
 		
 	}
 	private void initConnection() throws UnknownHostException, IOException
 	{
-		this.workers = new Inet4Address[this.workers.length];
+		this.workers = new Inet4Address[this.workersAddress.length];
 		for(int i=0;i<workers.length;++i)
 		{	
+			System.out.printf("%s %s%n",this.workersAddress[i],InetAddress.getByName(workersAddress[i]).getHostAddress());
 			this.workers[i] = InetAddress.getByName(workersAddress[i]);
+			System.out.printf("%s %s %s%n",this.workersAddress[i],InetAddress.getByName(workersAddress[i]).getHostAddress(),workers[i].getHostAddress().toString());
 		}
 	}
 	private void initDots(Path dotsPath) throws IOException, NumOfDotArguments
 	{
 		List<String> lines = Files.readAllLines(dotsPath);
-		int numOfLine = 0;
+		long numOfLine = 0;
 		for(String line : lines)
 		{
 			++numOfLine;
 			String[] strValues = line.split(",");
 			if(strValues.length != numOfComponents)
-				throw new NumOfDotArguments(numOfLine);
+				throw new NumOfDotArguments((int)numOfLine);
 			int iter = 0;
 			Dot dot = new Dot(numOfComponents , numOfLine-1);
 			for(String strValue : strValues)
@@ -93,7 +112,7 @@ public class MasterMethod {
 			double diff = Math.abs(parametars.maxValues[i]-parametars.minValues[i]);
 			double start = Math.abs(parametars.minValues[i]-dot.getValue(i));
 			int numOfWorker = (int)(start/(diff/numOfWorkers));
-			Network.sendObject(workers[numOfWorker], port, dot);
+			Network.sendObject(workers[numOfWorker], port, 2, dot);
 		}
 	}
 }

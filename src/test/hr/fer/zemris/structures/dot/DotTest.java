@@ -23,10 +23,10 @@ public class DotTest {
 		d2.setValue(0, 2);
 		d1.setValue(1, 1);
 		d2.setValue(1, 2);
-		assertNotEquals(d1.equals(d2), false);
+		assertEquals(d1.equals(d2), false);
 		d2.setValue(0,1);
 		d2.setValue(1, 1);
-		assertNotEquals(d1.equals(d2), false);
+		assertEquals(d1.equals(d2), false);
 		Dot d3 = new Dot(2,4);
 		assertEquals(d1.equals(d3),true);
 	}
