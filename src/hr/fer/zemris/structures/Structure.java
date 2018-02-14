@@ -14,7 +14,7 @@ public interface Structure {
 	 * @param Integer id of the Dot 
 	 * @return void
 	 */
-	public void add(double newValue, Integer dot);
+	public void add(double newValue, Long dot);
 	/*
 	 * Replace the oldValue with the newValue in the structure.
 	 * @param double oldValue
@@ -23,15 +23,16 @@ public interface Structure {
 	 * @return void
 	 * @throws DimmensionException
 	 */
-	public void update(double oldValue, double newValue, Integer dot) throws DimmensionException;
+	public void update(double oldValue, double newValue, Long dot) throws DimmensionException;
 	
 	/*
-	 * Returns the List<Integer> of ids which are in the specified range.
+	 * Returns the List<Long> of ids which are in the specified range.
 	 * @param double min
 	 * @param double max
-	 * @return List<Integer>
+	 * @return List<Long>
 	 * @throws IllegialArgumentException
 	 */
-	public List<Integer> query(double min, double max) throws IllegalArgumentException;
+	public List<Long> query(double min, double max) throws IllegalArgumentException;
 	
+	public void delete(double value, Long dot);
 }

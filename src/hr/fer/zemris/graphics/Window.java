@@ -28,7 +28,8 @@ public class Window extends JFrame{
 	private JSlider moveFactor;
 	private JSlider queryFactor;
 	private JTextField bucketNumber;
-	JButton minMaxValue = new JButton("temp"); //todo remove
+	private JButton minMaxValue;
+	private JButton minMaxMove;
 	private Path dotFile;
 	private JButton fileButton;
 	private JLabel moveFactorValue;
@@ -54,6 +55,10 @@ public class Window extends JFrame{
 		setLayout(new BorderLayout());
 		structureType = new JComboBox<>(Constants.structureName);
 		fileButton  = new JButton("Browser ...");
+		
+		minMaxValue = new JButton("Min/Max values");
+		minMaxMove = new JButton("Min/Max moves");
+		
 		moveFactor  = new JSlider(0,100);
 		queryFactor = new JSlider(0,100);
 		bucketNumber = new JTextField(3);
@@ -114,6 +119,7 @@ public class Window extends JFrame{
 				try {
 					numOfComponent = Files.readAllLines(dotFile).get(0).split(",").length;
 					minMaxValue.setEnabled(true);
+					minMaxMove.setEnabled(true);
 				}
 				 catch (Exception e1) {
 					 JOptionPane.showMessageDialog(this,new DotFileNotFound(fc.getSelectedFile().getAbsolutePath()).getMessage());
@@ -128,6 +134,7 @@ public class Window extends JFrame{
 				));
 		
 		minMaxValue.setEnabled(false);
+		minMaxMove.setEnabled(false);
 		minMaxValue.addActionListener((e)->{
 			MultiValueChoose M = new MultiValueChoose("naziv", "poruka", numOfComponent);
 			int result = JOptionPane.showConfirmDialog(this, M);
@@ -148,6 +155,10 @@ public class Window extends JFrame{
 		rightFactors.add(groupComponents(
 				new JLabel("Dots size: "),
 				minMaxValue
+				));
+		rightFactors.add(groupComponents(
+				new JLabel("Moves size: "),
+				minMaxMove
 				));
 		rightFactors.add(groupComponents(
 				new JLabel("QueryFactor"),
@@ -224,12 +235,14 @@ public class Window extends JFrame{
 					V.maxValues,
 					Integer.parseInt(bucketNumber.getText())
 					);
-			String[] adrese = new String[] {"192.168.1.4"};
+			String[] adrese = new String[] {"192.168.1.10"};
+			int port1 = 1234+12;
+			int port2 = 2345;
 			MasterMethod masterMethod = new MasterMethod(
-					parametars, adrese,dotFile, new PrintWriter(System.out),3456
+					parametars, adrese,dotFile, new PrintWriter(System.out),port1,port2
 					);
 			Thread workerThread = new Thread(()-> {
-				MainWorker main = new MainWorker(8965,3456);
+				MainWorker main = new MainWorker(port2,port1);
 				main.run();
 			});
 			Thread masterThread = new Thread(()->{

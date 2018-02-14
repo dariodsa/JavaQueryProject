@@ -58,7 +58,7 @@ public class Main {
 			ex.printStackTrace();
 		}
 		
-		/*
+	    /*
 		Thread T = new Thread(
 				()->{
 					Socket echoSocket;
@@ -66,17 +66,19 @@ public class Main {
 						
 						InetAddress host = InetAddress.getLocalHost();
 						System.out.println(host.getHostName());
-						
-						int N = 1005;
+						echoSocket = new Socket("192.168.1.1",80);
+						DataOutputStream out = new DataOutputStream(echoSocket.getOutputStream());
+						int N = 1000005;
 						for(int i=0; i<N;i++){
-							echoSocket = new Socket(host.getHostName(),port);
-							DataOutputStream out = new DataOutputStream(echoSocket.getOutputStream());
+							
 						out.writeInt(N-i);
 						//out.flush();
-						out.close();
-						System.out.println(N-i);
+						
+						if(i%10000==0)System.out.println(N-i);
 						
 						}
+						echoSocket.close();
+						out.close();
 						
 					} catch (Exception e) {
 						// TODO Auto-generated catch block

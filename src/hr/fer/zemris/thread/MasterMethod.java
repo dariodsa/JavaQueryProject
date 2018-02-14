@@ -4,9 +4,12 @@ import hr.fer.zemris.exceptions.NumOfDotArguments;
 import hr.fer.zemris.network.Network;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.dot.Dot;
+import hr.fer.zemris.structures.dot.DotCache;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.*;
@@ -18,7 +21,6 @@ import javax.swing.JOptionPane;
 
 public class MasterMethod {
 	
-	private final int PORT = 8965;
 	
 	private Parametars parametars;
 	private String[] workersAddress;
@@ -28,40 +30,61 @@ public class MasterMethod {
 	private int numOfComponents;
 	private Path dotsPath;
 	private PrintWriter logOutput;
+
+	private List<DotCache>[] cacheDots;
+	
+	private int port;
+	
+	private double[][] minValues;
+	private double[][] maxValues;
 	
 	public MasterMethod(Parametars parametars,
-			String[] workers, Path dotsPath, PrintWriter logOutput, int portMaster) throws IOException, NumOfDotArguments{
+			String[] workers, Path dotsPath, PrintWriter logOutput, int portMaster,int port) throws IOException, NumOfDotArguments{
 		
+		this.port = port;
 		this.portMaster = portMaster;
 		this.parametars = parametars;
 		this.workersAddress = workers;
 		this.numOfComponents = parametars.minValues.length;
 		this.dotsPath = dotsPath;
 		this.logOutput = logOutput;
+		
+		this.minValues = new double[this.workers.length][this.numOfComponents];
+		this.maxValues = new double[this.workers.length][this.numOfComponents];
+		
+		this.cacheDots = new ArrayList[this.workersAddress.length];
+		for(int i=0;i<this.cacheDots.length; ++i)
+		{
+			this.cacheDots[i] = new ArrayList<DotCache>();
+		}
+		
 	}
 	public void run() throws IOException, NumOfDotArguments {
+		
+		ServerSocket serverSocket = new ServerSocket(portMaster);
 		System.out.println("Usao  ....");
 		try {
 			initConnection();
 			
 		} catch (UnknownHostException e) {
-			//e.getMessage()
+			e.printStackTrace();
+			serverSocket.close();
 			return;
 		} catch (IOException e) {
 			e.printStackTrace();
+			serverSocket.close();
 			return;
 		}
-		ServerSocket serverSocket = new ServerSocket(portMaster);
 		initParametars();
 		int workersLeft = workers.length;
-		while(workersLeft > 0)
+		/*while(workersLeft > 0)
 		{
 			Socket client = serverSocket.accept();
 			int br = new ObjectInputStream(client.getInputStream()).readInt();
 			System.out.println("Br "+br);
 			if(br == 1)
 				--workersLeft;
-		}
+		}*/
 		serverSocket.close();
 		logOutput.println("All workers recieved parametars.");
 		logOutput.println("Sending dots to the workers");
@@ -71,18 +94,53 @@ public class MasterMethod {
 	{
 		for(int i=0;i<workers.length;++i)
 		{
-			Network.sendObject(workers[i], PORT, 1, parametars);
+			Socket S = new Socket(this.workers[i], this.port);
+			
+			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+			oos.writeInt(1);
+			oos.writeObject(parametars);
+			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
+			int val = ois.readInt();
+			if(val == 1){
+				System.out.println("Primio "+this.workersAddress[i]);
+			}
+			else {
+				S.close();
+				throw new IOException("nisam dobio potvrdu.");
+			}
+			ois.close();
+			oos.close();
+			S.close();
 		}
 		
 	}
 	private void initConnection() throws UnknownHostException, IOException
 	{
 		this.workers = new Inet4Address[this.workersAddress.length];
+		
 		for(int i=0;i<workers.length;++i)
 		{	
 			System.out.printf("%s %s%n",this.workersAddress[i],InetAddress.getByName(workersAddress[i]).getHostAddress());
 			this.workers[i] = InetAddress.getByName(workersAddress[i]);
-			System.out.printf("%s %s %s%n",this.workersAddress[i],InetAddress.getByName(workersAddress[i]).getHostAddress(),workers[i].getHostAddress().toString());
+			
+			//Init min and max values
+			for(int k=0;k<numOfComponents;++k)
+			{
+				double diff = Math.abs(parametars.minValues[k] - parametars.maxValues[k]);
+				double each = diff / (double)this.workers.length;
+				if(i == 0){
+					minValues[i][k] = parametars.minValues[k];
+					maxValues[i][k] = minValues[i][k] + each;
+				}
+				else if(i == workers.length - 1){
+					minValues[i][k] = maxValues[i][k] - each;
+					maxValues[i][k] = parametars.maxValues[k];
+				}
+				else {
+					minValues[i][k] = maxValues[i-1][k];
+					maxValues[i][k] = minValues[i][k] + each;
+				}
+			}
 		}
 	}
 	private void initDots(Path dotsPath) throws IOException, NumOfDotArguments
@@ -101,18 +159,46 @@ public class MasterMethod {
 			{
 				dot.setValue(iter++, Double.parseDouble(strValue));
 			}
-			sendDot(dot, PORT);
+			sendDot(dot, port);
+			if(numOfLine % 1000 == 0)System.out.println(numOfLine + " / " + lines.size());
 		}
+		sendsDot();
 		logOutput.println("Dots are sent over the network.");
+	}
+	private void sendsDot() throws IOException
+	{
+		for(int i=0;i<this.workers.length; ++i)
+		{
+			if(cacheDots[i].isEmpty())
+				continue;
+			Socket S = new Socket(this.workers[i], port);
+			ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(S.getOutputStream()));
+			oos.writeInt(2);
+			oos.writeInt(cacheDots[i].size());
+			for(DotCache dot : cacheDots[i])
+			{
+				oos.writeLong(dot.getId());
+				oos.writeInt(dot.getComponent());
+				oos.writeDouble(dot.getValue());
+			}
+			cacheDots[i].clear();
+			oos.close();
+			S.close();
+		}
 	}
 	private void sendDot(Dot dot, int port) throws IOException 
 	{
 		int numOfWorkers = workersAddress.length;
-		for(int i=0;i<dot.getNumOfComponents();++i){
-			double diff = Math.abs(parametars.maxValues[i]-parametars.minValues[i]);
-			double start = Math.abs(parametars.minValues[i]-dot.getValue(i));
-			int numOfWorker = (int)(start/(diff/numOfWorkers));
-			Network.sendObject(workers[numOfWorker], port, 2, dot);
+		for(int i=0;i<dot.getNumOfComponents();++i)
+		{
+			for(int j=0;j<numOfWorkers;++j)
+			{
+				if(minValues[j][i] <= dot.getValue(i) && maxValues[j][i] >= dot.getValue(i))
+				{
+					cacheDots[j].add(new DotCache(dot.getId(),i,dot.getValue(i)));
+					break;
+				}
+			}
 		}
 	}
 }

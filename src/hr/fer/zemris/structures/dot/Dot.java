@@ -49,4 +49,16 @@ public class Dot implements Serializable{
 			clone.setValue(i, getValue(i));
 		return clone;
 	}
+	@Override
+	public String toString()
+	{
+		String ans = "( ";
+		for(int i=0;i<values.length;++i)
+		{
+			ans += i!=0?", ":"";
+			ans += new Double(values[i]).toString();
+		}
+		ans += ")";
+		return ans;
+	}
 }

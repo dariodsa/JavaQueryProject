@@ -17,7 +17,7 @@ public class BucketStructure implements Structure{
 	private int numOfBuckets;
 	private double sizePerBucket;
 	
-	private List<Integer>[] buckets;
+	private List<Long>[] buckets;
 		
 	public BucketStructure(double minValue,double maxValue, int numOfBuckets) 
 	{
@@ -37,13 +37,13 @@ public class BucketStructure implements Structure{
 		return (int)(Math.abs(value - this.minValue) / sizePerBucket);
 	}
 	@Override
-	public void add(double newValue, Integer dot)
+	public void add(double newValue, Long dot)
 	{
 		int newBucket = getBucket(newValue);
 		this.buckets[newBucket].add(dot);
 	}
 	@Override
-	public void update(double oldValue, double newValue, Integer dot) throws DimmensionException 
+	public void update(double oldValue, double newValue, Long dot) throws DimmensionException 
 	{
 		if(!(minValue <= newValue && newValue <= maxValue))
 			throw new DimmensionException(newValue, minValue, maxValue); 
@@ -55,21 +55,26 @@ public class BucketStructure implements Structure{
 	}
 
 	@Override
-	public List<Integer> query(double min, double max) throws IllegalArgumentException 
+	public List<Long> query(double min, double max) throws IllegalArgumentException 
 	{
 		if(max<min)
 			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
 		int firstBucket = getBucket(min);
 		int lastBucket = getBucket(max);
-		List<Integer> result = new ArrayList<>();
+		List<Long> result = new ArrayList<>();
 		for(int i=firstBucket; i<=lastBucket; ++i)
 		{
-			for(Integer id : buckets[i])
+			for(Long id : buckets[i])
 			{
 				result.add(id);
 			}
 		}
 		return result;
+	}
+	public void delete(double value, Long dot)
+	{
+		int oldBucket = getBucket(value);
+		this.buckets[oldBucket].remove(dot);
 	}
 	private void initBuckets()
 	{

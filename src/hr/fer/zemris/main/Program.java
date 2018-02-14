@@ -156,7 +156,7 @@ public class Program
 	{
 		while(num-->0)
 		{
-			List<Integer>[] result = new ArrayList[numOfArguments];
+			List<Long>[] result = new ArrayList[numOfArguments];
 			for(int i=0;i<numOfArguments;++i)
 			{
 				double diff = Math.abs(maxValue[i]-minValue[i] - 15);
@@ -165,7 +165,7 @@ public class Program
 				result[i] = new ArrayList<>();
 				result[i] = S[i].query(min, max);
 			}
-			List<Integer> finalList = new ArrayList<>(result[0]);
+			List<Long> finalList = new ArrayList<>(result[0]);
 			for(int i=1;i<numOfArguments;++i)
 				finalList = Functions.intersection(finalList, result[i]);
 		}

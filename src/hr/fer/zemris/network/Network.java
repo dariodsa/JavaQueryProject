@@ -37,38 +37,27 @@ public class Network {
 	}
 	public static void sendResponse(InetAddress address, int port, int responseId) throws IOException
 	{
-		System.out.println(address.getHostAddress().toString()+" "+port);
+		//System.out.println(address.getHostAddress().toString()+" "+port);
 		Socket echoSocket = new Socket(address, port);
 		ObjectOutputStream os = new ObjectOutputStream(echoSocket.getOutputStream());
 		os.writeInt(responseId);
 		os.close();
 		echoSocket.close();
 	}
-	public static void sendObject(InetAddress address, int port, int responseId, Object dot) throws IOException
-	{
-		System.out.println(address.getHostAddress().toString()+" "+port);
-		Socket echoSocket = new Socket(address, port);
-		ObjectOutputStream oos = new ObjectOutputStream(echoSocket.getOutputStream());
-		oos.writeInt(responseId);
-		oos.writeObject(dot);
-		oos.close();
-		echoSocket.close();
-	}
 	public static void socketTest(int port)
 	{
 		try{
 		ServerSocket serverSocket = new ServerSocket(port);
-		
+		System.out.println("Waiting for client request");
+		Socket clientSocket = serverSocket.accept();
+		DataInputStream ois = new DataInputStream(clientSocket.getInputStream());
 		while(true)
 		{
-			System.out.println("Waiting for client request");
-			Socket clientSocket = serverSocket.accept();
-			DataInputStream ois = new DataInputStream(clientSocket.getInputStream());
 			int message = (int)ois.readInt();
-			ois.close();
-			System.out.println("I see ... "+message);
+			if(message%1000==0)System.out.println("I see ... "+message);
 			if(message==0) break;
 		}
+		ois.close();
 		System.out.println("Shutting down Socket server!!");
         serverSocket.close();
 		}
