@@ -41,6 +41,8 @@ public class Window extends JFrame{
 	
 	public PPicture picture;
 	
+	private PrintWriter logOutput;
+	
 	public Window(int width,int height)
 	{
 		super("Završni rad, Dario Sindicic");
@@ -80,7 +82,6 @@ public class Window extends JFrame{
 		});
 		queryFactorValue  = new JLabel("50%");
 		moveFactorValue   = new JLabel("50%");
-		
 		
 		queryFactor.addChangeListener((e)->{
 			queryFactorValue.setText(queryFactor.getValue()+"%"); 
@@ -136,6 +137,23 @@ public class Window extends JFrame{
 		minMaxValue.setEnabled(false);
 		minMaxMove.setEnabled(false);
 		minMaxValue.addActionListener((e)->{
+			MultiValueChoose M = new MultiValueChoose("naziv", "poruka", numOfComponent);
+			int result = JOptionPane.showConfirmDialog(this, M);
+			if(result == JOptionPane.YES_OPTION)
+			{
+				double[] minValues; 
+				double[] maxValues;
+				try {
+					minValues = M.getMinValue();
+					maxValues = M.getMaxValue();
+					V.setMinMaxValue(minValues, maxValues);
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(this, e1.getMessage());
+				}
+				
+			}
+		});
+		minMaxMove.addActionListener((e)->{
 			MultiValueChoose M = new MultiValueChoose("naziv", "poruka", numOfComponent);
 			int result = JOptionPane.showConfirmDialog(this, M);
 			if(result == JOptionPane.YES_OPTION)
@@ -226,20 +244,25 @@ public class Window extends JFrame{
 			checkInputErrors();
 			
 			
-			
+			double[] minMove = new double[] {0.5,0.5};
+			double[] maxMove = new double[] {0.5,0.5};
 			Parametars parametars = new Parametars(
 					structureType.getSelectedIndex(),
 					((double)queryFactor.getValue())/100.0,
 					((double)moveFactor.getValue())/100.0,
 					V.minValues,
 					V.maxValues,
-					Integer.parseInt(bucketNumber.getText())
+					Integer.parseInt(bucketNumber.getText()),
+					minMove,
+					maxMove
 					);
 			String[] adrese = new String[] {"192.168.1.10"};
 			int port1 = 1234+12;
 			int port2 = 2345;
+			
+			logOutput = new PrintWriter(System.out);
 			MasterMethod masterMethod = new MasterMethod(
-					parametars, adrese,dotFile, new PrintWriter(System.out),port1,port2
+					parametars, adrese,dotFile, logOutput,port1,port2
 					);
 			Thread workerThread = new Thread(()-> {
 				MainWorker main = new MainWorker(port2,port1);
@@ -254,7 +277,12 @@ public class Window extends JFrame{
 			masterThread.start();
 			masterThread.join();
 		}
-		catch(Exception ex){JOptionPane.showMessageDialog(this,ex.getMessage());}
+		catch(Exception ex){
+			JOptionPane.showMessageDialog(this,ex.getMessage());
+			System.out.println(ex.getClass().toString());
+			ex.printStackTrace();
+			
+		}
 	}
 	class Values
 	{

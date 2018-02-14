@@ -85,13 +85,17 @@ public class MainWorker {
 					
 					for(int i=0;i<num;++i)
 					{
+						System.out.println(i+ " , "+num);
 						long identi   = ois.readLong();
 						int component = ois.readInt();
 						double value  = ois.readDouble();
 						S[component].add(value, identi);
 						idInStructure[component].put(identi, value);
+						System.out.println("fin");
 					}
-					
+					ObjectOutputStream os2 = new ObjectOutputStream(client.getOutputStream());
+					os2.writeInt(1);
+					os2.close();
 					System.out.println("Primio ");
 					break;
 				case 3:      // please move  

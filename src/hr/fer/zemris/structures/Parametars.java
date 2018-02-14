@@ -16,7 +16,8 @@ public class Parametars implements Serializable{
 	public double[] minMove;
 	public double[] maxMove;
 
-	public Parametars(int structureType, double queryFactor, double moveFactor, double[]  minValues, double[] maxValues, int bucketSize)
+	public Parametars(int structureType, double queryFactor, double moveFactor, double[]  minValues, double[] maxValues
+			        , int bucketSize, double[] minMove, double[] maxMove)
 	{
 		this.structureType = structureType;
 		this.queryFactor = queryFactor;

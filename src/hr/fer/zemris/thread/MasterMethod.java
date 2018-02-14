@@ -21,7 +21,7 @@ import javax.swing.JOptionPane;
 
 public class MasterMethod {
 	
-	
+	private static Random rand = new Random();
 	private Parametars parametars;
 	private String[] workersAddress;
 	private InetAddress[] workers;
@@ -49,8 +49,8 @@ public class MasterMethod {
 		this.dotsPath = dotsPath;
 		this.logOutput = logOutput;
 		
-		this.minValues = new double[this.workers.length][this.numOfComponents];
-		this.maxValues = new double[this.workers.length][this.numOfComponents];
+		this.minValues = new double[workers.length][this.numOfComponents];
+		this.maxValues = new double[workers.length][this.numOfComponents];
 		
 		this.cacheDots = new ArrayList[this.workersAddress.length];
 		for(int i=0;i<this.cacheDots.length; ++i)
@@ -76,19 +76,24 @@ public class MasterMethod {
 			return;
 		}
 		initParametars();
-		int workersLeft = workers.length;
-		/*while(workersLeft > 0)
-		{
-			Socket client = serverSocket.accept();
-			int br = new ObjectInputStream(client.getInputStream()).readInt();
-			System.out.println("Br "+br);
-			if(br == 1)
-				--workersLeft;
-		}*/
 		serverSocket.close();
-		logOutput.println("All workers recieved parametars.");
-		logOutput.println("Sending dots to the workers");
+		logOutput.write("All workers recieved parametars.");
+		logOutput.write("Sending dots to the workers");
 		initDots(dotsPath);
+		for(int i=0;i<5;++i)
+		{
+			System.out.print(String.format("%d. %s%n", i+1, "iteration"));
+			double rand = MasterMethod.rand.nextDouble();
+			if(rand < parametars.queryFactor)
+			{
+				logOutput.write("I will perform query operation.");
+				
+			}
+			if(rand < parametars.moveFactor)
+			{
+				logOutput.write("I will perform move operation.");
+			}
+		}
 	}
 	private void initParametars() throws IOException 
 	{
@@ -182,6 +187,10 @@ public class MasterMethod {
 				oos.writeDouble(dot.getValue());
 			}
 			cacheDots[i].clear();
+			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
+			int val = ois.readInt();
+			if(val == 1){}
+			ois.close();
 			oos.close();
 			S.close();
 		}
