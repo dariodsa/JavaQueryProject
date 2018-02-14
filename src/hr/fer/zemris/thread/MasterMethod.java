@@ -16,6 +16,7 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.JOptionPane;
 
@@ -37,6 +38,8 @@ public class MasterMethod {
 	
 	private double[][] minValues;
 	private double[][] maxValues;
+	
+	private ArrayBlockingQueue<Long> result = new ArrayBlockingQueue<Long>(5);
 	
 	public MasterMethod(Parametars parametars,
 			String[] workers, Path dotsPath, PrintWriter logOutput, int portMaster,int port) throws IOException, NumOfDotArguments{
@@ -84,7 +87,7 @@ public class MasterMethod {
 		{
 			System.out.print(String.format("%d. %s%n", i+1, "iteration"));
 			double rand = MasterMethod.rand.nextDouble();
-			if(rand < parametars.queryFactor)
+			if(rand < 1/*parametars.queryFactor*/)
 			{
 				logOutput.write("I will perform query operation.");
 				//todo
@@ -96,7 +99,7 @@ public class MasterMethod {
 					if(true)
 					{
 						//kreiraj novu dretvu sa socketom
-						
+						Thread T = new QueryThread(workersAddress[j], port,1,mini,maxi);
 					}
 				}
 				for(Thread thread : threads)
@@ -105,7 +108,7 @@ public class MasterMethod {
 					thread.join();
 				logOutput.write("Query operation completed.");
 			}
-			if(rand < 2)
+			if(rand < 1/*parametars.moveFactor*/)
 			{
 				logOutput.write("I will perform move operation.");
 				List<Thread> threads = new ArrayList<Thread>();
