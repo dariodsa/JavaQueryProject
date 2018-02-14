@@ -59,7 +59,7 @@ public class MasterMethod {
 		}
 		
 	}
-	public void run() throws IOException, NumOfDotArguments {
+	public void run() throws IOException, NumOfDotArguments, InterruptedException {
 		
 		ServerSocket serverSocket = new ServerSocket(portMaster);
 		System.out.println("Usao  ....");
@@ -87,11 +87,38 @@ public class MasterMethod {
 			if(rand < parametars.queryFactor)
 			{
 				logOutput.write("I will perform query operation.");
-				
+				//todo
+				double mini = 0;
+				double maxi = 10;
+				List<Thread> threads = new ArrayList<Thread>();
+				for(int j=0;j<workersAddress.length;++j)
+				{
+					if(true)
+					{
+						//kreiraj novu dretvu sa socketom
+						
+					}
+				}
+				for(Thread thread : threads)
+					thread.start();
+				for(Thread thread : threads)
+					thread.join();
+				logOutput.write("Query operation completed.");
 			}
-			if(rand < parametars.moveFactor)
+			if(rand < 2)
 			{
 				logOutput.write("I will perform move operation.");
+				List<Thread> threads = new ArrayList<Thread>();
+				for(int j=0;j<workersAddress.length;++j)
+				{
+					Thread T = new MoveThread(workersAddress[j],port); 
+					
+					threads.add(T);
+				}
+				for(Thread thread : threads)
+					thread.start();
+				for(Thread thread : threads)
+					thread.join();
 			}
 		}
 	}
@@ -104,6 +131,7 @@ public class MasterMethod {
 			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
 			oos.writeInt(1);
 			oos.writeObject(parametars);
+			oos.flush();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 			int val = ois.readInt();
 			if(val == 1){
@@ -186,6 +214,7 @@ public class MasterMethod {
 				oos.writeInt(dot.getComponent());
 				oos.writeDouble(dot.getValue());
 			}
+			oos.flush();
 			cacheDots[i].clear();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 			int val = ois.readInt();

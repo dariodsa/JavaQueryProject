@@ -85,13 +85,13 @@ public class MainWorker {
 					
 					for(int i=0;i<num;++i)
 					{
-						System.out.println(i+ " , "+num);
 						long identi   = ois.readLong();
 						int component = ois.readInt();
 						double value  = ois.readDouble();
+						
 						S[component].add(value, identi);
 						idInStructure[component].put(identi, value);
-						System.out.println("fin");
+						
 					}
 					ObjectOutputStream os2 = new ObjectOutputStream(client.getOutputStream());
 					os2.writeInt(1);
@@ -124,17 +124,19 @@ public class MainWorker {
 					});
 					dretvaMove.run();
 					dretvaMove.join();
-					
+					ObjectOutputStream os3 = new ObjectOutputStream(client.getOutputStream());
+					os3.writeInt(1);
+					os3.close();
 					break;
 				case 4:      // please query 
 					double min  = ois.readDouble();
 					double max  = ois.readDouble();
 					int component = ois.readInt();
-					int idQuery = ois.readInt();
+					//int idQuery = ois.readInt();
 					
 					List<Long> answer = S[component].query(min, max);
 					ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
-					oos.writeInt(idQuery);
+					//oos.writeInt(idQuery);
 					oos.writeInt(answer.size());
 					for(Long val : answer){
 						oos.writeLong(val);
