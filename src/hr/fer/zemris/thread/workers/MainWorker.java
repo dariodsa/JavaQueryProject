@@ -9,6 +9,7 @@ import hr.fer.zemris.structures.Structure;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 
+import java.io.BufferedInputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
@@ -44,8 +45,9 @@ public class MainWorker {
 		
 		for(int i=0,len = parametars.minValues.length; i < len; ++i)
 		{
+			System.out.println(parametars.structureType);
 			switch (parametars.structureType) {
-			case 1:
+			case 0:
 				S[i] = new BucketStructure(parametars.minValues[i], parametars.maxValues[i], parametars.bucketSize);
 				break;
 			default:
@@ -61,7 +63,7 @@ public class MainWorker {
 			while(true)
 			{
 				Socket client = serverSocket.accept();
-				ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
+				ObjectInputStream ois = new ObjectInputStream( new BufferedInputStream(client.getInputStream()));
 				int id = ois.readInt();
 				System.out.printf("I see %d%n", id);
 				switch (id) {
@@ -83,21 +85,22 @@ public class MainWorker {
 					break;   
 				case 2:      // init position of dots
 					int num = ois.readInt();
-					
+					System.out.println("Loading ... "+num);
 					for(int i=0;i<num;++i)
 					{
 						long identi   = ois.readLong();
-						int component = ois.readInt();
+						int component = ois.read();
 						double value  = ois.readDouble();
-						
+						//System.out.printf("%d %d %f%n", identi, component, value);
 						S[component].add(value, identi);
 						idInStructure[component].put(identi, value);
-						
+						//if(i%10000==0)System.out.println(i+"/"+num);
 					}
 					ObjectOutputStream os2 = new ObjectOutputStream(client.getOutputStream());
 					os2.writeInt(1);
 					os2.close();
 					System.out.println("Primio ");
+					System.out.println("Hash size: " + idInStructure[0].size() + "," +idInStructure[1].size());
 					break;
 				case 3:      // please move  
 					Thread dretvaMove = new Thread(new Runnable(){
@@ -150,6 +153,7 @@ public class MainWorker {
 				default:
 					break;
 				}
+				client.close();
 			}
 		}
 		catch(Exception ex){

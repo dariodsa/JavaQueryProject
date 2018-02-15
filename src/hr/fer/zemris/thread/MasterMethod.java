@@ -7,6 +7,8 @@ import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -181,9 +183,11 @@ public class MasterMethod {
 	}
 	private void initDots(Path dotsPath) throws IOException, NumOfDotArguments
 	{
-		List<String> lines = Files.readAllLines(dotsPath);
+		//List<String> lines = Files.readAllLines(dotsPath);
+		BufferedReader br = new BufferedReader(new FileReader(dotsPath.toString()));
 		long numOfLine = 0;
-		for(String line : lines)
+		String line;
+		while((line = br.readLine()) != null) 
 		{
 			++numOfLine;
 			String[] strValues = line.split(",");
@@ -196,9 +200,13 @@ public class MasterMethod {
 				dot.setValue(iter++, Double.parseDouble(strValue));
 			}
 			sendDot(dot, port);
-			if(numOfLine % 1000 == 0)System.out.println(numOfLine + " / " + lines.size());
+			if(numOfLine % 100000 == 0){
+				System.out.println(numOfLine + " / ");
+				sendsDot();
+			}
 		}
 		sendsDot();
+		br.close();
 		logOutput.println("Dots are sent over the network.");
 	}
 	private void sendsDot() throws IOException
@@ -214,7 +222,7 @@ public class MasterMethod {
 			for(DotCache dot : cacheDots[i])
 			{
 				oos.writeLong(dot.getId());
-				oos.writeInt(dot.getComponent());
+				oos.write(dot.getComponent());
 				oos.writeDouble(dot.getValue());
 			}
 			oos.flush();
