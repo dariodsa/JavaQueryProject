@@ -8,13 +8,17 @@ import java.net.Socket;
 public class QueryThread extends Thread {
 	
 	private String address;
+	
+	private int id;
 	private int port;
 	private int component;
+	
 	private double min;
 	private double max;
 	
-	public QueryThread(String address, int port, int component, double min, double max)
+	public QueryThread(int id, String address, int port, int component, double min, double max)
 	{
+		this.id = id;
 		this.address = address;
 		this.port = port; 
 		this.component = component;
@@ -33,10 +37,11 @@ public class QueryThread extends Thread {
 			oos.flush();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 			int size = ois.readInt();
+			System.out.println("Size query result : "+size);
 			for(int i=0;i<size;++i)
 			{
 				long id = ois.readLong(); 
-				//dodaj id u listu za presjek
+				MasterMethod.result[this.id].add(id);
 				
 			}
 			S.close();

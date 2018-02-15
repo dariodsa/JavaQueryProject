@@ -6,6 +6,7 @@ import hr.fer.zemris.exceptions.MinMaxValuesAreNotSet;
 import hr.fer.zemris.graphics.component.IpTable;
 import hr.fer.zemris.graphics.component.MultiValueChoose;
 import hr.fer.zemris.graphics.component.PPicture;
+import hr.fer.zemris.graphics.component.ip.MyTableModel;
 import hr.fer.zemris.graphics.constants.Constants;
 import hr.fer.zemris.graphics.constants.StructureType;
 import hr.fer.zemris.structures.Parametars;
@@ -40,6 +41,7 @@ public class Window extends JFrame{
 	private int numOfComponent = 0;
 	
 	public PPicture picture;
+	public IpTable ipTable = new IpTable();
 	
 	private PrintWriter logOutput;
 	
@@ -219,7 +221,7 @@ public class Window extends JFrame{
 	{
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setSize(getWidth(),getHeight());
-		panel.add(new IpTable());
+		panel.add(ipTable);
 		return panel;
 	}
 	private JPanel groupComponents(JComponent... components)
@@ -256,11 +258,17 @@ public class Window extends JFrame{
 					minMove,
 					maxMove
 					);
-			String[] adrese = new String[] {"192.168.1.10"};
+			
+			MyTableModel model = ipTable.getTable().model;
+			String[] adrese = new String[model.getRowCount()];
+			for(int i=0;i<model.getRowCount();++i)
+			{
+				adrese[i] = (String)model.getValueAt(i, 1);
+			}
 			int port1 = 1234+12;
 			int port2 = 2345;
 			
-			logOutput = new PrintWriter(System.out);
+			logOutput = new PrintWriter(System.err);
 			MasterMethod masterMethod = new MasterMethod(
 					parametars, adrese,dotFile, logOutput,port1,port2
 					);

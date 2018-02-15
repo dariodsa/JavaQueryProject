@@ -73,9 +73,7 @@ public class MainWorker {
 				case 1:      // send parametars
 					System.out.println("Primio parametre");
 					parametars = (Parametars)ois.readObject();
-					System.out.printf("%f %f %d%n",parametars.moveFactor,parametars.queryFactor,parametars.bucketSize);
 					init();
-					System.out.println("Primio parametre");
 					//Network.sendResponse(client.getLocalAddress(), mainPort, 1); // parametars sent
 					ObjectOutputStream os = new ObjectOutputStream(client.getOutputStream());
 					os.writeInt(1);

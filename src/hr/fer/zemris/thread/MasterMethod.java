@@ -5,6 +5,7 @@ import hr.fer.zemris.network.Network;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
+import hr.fer.zemris.structures.dot.Functions;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -41,7 +42,7 @@ public class MasterMethod {
 	private double[][] minValues;
 	private double[][] maxValues;
 	
-	private ArrayBlockingQueue<Long> result = new ArrayBlockingQueue<Long>(5);
+	public static ArrayList<Long>[] result;
 	
 	public MasterMethod(Parametars parametars,
 			String[] workers, Path dotsPath, PrintWriter logOutput, int portMaster,int port) throws IOException, NumOfDotArguments{
@@ -58,9 +59,13 @@ public class MasterMethod {
 		this.maxValues = new double[workers.length][this.numOfComponents];
 		
 		this.cacheDots = new ArrayList[this.workersAddress.length];
+		
+		this.result    = new ArrayList[this.workersAddress.length];
+		
 		for(int i=0;i<this.cacheDots.length; ++i)
 		{
 			this.cacheDots[i] = new ArrayList<DotCache>();
+			this.result[i]    = new ArrayList<Long>();
 		}
 		
 	}
@@ -84,33 +89,63 @@ public class MasterMethod {
 		serverSocket.close();
 		logOutput.write("All workers recieved parametars.");
 		logOutput.write("Sending dots to the workers");
+		long tMain = System.currentTimeMillis();
 		initDots(dotsPath);
 		for(int i=0;i<5;++i)
 		{
 			System.out.print(String.format("%d. %s%n", i+1, "iteration"));
 			double rand = MasterMethod.rand.nextDouble();
-			if(rand < 1/*parametars.queryFactor*/)
+			
+			List<Long> result = new ArrayList<>();
+			boolean firstResult = true;
+			if(rand < parametars.queryFactor)
 			{
 				logOutput.write("I will perform query operation.");
 				//todo
 				double mini = 0;
 				double maxi = 10;
 				List<Thread> threads = new ArrayList<Thread>();
+				long t1 = System.currentTimeMillis();
 				for(int j=0;j<workersAddress.length;++j)
 				{
 					if(true)
 					{
 						//kreiraj novu dretvu sa socketom
-						Thread T = new QueryThread(workersAddress[j], port,1,mini,maxi);
+						Thread T = new QueryThread(j, workersAddress[j], port,1,mini,maxi);
+						threads.add(T);
 					}
 				}
 				for(Thread thread : threads)
 					thread.start();
 				for(Thread thread : threads)
 					thread.join();
+				for(int j=0;j<workersAddress.length;++j)
+				{
+					if(!MasterMethod.result[j].isEmpty())
+					{
+						if(firstResult)
+						{
+							result = new ArrayList<>();
+							for(Long r : MasterMethod.result[j]){
+								result.add(r);
+							}
+							firstResult = false;
+						}
+						else
+						{
+							result = Functions.intersection(result, MasterMethod.result[j]);
+						}
+						MasterMethod.result[j].clear();
+					}
+				}
+				/*for(Long r : result){
+					System.out.printf("%d ",r);
+				}*/
+				long t2 = System.currentTimeMillis();
+				System.out.printf("%d milisec.%n",t2-t1);
 				logOutput.write("Query operation completed.");
 			}
-			if(rand < 1/*parametars.moveFactor*/)
+			if(rand < parametars.moveFactor)
 			{
 				logOutput.write("I will perform move operation.");
 				List<Thread> threads = new ArrayList<Thread>();
@@ -126,6 +161,8 @@ public class MasterMethod {
 					thread.join();
 			}
 		}
+		long tMainEnd = System.currentTimeMillis();
+		System.out.println("Total time: "+(tMainEnd-tMain));
 	}
 	private void initParametars() throws IOException 
 	{
@@ -211,6 +248,7 @@ public class MasterMethod {
 	}
 	private void sendsDot() throws IOException
 	{
+		System.out.println("Sending dots over the network.");
 		for(int i=0;i<this.workers.length; ++i)
 		{
 			if(cacheDots[i].isEmpty())

@@ -27,6 +27,10 @@ public class IpTable extends JPanel {
 		initGUI();
 		
 	}
+	public DataTable getTable()
+	{
+		return this.table;
+	}
 	private void initGUI() 
 	{
 		btnAddIp = new JButton("Add new computer");
