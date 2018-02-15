@@ -195,10 +195,15 @@ public class Window extends JFrame{
 				new JLabel("Number of buckets"),
 				bucketNumber));
 		JButton btnOk = new JButton("Run");
-		btnOk.addActionListener((e)->{btnOkClick();});
+		btnOk.addActionListener((e)->{btnOkClick(1);});
 		rightFactors.add(btnOk);
+		JButton runWorker = new JButton("Run only worker");
+		rightFactors.add(runWorker);
+		runWorker.addActionListener((e)->{btnOkClick(2);});
 		
-		panel.add(rightFactors,BorderLayout.EAST);
+		JScrollPane jsRight = new JScrollPane(rightFactors);
+		
+		panel.add(jsRight,BorderLayout.EAST);
 		
 		JTextArea logOutput = new JTextArea("mirko\n%n mirko\n%n  mirko\n a"); //todo issue with panel size, need to change main layout manager
 		logOutput.setEditable(false);
@@ -208,6 +213,7 @@ public class Window extends JFrame{
 		panel.add(js,BorderLayout.SOUTH);
 		return panel;
 	}
+	
 	private JComponent getPictureTab() {
 		
 		JPanel panel = new JPanel(new BorderLayout());
@@ -240,50 +246,66 @@ public class Window extends JFrame{
 			throw new MinMaxValuesAreNotSet();
 		
 	}
-	private void btnOkClick()
+	private void btnOkClick(int type)
 	{
+		int port1 = 1234+12;
+		int port2 = 2345;
+		
 		try {
-			checkInputErrors();
-			
-			
-			double[] minMove = new double[] {0.5,0.5};
-			double[] maxMove = new double[] {0.5,0.5};
-			Parametars parametars = new Parametars(
-					structureType.getSelectedIndex(),
-					((double)queryFactor.getValue())/100.0,
-					((double)moveFactor.getValue())/100.0,
-					V.minValues,
-					V.maxValues,
-					Integer.parseInt(bucketNumber.getText()),
-					minMove,
-					maxMove
-					);
-			
-			MyTableModel model = ipTable.getTable().model;
-			String[] adrese = new String[model.getRowCount()];
-			for(int i=0;i<model.getRowCount();++i)
-			{
-				adrese[i] = (String)model.getValueAt(i, 1);
+			switch (type) {
+			case 1:
+				checkInputErrors();
+				
+				double[] minMove = new double[] {0.5,0.5};
+				double[] maxMove = new double[] {0.5,0.5};
+				Parametars parametars = new Parametars(
+						structureType.getSelectedIndex(),
+						((double)queryFactor.getValue())/100.0,
+						((double)moveFactor.getValue())/100.0,
+						V.minValues,
+						V.maxValues,
+						Integer.parseInt(bucketNumber.getText()),
+						minMove,
+						maxMove
+						);
+				
+				MyTableModel model = ipTable.getTable().model;
+				String[] adrese = new String[model.getRowCount()];
+				for(int i=0;i<model.getRowCount();++i)
+				{
+					adrese[i] = (String)model.getValueAt(i, 1);
+				}
+				
+				
+				logOutput = new PrintWriter(System.err);
+				MasterMethod masterMethod = new MasterMethod(
+						parametars, adrese,dotFile, logOutput,port1,port2
+						);
+				Thread workerThread = new Thread(()-> {
+					MainWorker main = new MainWorker(port2,port1);
+					main.run();
+				});
+				Thread masterThread = new Thread(()->{
+					try {
+						masterMethod.run();
+					} catch (Exception e) {e.printStackTrace();}
+				});
+				workerThread.start();
+				if(type==1){
+					masterThread.start();
+					masterThread.join();
+				}
+				break;
+			case 2:
+				Thread workerThread2 = new Thread(()-> {
+					MainWorker main = new MainWorker(port2,port1);
+					main.run();
+				});
+				workerThread2.start();
+			default:
+				break;
 			}
-			int port1 = 1234+12;
-			int port2 = 2345;
 			
-			logOutput = new PrintWriter(System.err);
-			MasterMethod masterMethod = new MasterMethod(
-					parametars, adrese,dotFile, logOutput,port1,port2
-					);
-			Thread workerThread = new Thread(()-> {
-				MainWorker main = new MainWorker(port2,port1);
-				main.run();
-			});
-			Thread masterThread = new Thread(()->{
-				try {
-					masterMethod.run();
-				} catch (Exception e) {e.printStackTrace();}
-			});
-			workerThread.start();
-			masterThread.start();
-			masterThread.join();
 		}
 		catch(Exception ex){
 			JOptionPane.showMessageDialog(this,ex.getMessage());

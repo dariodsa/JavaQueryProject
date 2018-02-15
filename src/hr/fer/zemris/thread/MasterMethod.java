@@ -87,11 +87,12 @@ public class MasterMethod {
 		}
 		initParametars();
 		serverSocket.close();
+		createServerThread();
 		logOutput.write("All workers recieved parametars.");
 		logOutput.write("Sending dots to the workers");
 		long tMain = System.currentTimeMillis();
 		initDots(dotsPath);
-		for(int i=0;i<5;++i)
+		for(int i=0;i<50;++i)
 		{
 			System.out.print(String.format("%d. %s%n", i+1, "iteration"));
 			double rand = MasterMethod.rand.nextDouble();
@@ -160,9 +161,63 @@ public class MasterMethod {
 				for(Thread thread : threads)
 					thread.join();
 			}
+			for(String host : workersAddress){
+				Socket S = new Socket(host, port);
+				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+				oos.writeInt(5);
+				oos.flush();
+				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
+				int val = ois.read();
+				S.close();
+			}
+			
 		}
 		long tMainEnd = System.currentTimeMillis();
 		System.out.println("Total time: "+(tMainEnd-tMain));
+	}
+	private void createServerThread() {
+		Thread serverThread = new Thread(new Runnable(){
+			@Override
+			public void run()
+			{
+				try {
+					ServerSocket serverSocket = new ServerSocket(portMaster);
+					while(true){
+						Socket client = serverSocket.accept();
+						ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
+						int operationId = ois.readInt();
+						
+						switch (operationId) {
+						case 4: // response to the question about where to send a dot
+							int component = ois.readInt();
+							double value  = ois.readDouble();
+							for(int i=0;i<workersAddress.length;++i){
+								if(minValues[i][component] <= value && maxValues[i][component] >= value){
+									ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+									oos.writeBytes(workersAddress[i]);
+									break;
+								}
+							}
+							break;
+						case 5: // sending how big am I 
+							int size     = ois.readInt();
+							int workerId = ois.read();
+							
+							break;
+						default:
+							break;
+						}
+						client.close();
+					}
+					//serverSocket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		serverThread.start();
+		
 	}
 	private void initParametars() throws IOException 
 	{
