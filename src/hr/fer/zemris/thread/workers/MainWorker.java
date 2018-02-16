@@ -4,6 +4,7 @@ import hr.fer.zemris.exceptions.DimmensionException;
 import hr.fer.zemris.network.Network;
 import hr.fer.zemris.structures.BinaryTree;
 import hr.fer.zemris.structures.BucketStructure;
+import hr.fer.zemris.structures.Pair;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.Structure;
 import hr.fer.zemris.structures.dot.Dot;
@@ -31,7 +32,7 @@ public class MainWorker {
 	public int numOfComponents;
 	
 	Structure[] S;
-	private HashMap<Long, Double>[] idInStructure;
+	//private HashMap<Long, Double>[] idInStructure;
 	
 	public MainWorker(int port,int mainPort)
 	{
@@ -42,11 +43,11 @@ public class MainWorker {
 	{
 		this.S = new Structure[parametars.minValues.length];
 		this.numOfComponents = parametars.minValues.length;
-		this.idInStructure = new HashMap[numOfComponents];
+		/*this.idInStructure = new HashMap[numOfComponents];
 		for(int i=0;i<numOfComponents; ++i)
 		{
 			idInStructure[i] = new HashMap<Long, Double>();
-		}
+		}*/
 		
 		for(int i=0,len = parametars.minValues.length; i < len; ++i)
 		{
@@ -63,7 +64,9 @@ public class MainWorker {
 	}
 	
 	private List<DotCache>wrongDots = new ArrayList<>();
-	
+	private List<Double> toRemoveValue = new ArrayList<>();
+	private List<Long> toRemoveId = new ArrayList<>();
+	private List<Double> toAdd = new ArrayList<>();
 	public void run()
 	{
 		try{
@@ -100,21 +103,27 @@ public class MainWorker {
 						double value  = ois.readDouble();
 						//System.out.printf("%d %d %f%n", identi, component, value);
 						S[component].add(value, identi);
-						idInStructure[component].put(identi, value);
+						//idInStructure[component].put(identi, value);
 						//if(i%10000==0)System.out.println(i+"/"+num);
 					}
 					ObjectOutputStream os2 = new ObjectOutputStream(client.getOutputStream());
 					os2.writeInt(1);
 					os2.close();
-					System.out.println("Primio ");
-					System.out.println("Hash size: " + idInStructure[0].size() + "," +idInStructure[1].size());
+					System.out.println("Primio početne pozicije.");
+					
 					break;
 				case 3:      // please move  
 					for(int k=0;k<numOfComponents;++k)
 					{
-						for(Long idDot : idInStructure[k].keySet()) 
+						int p =0;
+						toRemoveId.clear();
+						toRemoveValue.clear();
+						toAdd.clear();
+						for(Pair P : S[k])
+						//for(Long idDot : idInStructure[k].keySet()) 
 						{
-								double oldValue = idInStructure[k].get(idDot);
+								double oldValue = P.value;
+								long idDot = P.id;
 								double value = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
 								if(value < parametars.minValues[k] || value >= parametars.maxValues[k])
 								{
@@ -122,13 +131,19 @@ public class MainWorker {
 								}
 								else
 								{
-									try {
-										S[k].update(oldValue, value, idDot);
-									} catch (DimmensionException e) {
-										e.printStackTrace();
-									}
-									idInStructure[k].replace(idDot, value);
+									toRemoveId.add(idDot);
+									toRemoveValue.add(oldValue);
+									toAdd.add(value);
+									//idInStructure[k].replace(idDot, value);
 								}
+						}
+						for(int i=0, len = toRemoveId.size(); i<len; ++i)
+						{
+							try {
+								S[k].update(toRemoveValue.get(i), toAdd.get(i), toRemoveId.get(i));
+							} catch (DimmensionException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 					
@@ -160,7 +175,7 @@ public class MainWorker {
 					{
 						long idDot = dot.getId();
 						int k = dot.getComponent();
-				 		double value = idInStructure[k].get(idDot);
+				 		double value = dot.getValue();
 						if(parametars.minValues[k] > value && parametars.maxValues[k] <= value)
 						{
 							Socket S = new Socket(masterAddress, mainPort);
@@ -199,7 +214,7 @@ public class MainWorker {
 							oos3.writeInt(D.getComponent());
 							oos3.writeDouble(D.getValue());
 							this.S[D.getComponent()].delete(D.getValue(), D.getId());
-							idInStructure[D.getComponent()].remove(D.getId());
+							
 						}
 						oos3.flush();
 						ObjectInputStream ois3 = new ObjectInputStream(S.getInputStream());
@@ -216,7 +231,7 @@ public class MainWorker {
 						int compo  = ois4.readInt();
 						double value = ois4.readDouble();
 						S[compo].add(value, dotId);
-						idInStructure[compo].put(dotId, value);
+						
 					}
 					ObjectOutputStream oos4 = new ObjectOutputStream(client.getOutputStream());
 					oos4.write(1);

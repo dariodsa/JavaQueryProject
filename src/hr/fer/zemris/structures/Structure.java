@@ -2,10 +2,11 @@ package hr.fer.zemris.structures;
 
 import hr.fer.zemris.exceptions.DimmensionException;
 
+import java.util.Iterator;
 import java.util.List;
 
 
-public interface Structure {
+public interface Structure extends Iterable<Pair>{
 	
 	/*
 	 * Adds the new element to the structure. The new element is specified with the double 

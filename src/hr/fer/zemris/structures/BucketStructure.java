@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import hr.fer.zemris.exceptions.DimmensionException;
 import hr.fer.zemris.structures.dot.Dot;
 
-public class BucketStructure implements Structure{
+public class BucketStructure implements Structure {
 
 	//private arrray
 	
@@ -91,20 +92,35 @@ public class BucketStructure implements Structure{
 			this.buckets[i] = new ArrayList<>();
 		}
 	}
-	class Pair{
-		private double value;
-		private long id;
-		public Pair(long id, double value)
-		{
-			this.id = id;
-			this.value = value;
-		}
-		@Override
-		public boolean equals(Object O)
-		{
-			Pair P =(Pair)O;
-			return id == P.id && value == P.value;
-		}
+	@Override
+	public Iterator<Pair> iterator() {
 		
+		Iterator<Pair> it = new Iterator<Pair>(){
+			private int numPosition = 0;
+			private int buckPosition = 0;
+			@Override
+			public boolean hasNext() {
+				while(true)
+				{
+					if(numOfBuckets <= buckPosition)
+						return false;
+					
+					if(buckets[buckPosition].size() > numPosition)
+						return true;
+					else{
+						numPosition = 0;
+						++buckPosition;
+					}
+				}
+			}
+
+			@Override
+			public Pair next() {
+				++numPosition;
+				return buckets[buckPosition].get(numPosition-1);
+			}
+			
+		};
+		return it;
 	}
 }

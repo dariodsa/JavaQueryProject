@@ -1,14 +1,17 @@
 package hr.fer.zemris.structures;
-
+ 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
+import hr.fer.zemris.structures.BinaryTree;
 import hr.fer.zemris.structures.dot.Dot;
 
-public class BinaryTree extends TreeMap<Double, List<Long>> implements Structure
+public class BinaryTree extends TreeSet<Pair> implements Structure
 {
 	public BinaryTree()
 	{
@@ -23,43 +26,23 @@ public class BinaryTree extends TreeMap<Double, List<Long>> implements Structure
 	
 	public void delete(double oldValue, Long dot) 
 	{
-		if(!this.containsKey(oldValue))
-			return;
-		List<Long> list = new ArrayList<>(this.get(oldValue));
-		list.remove(dot);
-		
-		this.put(oldValue, list);	
+		this.remove(new Pair(dot, oldValue));
 	}
 	public void add(double newValue, Long dot)
 	{
-		List<Long> tempList = new ArrayList<>();
-		tempList.add(dot);
-		
-		if(this.containsKey(newValue))
-		{
-			List<Long> list = new ArrayList<>(this.get(newValue));
-			list.add(dot);
-			
-			//this.remove(newValue);
-			this.put(newValue, list);
-		}
-		else
-			this.put(newValue, tempList);
+		add(new Pair(dot, newValue));
 	}
 	public List<Long> query(double min, double max) throws IllegalArgumentException
 	{
 		if(max<min)
 			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
-		SortedMap<Double,List<Long>> sortedMap = this.subMap(min, max);
-		Collection<List<Long>> list = sortedMap.values();
 		
+		SortedSet<Pair> sortedMap = this.subSet(new Pair(0,min), new Pair(0,max));
 		List<Long> resultList = new ArrayList<>();
-		for(List<Long> tempList : list)
+		
+		for(Pair P : sortedMap)
 		{
-			for(Long dot : tempList)
-			{
-				resultList.add(dot);
-			}
+			resultList.add(P.id);
 		}
 		return resultList;
 	}
