@@ -256,7 +256,7 @@ public class Window extends JFrame{
 					minMove,
 					maxMove
 					);
-			String[] adrese = new String[] {"192.168.1.10"};
+			String[] adrese = new String[] {"192.168.1.4"};
 			int port1 = 1234+12;
 			int port2 = 2345;
 			
