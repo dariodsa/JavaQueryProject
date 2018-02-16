@@ -199,15 +199,8 @@ public class MasterMethod {
 						
 						switch (operationId) {
 						case 4: // response to the question about where to send a dot
-							int component = ois.readInt();
-							double value  = ois.readDouble();
-							for(int i=0;i<workersAddress.length;++i){
-								if(minValues[i][component] <= value && maxValues[i][component] >= value){
-									ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
-									oos.writeBytes(workersAddress[i]);
-									break;
-								}
-							}
+							Thread echoThread = new EchoThread(client);
+							echoThread.start();
 							break;
 						case 5: // sending how big am I 
 							int size     = ois.readInt();
@@ -215,7 +208,8 @@ public class MasterMethod {
 							
 							break;
 						default:
-							break;
+							serverSocket.close();
+							return;
 						}
 						client.close();
 					}
@@ -352,6 +346,44 @@ public class MasterMethod {
 					cacheDots[j].add(new DotCache(dot.getId(),i,dot.getValue(i)));
 					break;
 				}
+			}
+		}
+	}
+	class EchoThread extends Thread
+	{
+		Socket client;
+		public EchoThread(Socket client) 
+		{
+			this.client = client;
+		}
+		public void run() 
+		{
+			ObjectInputStream ois;
+			try {
+				ois = new ObjectInputStream(client.getInputStream());
+				while(true)
+				{
+					int component = ois.read();
+					if(component == -1)
+					{
+						client.close();
+						return;
+					}
+					double value  = ois.readDouble();
+					for(int i=0;i<workersAddress.length;++i)
+					{
+						if(minValues[i][component] <= value && maxValues[i][component] >= value)
+						{
+							ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+							oos.writeBytes(workersAddress[i]);
+							oos.flush();
+							break;
+						}
+					}
+				}
+			}
+			catch(IOException ex){
+				ex.printStackTrace();
 			}
 		}
 	}

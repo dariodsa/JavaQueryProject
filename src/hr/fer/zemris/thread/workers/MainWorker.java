@@ -171,36 +171,39 @@ public class MainWorker {
 					
 				case 5:
 					HashMap<String, List<DotCache>> wrongPositionDots = new HashMap<>();
-				 	for(DotCache dot : wrongDots)
-					{
-						long idDot = dot.getId();
-						int k = dot.getComponent();
-				 		double value = dot.getValue();
-						if(parametars.minValues[k] > value && parametars.maxValues[k] <= value)
+				 	if(!wrongDots.isEmpty())
+				 	{
+				 		Socket S = new Socket(masterAddress, mainPort);
+				 		ObjectOutputStream oos2 = new ObjectOutputStream(S.getOutputStream());
+				 		oos2.writeInt(4);
+				 		for(DotCache dot : wrongDots)
 						{
-							Socket S = new Socket(masterAddress, mainPort);
-							ObjectOutputStream oos2 = new ObjectOutputStream(S.getOutputStream());
-							oos2.writeInt(4);
-							oos2.writeInt(k);
+							long idDot = dot.getId();
+							int k = dot.getComponent();
+					 		double value = dot.getValue();
+					 		
+				 			oos2.write(k);
 							oos2.writeDouble(value);
 							oos2.flush();
 							ObjectInputStream ois2 = new ObjectInputStream(S.getInputStream());
 							String ipAddress = ois2.readUTF();
-							S.close();
+							
 							System.out.println("Radilica : "+ipAddress);
 							if(!wrongPositionDots.containsKey(ipAddress))
 							{
 								wrongPositionDots.put(ipAddress, new ArrayList<>());
 							}
-							List<DotCache> list = wrongPositionDots.get(ipAddress);
+							/*List<DotCache> list = wrongPositionDots.get(ipAddress);
 							list.add(new DotCache(idDot,k,value));
-							wrongPositionDots.replace(ipAddress, list);
+							wrongPositionDots.replace(ipAddress, list);*/
+							wrongPositionDots.get(ipAddress).add(new DotCache(idDot,k,value));
+							
 						}
+						wrongDots.clear();
+						ObjectOutputStream oos5 = new ObjectOutputStream(client.getOutputStream());
+						oos5.write(-1);
+						oos5.flush();
 					}
-					wrongDots.clear();
-					ObjectOutputStream oos5 = new ObjectOutputStream(client.getOutputStream());
-					oos5.write(1);
-					oos5.flush();
 					Set<String> set = wrongPositionDots.keySet();
 					for(String address : set){
 						Socket S = new Socket(address, port);
