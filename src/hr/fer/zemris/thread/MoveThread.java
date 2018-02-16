@@ -22,7 +22,7 @@ public class MoveThread extends Thread
 			oos.writeInt(3);
 			oos.flush();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
-			int val = ois.readInt();
+			int val = ois.read();
 			if(val==1)
 			{
 				S.close();

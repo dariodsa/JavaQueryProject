@@ -2,7 +2,10 @@ package hr.fer.zemris.structures;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import hr.fer.zemris.exceptions.DimmensionException;
 import hr.fer.zemris.structures.dot.Dot;
@@ -17,7 +20,7 @@ public class BucketStructure implements Structure{
 	private int numOfBuckets;
 	private double sizePerBucket;
 	
-	private List<Long>[] buckets;
+	private List<Pair>[] buckets;
 		
 	public BucketStructure(double minValue,double maxValue, int numOfBuckets) 
 	{
@@ -40,7 +43,7 @@ public class BucketStructure implements Structure{
 	public void add(double newValue, Long dot)
 	{
 		int newBucket = getBucket(newValue);
-		this.buckets[newBucket].add(dot);
+		this.buckets[newBucket].add(new Pair(dot,newValue));
 	}
 	@Override
 	public void update(double oldValue, double newValue, Long dot) throws DimmensionException 
@@ -50,8 +53,11 @@ public class BucketStructure implements Structure{
 		int oldBucket = getBucket(oldValue);
 		int newBucket = getBucket(newValue);
 		
-		this.buckets[oldBucket].remove(dot);
-		this.buckets[newBucket].add(dot);
+		if(newBucket != oldBucket)
+		{
+			this.buckets[oldBucket].remove(new Pair(dot,oldValue));
+			this.buckets[newBucket].add(new Pair(dot,newValue));
+		}
 	}
 
 	@Override
@@ -64,9 +70,10 @@ public class BucketStructure implements Structure{
 		List<Long> result = new ArrayList<>();
 		for(int i=firstBucket; i<=lastBucket; ++i)
 		{
-			for(Long id : buckets[i])
+			for(Pair id : buckets[i])
 			{
-				result.add(id);
+				if(id.value >= min && id.value <= max)
+					result.add(id.id);
 			}
 		}
 		return result;
@@ -83,5 +90,21 @@ public class BucketStructure implements Structure{
 			//System.out.printf("%d %d %n",i,numOfBuckets);
 			this.buckets[i] = new ArrayList<>();
 		}
+	}
+	class Pair{
+		private double value;
+		private long id;
+		public Pair(long id, double value)
+		{
+			this.id = id;
+			this.value = value;
+		}
+		@Override
+		public boolean equals(Object O)
+		{
+			Pair P =(Pair)O;
+			return id == P.id && value == P.value;
+		}
+		
 	}
 }

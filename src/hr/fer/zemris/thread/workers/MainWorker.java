@@ -112,9 +112,7 @@ public class MainWorker {
 				case 3:      // please move  
 					for(int k=0;k<numOfComponents;++k)
 					{
-						Set<Long> set = idInStructure[k].keySet();
-						
-						for(Long idDot : set) 
+						for(Long idDot : idInStructure[k].keySet()) 
 						{
 								double oldValue = idInStructure[k].get(idDot);
 								double value = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
@@ -132,11 +130,10 @@ public class MainWorker {
 									idInStructure[k].replace(idDot, value);
 								}
 						}
-						
 					}
 					
 					ObjectOutputStream os3 = new ObjectOutputStream(client.getOutputStream());
-					os3.writeInt(1);
+					os3.write(1);
 					os3.close();
 					break;
 				case 4:      // please query 
