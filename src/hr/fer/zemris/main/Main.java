@@ -4,6 +4,7 @@ import java.io.*;
 
 import hr.fer.zemris.graphics.*;
 import hr.fer.zemris.network.Network;
+import hr.fer.zemris.thread.workers.MainWorker;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
@@ -12,6 +13,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 
 import javax.swing.JFrame;
@@ -38,7 +40,7 @@ public class Main {
 	{
 		int port = 4564;
 		
-		if(args[0].length()==1)
+		//if(args[0].length()==1)
 			runGUI();
 		
 		Program program;
@@ -66,19 +68,17 @@ public class Main {
 						
 						InetAddress host = InetAddress.getLocalHost();
 						System.out.println(host.getHostName());
-						echoSocket = new Socket("192.168.1.1",80);
-						DataOutputStream out = new DataOutputStream(echoSocket.getOutputStream());
+						echoSocket = new Socket("192.168.1.10",port);
+						BufferedOutputStream out = new BufferedOutputStream(echoSocket.getOutputStream());
 						int N = 1000005;
-						for(int i=0; i<N;i++){
-							
-						out.writeInt(N-i);
-						//out.flush();
+						ArrayList<Long>rez = new ArrayList<>();
+						rez.add((Long)1l);rez.add((Long)2l);rez.add((Long)3l);rez.add((Long)4l);rez.add(new Long(-1));
 						
-						if(i%10000==0)System.out.println(N-i);
 						
-						}
-						echoSocket.close();
+						out.write(MainWorker.longToByte(rez));
+						out.flush();
 						out.close();
+
 						
 					} catch (Exception e) {
 						// TODO Auto-generated catch block

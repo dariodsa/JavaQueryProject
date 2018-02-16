@@ -101,17 +101,16 @@ public class MasterMethod {
 			boolean firstResult = true;
 			if(rand < parametars.queryFactor)
 			{
-				logOutput.write("I will perform query operation.");
+				System.out.println("I will perform query operation.");
 				//todo
-				double mini = 0;
-				double maxi = 10;
+				double mini = -130;
+				double maxi = 130;
 				List<Thread> threads = new ArrayList<Thread>();
 				long t1 = System.currentTimeMillis();
 				for(int j=0;j<workersAddress.length;++j)
 				{
 					if(true)
 					{
-						//kreiraj novu dretvu sa socketom
 						Thread T = new QueryThread(j, workersAddress[j], port,1,mini,maxi);
 						threads.add(T);
 					}
@@ -120,6 +119,8 @@ public class MasterMethod {
 					thread.start();
 				for(Thread thread : threads)
 					thread.join();
+				long t3 = System.currentTimeMillis();
+				System.out.printf("%d milisec for response.%n",t3-t1);
 				for(int j=0;j<workersAddress.length;++j)
 				{
 					if(!MasterMethod.result[j].isEmpty())
@@ -143,13 +144,14 @@ public class MasterMethod {
 					System.out.printf("%d ",r);
 				}*/
 				long t2 = System.currentTimeMillis();
-				System.out.printf("%d milisec.%n",t2-t1);
-				logOutput.write("Query operation completed.");
+				System.out.printf("Query operation completed. %d milisec. Size %d%n",t2-t1,result.size());
+				
 			}
 			if(rand < parametars.moveFactor)
 			{
-				logOutput.write("I will perform move operation.");
+				System.out.println("I will perform move operation.");
 				List<Thread> threads = new ArrayList<Thread>();
+				long t1 = System.currentTimeMillis();
 				for(int j=0;j<workersAddress.length;++j)
 				{
 					Thread T = new MoveThread(workersAddress[j],port); 
@@ -160,7 +162,11 @@ public class MasterMethod {
 					thread.start();
 				for(Thread thread : threads)
 					thread.join();
+				long t2 = System.currentTimeMillis();
+				System.out.printf("Move operation completed. %d milisec%n",t2-t1);
 			}
+			System.out.println("I will realocate wrong dots ...");
+			long t1 = System.currentTimeMillis();
 			for(String host : workersAddress){
 				Socket S = new Socket(host, port);
 				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
@@ -168,9 +174,13 @@ public class MasterMethod {
 				oos.flush();
 				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 				int val = ois.read();
+				while(val!=-1){
+					val = ois.read();
+				}
 				S.close();
 			}
-			
+			long t2 = System.currentTimeMillis();
+			System.out.printf("Realocation completed. %d milisec%n",t2-t1);
 		}
 		long tMainEnd = System.currentTimeMillis();
 		System.out.println("Total time: "+(tMainEnd-tMain));
@@ -221,6 +231,8 @@ public class MasterMethod {
 	}
 	private void initParametars() throws IOException 
 	{
+		System.out.println("Sending parametars ...");
+		System.out.println(parametars);
 		for(int i=0;i<workers.length;++i)
 		{
 			Socket S = new Socket(this.workers[i], this.port);
@@ -242,7 +254,7 @@ public class MasterMethod {
 			oos.close();
 			S.close();
 		}
-		
+		System.out.println("Operation completed.");
 	}
 	private void initConnection() throws UnknownHostException, IOException
 	{
@@ -292,7 +304,7 @@ public class MasterMethod {
 				dot.setValue(iter++, Double.parseDouble(strValue));
 			}
 			sendDot(dot, port);
-			if(numOfLine % 100000 == 0){
+			if(numOfLine % 1000000 == 0){
 				System.out.println(numOfLine + " / ");
 				sendsDot();
 			}

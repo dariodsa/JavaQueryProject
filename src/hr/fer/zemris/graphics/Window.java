@@ -246,6 +246,7 @@ public class Window extends JFrame{
 			throw new MinMaxValuesAreNotSet();
 		
 	}
+	private static int run = 0;
 	private void btnOkClick(int type)
 	{
 		int port1 = 1234+12;
@@ -290,7 +291,9 @@ public class Window extends JFrame{
 						masterMethod.run();
 					} catch (Exception e) {e.printStackTrace();}
 				});
-				workerThread.start();
+				if(Window.run == 0)
+					workerThread.start();
+				Window.run = 1;
 				if(type==1){
 					masterThread.start();
 					masterThread.join();

@@ -10,12 +10,15 @@ import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
 import java.util.*;
 import java.util.function.BiConsumer;
 
@@ -133,12 +136,14 @@ public class MainWorker {
 					//int idQuery = ois.readInt();
 					
 					List<Long> answer = S[component].query(min, max);
-					ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+					BufferedOutputStream oos = new BufferedOutputStream(client.getOutputStream());
 					//oos.writeInt(idQuery);
-					oos.writeInt(answer.size());
-					for(Long val : answer){
+					//oos.writeInt(answer.size());
+					byte[] res = longToByte(answer);
+					/*for(Long val : answer){
 						oos.writeLong(val);
-					}
+					}*/
+					oos.write(res);
 					oos.close();
 					break;
 					
@@ -221,6 +226,28 @@ public class MainWorker {
 		}
 		
 	}
+	public static byte[] longToByte(List<Long> input)
+	{
+	    ByteBuffer byteBuffer = ByteBuffer.allocate(input.size() * 8);        
+	    LongBuffer longBuffer = byteBuffer.asLongBuffer();
+	    long[] li = new long[input.size()];
+	    int iter = 0;
+	    for(Long l: input){
+	    	li[iter++] = l;
+	    }
+	    longBuffer.put(li);
+
+	    byte[] array = byteBuffer.array();
+
+	    return array;
+	}
+	public static long bytesToLong(byte[] bytes) {
+	    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+	    
+	    buffer.put(bytes);
+	    buffer.flip();//need flip 
+	    return buffer.getLong();
+	}
 	private double move(double oldValue, double minMove, double maxMove, double minValue, double maxValue)
 	{
 		double rand = minMove + (maxMove-minMove) * new Random().nextDouble();
@@ -234,7 +261,7 @@ public class MainWorker {
 		
 		return newValue;
 	}
-private double mod(double x,double y) {
+	private double mod(double x,double y) {
 		
 		if(x < 0)
 		{

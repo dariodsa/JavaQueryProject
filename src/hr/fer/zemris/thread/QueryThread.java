@@ -1,9 +1,14 @@
 package hr.fer.zemris.thread;
 
+import hr.fer.zemris.thread.workers.MainWorker;
+
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QueryThread extends Thread {
 	
@@ -25,6 +30,7 @@ public class QueryThread extends Thread {
 		this.min = min;
 		this.max = max;
 	}
+	byte[] bi = new byte[8192]; 
 	public void run()
 	{
 		try {
@@ -35,13 +41,20 @@ public class QueryThread extends Thread {
 			oos.writeDouble(max);
 			oos.writeInt(component);
 			oos.flush();
-			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
-			int size = ois.readInt();
-			System.out.println("Size query result : "+size);
-			for(int i=0;i<size;++i)
+			BufferedInputStream ois = new BufferedInputStream(S.getInputStream());
+			
+			System.out.println("Response from worker "+address);
+			List<Byte> list = new ArrayList<>();
+			while(true)
 			{
-				long id = ois.readLong(); 
-				MasterMethod.result[this.id].add(id);
+				int len = ois.read(bi);
+				if(len == -1)break;
+				for(int i=0;i<len;i+=8)
+				{
+					long dotId = MainWorker.bytesToLong(new byte[] {bi[i],bi[i+1],bi[i+2],bi[i+3],bi[i+4],bi[i+5],bi[i+6],bi[i+7]});
+					MasterMethod.result[this.id].add(dotId);
+				}
+				//MasterMethod.result[this.id].add(id);
 				
 			}
 			S.close();
