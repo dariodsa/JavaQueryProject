@@ -61,6 +61,9 @@ public class MainWorker {
 			}
 		}
 	}
+	
+	private List<DotCache>wrongDots = new ArrayList<>();
+	
 	public void run()
 	{
 		try{
@@ -115,12 +118,19 @@ public class MainWorker {
 						{
 								double oldValue = idInStructure[k].get(idDot);
 								double value = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
-								try {
-									S[k].update(oldValue, value, idDot);
-								} catch (DimmensionException e) {
-									e.printStackTrace();
+								if(value < parametars.minValues[k] || value >= parametars.maxValues[k])
+								{
+									wrongDots.add(new DotCache(idDot,k,oldValue));
 								}
-								idInStructure[k].replace(idDot, value);
+								else
+								{
+									try {
+										S[k].update(oldValue, value, idDot);
+									} catch (DimmensionException e) {
+										e.printStackTrace();
+									}
+									idInStructure[k].replace(idDot, value);
+								}
 						}
 						
 					}
@@ -149,34 +159,33 @@ public class MainWorker {
 					
 				case 5:
 					HashMap<String, List<DotCache>> wrongPositionDots = new HashMap<>();
-					for(int k=0;k<numOfComponents;++k)
+				 	for(DotCache dot : wrongDots)
 					{
-						Set<Long> set = idInStructure[k].keySet();
-						for(Long idDot : set) 
+						long idDot = dot.getId();
+						int k = dot.getComponent();
+				 		double value = idInStructure[k].get(idDot);
+						if(parametars.minValues[k] > value && parametars.maxValues[k] <= value)
 						{
-							double value = idInStructure[k].get(idDot);
-							if(parametars.minValues[k] > value && parametars.maxValues[k] <= value)
+							Socket S = new Socket(masterAddress, mainPort);
+							ObjectOutputStream oos2 = new ObjectOutputStream(S.getOutputStream());
+							oos2.writeInt(4);
+							oos2.writeInt(k);
+							oos2.writeDouble(value);
+							oos2.flush();
+							ObjectInputStream ois2 = new ObjectInputStream(S.getInputStream());
+							String ipAddress = ois2.readUTF();
+							S.close();
+							System.out.println("Radilica : "+ipAddress);
+							if(!wrongPositionDots.containsKey(ipAddress))
 							{
-								Socket S = new Socket(masterAddress, mainPort);
-								ObjectOutputStream oos2 = new ObjectOutputStream(S.getOutputStream());
-								oos2.writeInt(4);
-								oos2.writeInt(k);
-								oos2.writeDouble(value);
-								oos2.flush();
-								ObjectInputStream ois2 = new ObjectInputStream(S.getInputStream());
-								String ipAddress = ois2.readUTF();
-								S.close();
-								System.out.println("Radilica : "+ipAddress);
-								if(!wrongPositionDots.containsKey(ipAddress))
-								{
-									wrongPositionDots.put(ipAddress, new ArrayList<>());
-								}
-								List<DotCache> list = wrongPositionDots.get(ipAddress);
-								list.add(new DotCache(idDot,k,value));
-								wrongPositionDots.replace(ipAddress, list);
+								wrongPositionDots.put(ipAddress, new ArrayList<>());
 							}
+							List<DotCache> list = wrongPositionDots.get(ipAddress);
+							list.add(new DotCache(idDot,k,value));
+							wrongPositionDots.replace(ipAddress, list);
 						}
 					}
+					wrongDots.clear();
 					ObjectOutputStream oos5 = new ObjectOutputStream(client.getOutputStream());
 					oos5.write(1);
 					oos5.flush();
