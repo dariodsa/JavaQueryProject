@@ -204,6 +204,7 @@ public class MainWorker {
 						oos5.write(-1);
 						oos5.flush();
 					}
+				 	client.close();
 					Set<String> set = wrongPositionDots.keySet();
 					for(String address : set){
 						Socket S = new Socket(address, port);

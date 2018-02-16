@@ -1,14 +1,21 @@
 package hr.fer.zemris.graphics.component;
 
 import hr.fer.zemris.exceptions.ComputerIsNotFound;
+import hr.fer.zemris.exceptions.DotFileNotFound;
 import hr.fer.zemris.exceptions.DuplicateComputerName;
 import hr.fer.zemris.exceptions.InvalidIpAddress;
 import hr.fer.zemris.graphics.component.ip.*;
 import hr.fer.zemris.network.*;
 
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import java.util.List;
 
 import javax.swing.*;
 
@@ -19,6 +26,7 @@ public class IpTable extends JPanel {
 	 */
 	private static final long serialVersionUID = -6887805418581516885L;
 	private JButton btnAddIp;
+	private JButton btnLoadIp;
 	private DataTable table;
 	
 	public IpTable() 
@@ -41,13 +49,37 @@ public class IpTable extends JPanel {
 			} catch (Exception e1) {e1.printStackTrace();}
 		});
 		
-		
+		btnLoadIp = new JButton("Load IP address");
+		btnLoadIp.addActionListener((e)->{
+			JFileChooser fc = new JFileChooser(".");
+			int value = fc.showOpenDialog(this);
+			if(value == JFileChooser.APPROVE_OPTION){
+				Path ipAddresses = Paths.get(fc.getSelectedFile().getPath());
+				JOptionPane.showMessageDialog(this, "File loaded.");
+				
+				try {
+					List<String> lines = Files.readAllLines(ipAddresses);
+					for(String line : lines){
+						addNewComputer("", line);
+					}
+					
+				}
+				 catch (Exception e1) {
+					 JOptionPane.showMessageDialog(this,new DotFileNotFound(fc.getSelectedFile().getAbsolutePath()).getMessage());
+				}
+				
+				
+			}
+		});
 		
 		table = new DataTable();
-		
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		panel.add(btnAddIp,BorderLayout.WEST);
+		panel.add(btnLoadIp,BorderLayout.EAST);
 		JScrollPane pane = new JScrollPane(table);
 		
-		add(btnAddIp,BorderLayout.NORTH);
+		add(panel,BorderLayout.NORTH);
 		add(pane,BorderLayout.CENTER);
 	}
 	private void checkComputerName(String name) throws DuplicateComputerName
@@ -60,6 +92,16 @@ public class IpTable extends JPanel {
 				throw new DuplicateComputerName(name);
 			}
 		}
+	}
+	private void addNewComputer(String name, String ipAddress)
+	{
+		table.model.addRow(new RowItem(
+				"Nije u funkciji",
+				ipAddress,
+				"",
+				"7654",
+				new JButton("ok")));
+		table.repaint();
 	}
 	private void click_btnAddIp(String ipAdress) throws IOException
 	{
@@ -80,12 +122,7 @@ public class IpTable extends JPanel {
 						throw new ComputerIsNotFound(addNewComputer.ipAddress.getText());
 					}
 				}
-				table.model.addRow(new RowItem(
-						addNewComputer.computerName.getText(),
-						addNewComputer.ipAddress.getText(),
-						"",
-						"7654",
-						new JButton("ok")));
+				addNewComputer(addNewComputer.computerName.getText(), addNewComputer.ipAddress.getText());
 				
 				table.repaint();
 			} catch (InvalidIpAddress | DuplicateComputerName | ComputerIsNotFound e) {
