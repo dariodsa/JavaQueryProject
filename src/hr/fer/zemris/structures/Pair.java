@@ -18,7 +18,7 @@ public class Pair implements Comparable<Pair>{
 	@Override
 	public int compareTo(Pair o) 
 	{
-		return Double.compare(value, o.value);
+		return Double.compare(value, o.value)==0?Long.compare(id, o.id):Double.compare(value, o.value);
 	}
 	
 }

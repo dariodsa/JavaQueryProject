@@ -200,10 +200,10 @@ public class MainWorker {
 							
 						}
 						wrongDots.clear();
-						ObjectOutputStream oos5 = new ObjectOutputStream(client.getOutputStream());
-						oos5.write(-1);
-						oos5.flush();
 					}
+				 	ObjectOutputStream oos5 = new ObjectOutputStream(client.getOutputStream());
+					oos5.write(-1);
+					oos5.flush();
 				 	client.close();
 					Set<String> set = wrongPositionDots.keySet();
 					for(String address : set){

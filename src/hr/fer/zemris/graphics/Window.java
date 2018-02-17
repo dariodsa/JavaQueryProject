@@ -13,18 +13,32 @@ import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.thread.MasterMethod;
 import hr.fer.zemris.thread.workers.MainWorker;
 
+
+
+
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 
 import java.nio.file.Paths;
 
+
+
+
+
 import javax.swing.*;
 
 public class Window extends JFrame{
+	
+	int port1 = 1234+12;
+	int port2 = 2345;
 	
 	private JSlider moveFactor;
 	private JSlider queryFactor;
@@ -44,6 +58,8 @@ public class Window extends JFrame{
 	public IpTable ipTable = new IpTable();
 	
 	private PrintWriter logOutput;
+	
+	private JButton killThemAll = new JButton("Prepare for new iteration");
 	
 	public Window(int width,int height)
 	{
@@ -211,6 +227,41 @@ public class Window extends JFrame{
 		JScrollPane js = new JScrollPane(logOutput);
 		js.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		panel.add(js,BorderLayout.SOUTH);
+		panel.add(killThemAll, BorderLayout.WEST);
+		killThemAll.addActionListener((e)->{
+			//killThemAll
+			MyTableModel model = ipTable.getTable().model;
+			String[] adrese = new String[model.getRowCount()];
+			for(int i=0;i<model.getRowCount();++i)
+			{
+				adrese[i] = (String)model.getValueAt(i, 1);
+			}
+			/*for(int i=0;i<adrese.length;++i)
+			{
+				try
+				{
+					Socket S = new Socket(adrese[i],port2);
+					ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+					S.close();
+				}
+				catch(IOException ex)
+				{
+					ex.printStackTrace();
+				}
+			}*/
+			try 
+			{
+				Socket S = new Socket(InetAddress.getLocalHost().getHostAddress().toString(),port1);
+				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+				oos.writeInt(7);
+				oos.flush();
+				S.close();
+			} 
+			catch (Exception e1) 
+			{
+				e1.printStackTrace();
+			}
+		});
 		return panel;
 	}
 	
@@ -249,8 +300,7 @@ public class Window extends JFrame{
 	private static int run = 0;
 	private void btnOkClick(int type)
 	{
-		int port1 = 1234+12;
-		int port2 = 2345;
+		
 		
 		try {
 			switch (type) {

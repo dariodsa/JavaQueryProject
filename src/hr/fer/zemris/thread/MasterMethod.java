@@ -92,7 +92,7 @@ public class MasterMethod {
 		logOutput.write("Sending dots to the workers");
 		long tMain = System.currentTimeMillis();
 		initDots(dotsPath);
-		for(int i=0;i<50;++i)
+		for(int i=0;i<20;++i)
 		{
 			System.out.print(String.format("%d. %s%n", i+1, "iteration"));
 			double rand = MasterMethod.rand.nextDouble();

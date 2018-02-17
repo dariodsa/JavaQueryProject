@@ -5,8 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import hr.fer.zemris.exceptions.DimmensionException;
 import hr.fer.zemris.structures.dot.Dot;
@@ -21,7 +23,7 @@ public class BucketStructure implements Structure {
 	private int numOfBuckets;
 	private double sizePerBucket;
 	
-	private List<Pair>[] buckets;
+	private LinkedList<Pair>[] buckets;
 		
 	public BucketStructure(double minValue,double maxValue, int numOfBuckets) 
 	{
@@ -32,7 +34,7 @@ public class BucketStructure implements Structure {
 		double size = Math.abs(maxValue - minValue);
 		this.sizePerBucket = size / numOfBuckets;
 		
-		this.buckets = new ArrayList[numOfBuckets];
+		this.buckets = new LinkedList[numOfBuckets];
 		initBuckets();
 		
 	}
@@ -44,7 +46,19 @@ public class BucketStructure implements Structure {
 	public void add(double newValue, Long dot)
 	{
 		int newBucket = getBucket(newValue);
-		this.buckets[newBucket].add(new Pair(dot,newValue));
+		boolean k  = this.buckets[newBucket].add(new Pair(dot,newValue));
+		if(k==false)
+		{
+			boolean K = this.buckets[newBucket].contains(new Pair(dot,newValue));
+			for(Pair P : this.buckets[newBucket]){
+				if(P.equals(new Pair(dot,newValue))){
+					System.out.println("jednak kao dolje "+P.id +" "+ P.value);
+					break;
+				}
+			}
+			System.out.printf("%d %f sranje %d%n",dot,newValue,K?1:0);
+		}
+		
 	}
 	@Override
 	public void update(double oldValue, double newValue, Long dot) throws DimmensionException 
@@ -68,6 +82,7 @@ public class BucketStructure implements Structure {
 			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
 		int firstBucket = getBucket(min);
 		int lastBucket = getBucket(max);
+		System.out.println(firstBucket + " " +lastBucket);
 		List<Long> result = new ArrayList<>();
 		for(int i=firstBucket; i<=lastBucket; ++i)
 		{
@@ -89,7 +104,7 @@ public class BucketStructure implements Structure {
 		for(int i=0; i<numOfBuckets; ++i)
 		{
 			//System.out.printf("%d %d %n",i,numOfBuckets);
-			this.buckets[i] = new ArrayList<>();
+			this.buckets[i] = new LinkedList<>();
 		}
 	}
 	@Override
@@ -98,26 +113,25 @@ public class BucketStructure implements Structure {
 		Iterator<Pair> it = new Iterator<Pair>(){
 			private int numPosition = 0;
 			private int buckPosition = 0;
+			private Iterator<Pair> iterator = buckets[buckPosition].iterator();
 			@Override
 			public boolean hasNext() {
 				while(true)
 				{
-					if(numOfBuckets <= buckPosition)
-						return false;
-					
-					if(buckets[buckPosition].size() > numPosition)
+					if(iterator.hasNext())
 						return true;
 					else{
-						numPosition = 0;
 						++buckPosition;
+						if(numOfBuckets <= buckPosition)
+							return false;
+						iterator = buckets[buckPosition].iterator();
 					}
 				}
 			}
 
 			@Override
 			public Pair next() {
-				++numPosition;
-				return buckets[buckPosition].get(numPosition-1);
+				return iterator.next();
 			}
 			
 		};
