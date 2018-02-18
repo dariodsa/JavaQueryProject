@@ -7,11 +7,14 @@ import hr.fer.zemris.graphics.component.IpTable;
 import hr.fer.zemris.graphics.component.MultiValueChoose;
 import hr.fer.zemris.graphics.component.PPicture;
 import hr.fer.zemris.graphics.component.ip.MyTableModel;
+import hr.fer.zemris.graphics.component.statistics.StatisticsPanel;
 import hr.fer.zemris.graphics.constants.Constants;
 import hr.fer.zemris.graphics.constants.StructureType;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.thread.MasterMethod;
 import hr.fer.zemris.thread.workers.MainWorker;
+
+
 
 
 
@@ -28,6 +31,8 @@ import java.nio.file.Path;
 
 
 import java.nio.file.Paths;
+
+
 
 
 
@@ -60,6 +65,7 @@ public class Window extends JFrame{
 	private PrintWriter logOutput;
 	
 	private JButton killThemAll = new JButton("Prepare for new iteration");
+	private StatisticsPanel statisticsPanel;
 	
 	public Window(int width,int height)
 	{
@@ -112,9 +118,15 @@ public class Window extends JFrame{
 		
 		tabs.addTab("Postavke", getDataTab());
 		tabs.addTab("Slika", getPictureTab());
+		tabs.addTab("Statistika", getStatisticsTab());
 		tabs.addTab("Radilice", getComputersInfo());
 		
 		add(tabs);
+	}
+	private Component getStatisticsTab() {
+		statisticsPanel = new StatisticsPanel();
+		statisticsPanel.initGui();
+		return statisticsPanel;
 	}
 	private JComponent getDataTab(){
 		
