@@ -115,6 +115,7 @@ public class MainWorker {
 				case 3:      // please move  
 					for(int k=0;k<numOfComponents;++k)
 					{
+						System.out.println(k);
 						int p =0;
 						toRemoveId.clear();
 						toRemoveValue.clear();
@@ -146,7 +147,6 @@ public class MainWorker {
 							}
 						}
 					}
-					
 					ObjectOutputStream os3 = new ObjectOutputStream(client.getOutputStream());
 					os3.write(1);
 					os3.close();

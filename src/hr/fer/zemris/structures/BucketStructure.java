@@ -46,19 +46,7 @@ public class BucketStructure implements Structure {
 	public void add(double newValue, Long dot)
 	{
 		int newBucket = getBucket(newValue);
-		boolean k  = this.buckets[newBucket].add(new Pair(dot,newValue));
-		if(k==false)
-		{
-			boolean K = this.buckets[newBucket].contains(new Pair(dot,newValue));
-			for(Pair P : this.buckets[newBucket]){
-				if(P.equals(new Pair(dot,newValue))){
-					System.out.println("jednak kao dolje "+P.id +" "+ P.value);
-					break;
-				}
-			}
-			System.out.printf("%d %f sranje %d%n",dot,newValue,K?1:0);
-		}
-		
+		this.buckets[newBucket].add(new Pair(dot,newValue));
 	}
 	@Override
 	public void update(double oldValue, double newValue, Long dot) throws DimmensionException 
@@ -103,7 +91,6 @@ public class BucketStructure implements Structure {
 	{
 		for(int i=0; i<numOfBuckets; ++i)
 		{
-			//System.out.printf("%d %d %n",i,numOfBuckets);
 			this.buckets[i] = new LinkedList<>();
 		}
 	}

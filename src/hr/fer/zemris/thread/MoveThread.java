@@ -1,8 +1,6 @@
 package hr.fer.zemris.thread;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 
 public class MoveThread extends Thread 
@@ -18,12 +16,12 @@ public class MoveThread extends Thread
 	{
 		try {
 			Socket S = new Socket(address, port);
-			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+			OutputStream oos = new ObjectOutputStream(S.getOutputStream());
 			oos.write(3);
 			oos.flush();
-			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
+			InputStream ois = new ObjectInputStream(S.getInputStream());
 			int val = ois.read();
-			if(val==1)
+			if(val==1) 
 			{
 				S.close();
 				return;

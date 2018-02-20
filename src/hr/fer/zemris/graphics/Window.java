@@ -42,8 +42,8 @@ import javax.swing.*;
 
 public class Window extends JFrame{
 	
-	int port1 = 1234+12;
-	int port2 = 2345;
+	int port1 = 3456;
+	int port2 = 4567;
 	
 	private JSlider moveFactor;
 	private JSlider queryFactor;
