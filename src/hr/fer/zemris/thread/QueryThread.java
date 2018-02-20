@@ -36,10 +36,10 @@ public class QueryThread extends Thread {
 		try {
 			Socket S = new Socket(address, port);
 			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-			oos.writeInt(4);
+			oos.write(4);
 			oos.writeDouble(min);
 			oos.writeDouble(max);
-			oos.writeInt(component);
+			oos.write(component);
 			oos.flush();
 			BufferedInputStream ois = new BufferedInputStream(S.getInputStream());
 			

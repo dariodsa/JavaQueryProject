@@ -19,7 +19,7 @@ public class MoveThread extends Thread
 		try {
 			Socket S = new Socket(address, port);
 			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-			oos.writeInt(3);
+			oos.write(3);
 			oos.flush();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 			int val = ois.read();

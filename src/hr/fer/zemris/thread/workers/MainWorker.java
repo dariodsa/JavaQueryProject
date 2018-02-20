@@ -75,7 +75,7 @@ public class MainWorker {
 			{
 				Socket client = serverSocket.accept();
 				ObjectInputStream ois = new ObjectInputStream( new BufferedInputStream(client.getInputStream()));
-				int id = ois.readInt();
+				int id = ois.read();
 				System.out.printf("I see %d%n", id);
 				switch (id) {
 				case 0:      // terminate thread and connection
@@ -154,7 +154,7 @@ public class MainWorker {
 				case 4:      // please query 
 					double min  = ois.readDouble();
 					double max  = ois.readDouble();
-					int component = ois.readInt();
+					int component = ois.read();
 					//int idQuery = ois.readInt();
 					
 					List<Long> answer = S[component].query(min, max);
@@ -175,7 +175,7 @@ public class MainWorker {
 				 	{
 				 		Socket S = new Socket(masterAddress, mainPort);
 				 		ObjectOutputStream oos2 = new ObjectOutputStream(S.getOutputStream());
-				 		oos2.writeInt(4);
+				 		oos2.write(4);
 				 		for(DotCache dot : wrongDots)
 						{
 							long idDot = dot.getId();
@@ -209,13 +209,13 @@ public class MainWorker {
 					for(String address : set){
 						Socket S = new Socket(address, port);
 						ObjectOutputStream oos3 = new ObjectOutputStream(S.getOutputStream());
-						oos3.writeInt(6);
+						oos3.write(6);
 						int dotsSize = wrongPositionDots.get(address).size();
 						oos3.writeInt(dotsSize);
 						for(DotCache D : wrongPositionDots.get(address)){
 							
 							oos3.writeLong(D.getId());
-							oos3.writeInt(D.getComponent());
+							oos3.write(D.getComponent());
 							oos3.writeDouble(D.getValue());
 							this.S[D.getComponent()].delete(D.getValue(), D.getId());
 							
@@ -232,7 +232,7 @@ public class MainWorker {
 					int size = ois4.readInt();
 					for(int i=0;i<size;++i){
 						long dotId = ois4.readLong();
-						int compo  = ois4.readInt();
+						int compo  = ois4.read();
 						double value = ois4.readDouble();
 						S[compo].add(value, dotId);
 						

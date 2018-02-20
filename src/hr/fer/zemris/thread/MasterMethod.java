@@ -170,7 +170,7 @@ public class MasterMethod {
 			for(String host : workersAddress){
 				Socket S = new Socket(host, port);
 				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-				oos.writeInt(5);
+				oos.write(5);//oos.writeInt(5);
 				oos.flush();
 				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 				int val = ois.read();
@@ -195,7 +195,7 @@ public class MasterMethod {
 					while(true){
 						Socket client = serverSocket.accept();
 						ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
-						int operationId = ois.readInt();
+						int operationId = ois.read();
 						
 						switch (operationId) {
 						case 4: // response to the question about where to send a dot
@@ -232,7 +232,7 @@ public class MasterMethod {
 			Socket S = new Socket(this.workers[i], this.port);
 			
 			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-			oos.writeInt(1);
+			oos.write(1);
 			oos.writeObject(parametars);
 			oos.flush();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
@@ -316,7 +316,7 @@ public class MasterMethod {
 				continue;
 			Socket S = new Socket(this.workers[i], port);
 			ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(S.getOutputStream()));
-			oos.writeInt(2);
+			oos.write(2);
 			oos.writeInt(cacheDots[i].size());
 			for(DotCache dot : cacheDots[i])
 			{
