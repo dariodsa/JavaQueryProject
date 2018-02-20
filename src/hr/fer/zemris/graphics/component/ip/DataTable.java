@@ -14,12 +14,12 @@ public class DataTable extends JTable{
 	
 	private static final String[] columnNames = new String[] {"Naziv","IpAdresa","TCP-Connection","Port","Delete"};
 	private static final Class<?>[]  columnClasses = new Class<?>[] {String.class,String.class,Image.class,String.class, JButton.class};
-	public MyTableModel model;
+	public DefaultTableModel model;
 	
 	public DataTable() 
 	{
 		setVisible(true);
-		model  = new MyTableModel(columnNames,columnClasses);
+		model  = new DefaultTableModel(columnNames,0);
 		
 		//model.addRow(new RowItem("mirko",new JButton("ok")));
 		setModel(model);

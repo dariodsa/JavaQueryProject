@@ -20,6 +20,7 @@ import hr.fer.zemris.thread.workers.MainWorker;
 
 
 
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -38,7 +39,9 @@ import java.nio.file.Paths;
 
 
 
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class Window extends JFrame{
 	
@@ -242,7 +245,7 @@ public class Window extends JFrame{
 		panel.add(killThemAll, BorderLayout.WEST);
 		killThemAll.addActionListener((e)->{
 			//killThemAll
-			MyTableModel model = ipTable.getTable().model;
+			DefaultTableModel model = ipTable.getTable().model;
 			String[] adrese = new String[model.getRowCount()];
 			for(int i=0;i<model.getRowCount();++i)
 			{
@@ -332,7 +335,7 @@ public class Window extends JFrame{
 						maxMove
 						);
 				
-				MyTableModel model = ipTable.getTable().model;
+				DefaultTableModel model = ipTable.getTable().model;
 				String[] adrese = new String[model.getRowCount()];
 				for(int i=0;i<model.getRowCount();++i)
 				{

@@ -7,17 +7,19 @@ import hr.fer.zemris.exceptions.InvalidIpAddress;
 import hr.fer.zemris.graphics.component.ip.*;
 import hr.fer.zemris.network.*;
 
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class IpTable extends JPanel {
 
@@ -73,6 +75,21 @@ public class IpTable extends JPanel {
 		});
 		
 		table = new DataTable();
+		
+		 
+		 
+		ButtonColumn buttonColumn = new ButtonColumn(table, new AbstractAction() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				JTable table = (JTable)e.getSource();
+		        int modelRow = Integer.valueOf( e.getActionCommand() );
+		        ((DefaultTableModel)table.getModel()).removeRow(modelRow);
+			}
+		}, table.model.findColumn("Delete"));
+		buttonColumn.setMnemonic(KeyEvent.VK_D);
+		
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
 		panel.add(btnAddIp,BorderLayout.WEST);
@@ -95,13 +112,31 @@ public class IpTable extends JPanel {
 	}
 	private void addNewComputer(String name, String ipAddress)
 	{
-		table.model.addRow(new RowItem(
-				"Nije u funkciji",
+		JButton deleteButton = new JButton("Delete");
+		deleteButton.addActionListener((e)->{
+			removeComputer(name,ipAddress);
+		});
+		table.model.addRow(new Object[] {
+				name,
 				ipAddress,
 				"",
 				"7654",
-				new JButton("ok")));
-		table.repaint();
+				deleteButton});
+		//table.repaint();
+		table.invalidate();
+	}
+	private void removeComputer(String name, String ipAddress) 
+	{
+		for(int i=0;i<table.model.getRowCount();++i)
+		{
+			String rowName = table.model.getColumnName(0);
+			String rowIpAddress = table.model.getColumnName(1);
+			if( name == rowName && ipAddress == rowIpAddress)
+			{
+				table.model.removeRow(i);
+				return;
+			}
+		}
 	}
 	private void click_btnAddIp(String ipAdress) throws IOException
 	{
