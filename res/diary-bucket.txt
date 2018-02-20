@@ -20,7 +20,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 I see 4
@@ -302,7 +302,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -586,7 +586,7 @@ I see 2
 Loading ... 994084
 1. iteration
 I will perform query operation.
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 I see 4
 6944 43055
 Response from worker 10.140.150.5
@@ -866,7 +866,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -1148,7 +1148,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 I see 4
@@ -1430,7 +1430,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -1712,7 +1712,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -1994,7 +1994,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -2276,7 +2276,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -2560,7 +2560,7 @@ I see 2
 Loading ... 994084
 1. iteration
 I will perform query operation.
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 Response from worker 10.140.150.5
 I see 4
 23611 146388
@@ -2840,7 +2840,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -3122,7 +3122,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -3404,7 +3404,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -3686,7 +3686,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -3968,7 +3968,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -4250,7 +4250,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -4532,7 +4532,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -4814,7 +4814,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -5096,7 +5096,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -5378,7 +5378,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -5660,7 +5660,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -5942,7 +5942,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -6224,7 +6224,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -6506,7 +6506,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -6788,7 +6788,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -7070,7 +7070,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -7352,7 +7352,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -7634,7 +7634,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -7916,7 +7916,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
@@ -8198,7 +8198,7 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 994084
-Primio poèetne pozicije.
+Primio po?etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5

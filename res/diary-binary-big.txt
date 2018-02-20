@@ -19,11 +19,11 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 2000000
-Primio poèetne pozicije.
+Primio poï¿½etne pozicije.
 Sending dots over the network.
 I see 2
 Loading ... 1550300
-Primio poèetne pozicije.
+Primio poï¿½etne pozicije.
 1. iteration
 I will perform query operation.
 I see 4
@@ -286,11 +286,11 @@ Operation completed.
 Sending dots over the network.
 I see 2
 Loading ... 2000000
-Primio poèetne pozicije.
+Primio poï¿½etne pozicije.
 Sending dots over the network.
 I see 2
 Loading ... 1550300
-Primio poèetne pozicije.
+Primio poï¿½etne pozicije.
 1. iteration
 I will perform query operation.
 Response from worker 10.140.150.5
