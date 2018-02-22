@@ -52,6 +52,9 @@ public class Parametars implements Serializable{
 		for(int i=0;i<minMove.length;++i){
 			rez+=String.format("%s (%d) %f <--> %f%n","Min and max value ",i+1,minValues[i],maxValues[i]);
 		}
+		for(int i=0;i<minMove.length;++i){
+			rez+=String.format("%s (%d) %f <--> %f%n","Min and max value moves",i+1,minMove[i],maxMove[i]);
+		}
 		return rez;
 	}
 }

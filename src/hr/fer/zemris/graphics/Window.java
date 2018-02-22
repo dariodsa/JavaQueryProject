@@ -5,6 +5,7 @@ import hr.fer.zemris.exceptions.DotFileNotFound;
 import hr.fer.zemris.exceptions.MinMaxValuesAreNotSet;
 import hr.fer.zemris.graphics.component.IpTable;
 import hr.fer.zemris.graphics.component.MultiValueChoose;
+import hr.fer.zemris.graphics.component.MultiValueSliderChoose;
 import hr.fer.zemris.graphics.component.PPicture;
 import hr.fer.zemris.graphics.component.ip.MyTableModel;
 import hr.fer.zemris.graphics.component.statistics.StatisticsPanel;
@@ -13,6 +14,7 @@ import hr.fer.zemris.graphics.constants.StructureType;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.thread.MasterMethod;
 import hr.fer.zemris.thread.workers.MainWorker;
+
 
 
 
@@ -32,6 +34,7 @@ import java.nio.file.Path;
 
 
 import java.nio.file.Paths;
+
 
 
 
@@ -187,7 +190,7 @@ public class Window extends JFrame{
 			}
 		});
 		minMaxMove.addActionListener((e)->{
-			MultiValueChoose M = new MultiValueChoose("naziv", "poruka", numOfComponent);
+			MultiValueSliderChoose M = new MultiValueSliderChoose("Pomaci", "Pomaci po komponentama", numOfComponent);
 			int result = JOptionPane.showConfirmDialog(this, M);
 			if(result == JOptionPane.YES_OPTION)
 			{
