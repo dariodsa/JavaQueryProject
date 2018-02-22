@@ -84,7 +84,7 @@ public class MainWorker {
 				case 1:      // send parametars
 					System.out.println("Primio parametre");
 					parametars = (Parametars)ois.readObject();
-					masterAddress = ((InetSocketAddress)client.getRemoteSocketAddress()).getAddress().toString();
+					masterAddress = (client.getRemoteSocketAddress()).toString();
 					init();
 					//Network.sendResponse(client.getLocalAddress(), mainPort, 1); // parametars sent
 					ObjectOutputStream os = new ObjectOutputStream(client.getOutputStream());

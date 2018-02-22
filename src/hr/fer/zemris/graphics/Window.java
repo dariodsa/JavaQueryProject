@@ -63,6 +63,8 @@ public class Window extends JFrame{
 	private JComboBox<String> structureType;
 	
 	private Values V = new Values();
+	private Values VMoves = new Values();
+	
 	private int numOfComponent = 0;
 	
 	public PPicture picture;
@@ -199,7 +201,7 @@ public class Window extends JFrame{
 				try {
 					minValues = M.getMinValue();
 					maxValues = M.getMaxValue();
-					V.setMinMaxValue(minValues, maxValues);
+					VMoves.setMinMaxValue(minValues, maxValues);
 				} catch (Exception e1) {
 					JOptionPane.showMessageDialog(this, e1.getMessage());
 				}
@@ -334,8 +336,8 @@ public class Window extends JFrame{
 						V.minValues,
 						V.maxValues,
 						Integer.parseInt(bucketNumber.getText()),
-						minMove,
-						maxMove
+						VMoves.minValues,
+						VMoves.maxValues
 						);
 				
 				DefaultTableModel model = ipTable.getTable().model;

@@ -70,7 +70,7 @@ public class BucketStructure implements Structure {
 			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
 		int firstBucket = getBucket(min);
 		int lastBucket = getBucket(max);
-		System.out.println(firstBucket + " " +lastBucket);
+		System.out.println(min+"("+firstBucket +")"+ " " +max+" ("+lastBucket+")");
 		List<Long> result = new ArrayList<>();
 		for(int i=firstBucket; i<=lastBucket; ++i)
 		{
