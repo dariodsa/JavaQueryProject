@@ -60,7 +60,7 @@ public class MultiValueSliderChoose extends JPanel {
 		double[] arr = new double[numOfComponents];
 		for(int i=0;i<numOfComponents;++i)
 		{
-			arr[i] = minValue[i].getValue()/2.0;
+			arr[i] = (minValue[i].getValue()/2.0)/100.0;
 		}
 		return arr;
 	}
@@ -69,7 +69,7 @@ public class MultiValueSliderChoose extends JPanel {
 		double[] arr = new double[numOfComponents];
 		for(int i=0;i<numOfComponents;++i)
 		{
-			arr[i] = maxValue[i].getValue()/2.0;
+			arr[i] = (maxValue[i].getValue()/2.0)/100.0;
 		}
 		return arr;
 	}

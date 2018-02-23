@@ -116,7 +116,7 @@ public class MainWorker {
 					for(int k=0;k<numOfComponents;++k)
 					{
 						System.out.println(k);
-						int p =0;
+						
 						toRemoveId.clear();
 						toRemoveValue.clear();
 						toAdd.clear();

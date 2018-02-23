@@ -103,22 +103,25 @@ public class MasterMethod {
 			{
 				System.out.println("I will perform query operation.");
 				//todo
-				double mini = -130;
-				double maxi = 130;
-				List<Thread> threads = new ArrayList<Thread>();
+				double mini = -89;
+				double maxi = 89;
 				long t1 = System.currentTimeMillis();
-				for(int j=0;j<workersAddress.length;++j)
+				for(int k=0;k<numOfComponents;++k)
 				{
-					if(true)
+					List<Thread> threads = new ArrayList<Thread>();
+					for(int j=0;j<workersAddress.length;++j)
 					{
-						Thread T = new QueryThread(j, workersAddress[j], port,1,mini,maxi);
-						threads.add(T);
+						if(!(minValues[j][k] > maxi  || maxValues[j][k] < mini))
+						{
+							Thread T = new QueryThread(j, workersAddress[j], port,1,mini,maxi);
+							threads.add(T);
+						}
 					}
+					for(Thread thread : threads)
+						thread.start();
+					for(Thread thread : threads)
+						thread.join();
 				}
-				for(Thread thread : threads)
-					thread.start();
-				for(Thread thread : threads)
-					thread.join();
 				long t3 = System.currentTimeMillis();
 				System.out.printf("%d milisec for response.%n",t3-t1);
 				for(int j=0;j<workersAddress.length;++j)

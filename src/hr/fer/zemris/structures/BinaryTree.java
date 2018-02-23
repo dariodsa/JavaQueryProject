@@ -1,5 +1,6 @@
 package hr.fer.zemris.structures;
  
+import java.io.ObjectOutputStream.PutField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +21,6 @@ public class BinaryTree extends TreeSet<Pair> implements Structure
 	public void update(double oldValue, double newValue, Long dot)
 	{
 		delete(oldValue, dot);
-		
 		add(newValue, dot);
 	}
 	
