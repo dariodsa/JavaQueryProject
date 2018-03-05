@@ -31,6 +31,7 @@ public class StatisticsPanel extends JPanel
 				try {
 					HashMap<Integer, List<Integer>> queryList = new HashMap<Integer, List<Integer>>();
 					HashMap<Integer, List<Integer>> moveList  = new HashMap<Integer, List<Integer>>();
+					HashMap<Integer, List<Integer>> relocList  = new HashMap<Integer, List<Integer>>();
 					List<String> lines = Files.readAllLines(path);
 					int bucket = 0;
 					for(String line : lines)
@@ -73,6 +74,22 @@ public class StatisticsPanel extends JPanel
 								moveList.put(bucket, new ArrayList<Integer>());
 							moveList.get(bucket).add(broj);
 						}
+						if(line.startsWith("Realocation completed. ")){
+							String S = "";
+							for(int i = new String("Realocation completed. ").length() ; i < line.length(); ++i)
+							{
+								if((line.charAt(i) >='0' && line.charAt(i) <= '9'))
+								{
+									S += line.charAt(i);
+								}
+								else
+									break;
+							}
+							int broj = Integer.parseInt(S);
+							if(!relocList.containsKey(bucket))
+								relocList.put(bucket, new ArrayList<Integer>());
+							relocList.get(bucket).add(broj);
+						}
 					}
 					System.out.println("Query results: ");
 					for(Integer bucketNum : queryList.keySet())
@@ -94,6 +111,15 @@ public class StatisticsPanel extends JPanel
 						list = list.stream().sorted().skip(2).sorted(Comparator.reverseOrder()).skip(2).collect(Collectors.toList());
 						list.stream().mapToInt(t -> t).average().ifPresent(avg -> System.out.println("Avg: " + avg));
 						
+					}
+					System.out.println("Relocation results: ");
+					for(Integer bucketNum : relocList.keySet())
+					{
+						List<Integer> list = relocList.get(bucketNum);
+						System.out.printf("%d -> ",bucketNum);
+						
+						list.stream().sorted().skip(2).sorted(Comparator.reverseOrder()).skip(2).collect(Collectors.toList());
+						list.stream().mapToInt(t -> t).average().ifPresent(avg -> System.out.println("Avg: " + avg));
 					}
 				} 
 				catch (Exception e1) 
