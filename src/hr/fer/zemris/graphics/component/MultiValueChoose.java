@@ -18,7 +18,6 @@ public class MultiValueChoose extends JPanel {
 		this.numOfComponents = numOfComponents;
 		minValue = new JTextField[numOfComponents];
 		maxValue = new JTextField[numOfComponents];
-	
 		setVisible(true);
 		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		add(new JLabel(message));

@@ -5,25 +5,51 @@ import hr.fer.zemris.exceptions.DotFileNotFound;
 import hr.fer.zemris.exceptions.MinMaxValuesAreNotSet;
 import hr.fer.zemris.graphics.component.IpTable;
 import hr.fer.zemris.graphics.component.MultiValueChoose;
+import hr.fer.zemris.graphics.component.MultiValueSliderChoose;
 import hr.fer.zemris.graphics.component.PPicture;
+import hr.fer.zemris.graphics.component.ip.MyTableModel;
+import hr.fer.zemris.graphics.component.statistics.StatisticsPanel;
 import hr.fer.zemris.graphics.constants.Constants;
 import hr.fer.zemris.graphics.constants.StructureType;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.thread.MasterMethod;
 import hr.fer.zemris.thread.workers.MainWorker;
 
+
+
+
+
+
+
+
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 
 import java.nio.file.Paths;
 
+
+
+
+
+
+
+
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class Window extends JFrame{
+	
+	int port1 = 3456;
+	int port2 = 4567;
 	
 	private JSlider moveFactor;
 	private JSlider queryFactor;
@@ -37,11 +63,17 @@ public class Window extends JFrame{
 	private JComboBox<String> structureType;
 	
 	private Values V = new Values();
+	private Values VMoves = new Values();
+	
 	private int numOfComponent = 0;
 	
 	public PPicture picture;
+	public IpTable ipTable = new IpTable();
 	
 	private PrintWriter logOutput;
+	
+	private JButton killThemAll = new JButton("Prepare for new iteration");
+	private StatisticsPanel statisticsPanel;
 	
 	public Window(int width,int height)
 	{
@@ -94,9 +126,15 @@ public class Window extends JFrame{
 		
 		tabs.addTab("Postavke", getDataTab());
 		tabs.addTab("Slika", getPictureTab());
+		tabs.addTab("Statistika", getStatisticsTab());
 		tabs.addTab("Radilice", getComputersInfo());
 		
 		add(tabs);
+	}
+	private Component getStatisticsTab() {
+		statisticsPanel = new StatisticsPanel();
+		statisticsPanel.initGui();
+		return statisticsPanel;
 	}
 	private JComponent getDataTab(){
 		
@@ -154,7 +192,7 @@ public class Window extends JFrame{
 			}
 		});
 		minMaxMove.addActionListener((e)->{
-			MultiValueChoose M = new MultiValueChoose("naziv", "poruka", numOfComponent);
+			MultiValueSliderChoose M = new MultiValueSliderChoose("Pomaci", "Pomaci po komponentama", numOfComponent);
 			int result = JOptionPane.showConfirmDialog(this, M);
 			if(result == JOptionPane.YES_OPTION)
 			{
@@ -163,7 +201,7 @@ public class Window extends JFrame{
 				try {
 					minValues = M.getMinValue();
 					maxValues = M.getMaxValue();
-					V.setMinMaxValue(minValues, maxValues);
+					VMoves.setMinMaxValue(minValues, maxValues);
 				} catch (Exception e1) {
 					JOptionPane.showMessageDialog(this, e1.getMessage());
 				}
@@ -193,10 +231,15 @@ public class Window extends JFrame{
 				new JLabel("Number of buckets"),
 				bucketNumber));
 		JButton btnOk = new JButton("Run");
-		btnOk.addActionListener((e)->{btnOkClick();});
+		btnOk.addActionListener((e)->{btnOkClick(1);});
 		rightFactors.add(btnOk);
+		JButton runWorker = new JButton("Run only worker");
+		rightFactors.add(runWorker);
+		runWorker.addActionListener((e)->{btnOkClick(2);});
 		
-		panel.add(rightFactors,BorderLayout.EAST);
+		JScrollPane jsRight = new JScrollPane(rightFactors);
+		
+		panel.add(jsRight,BorderLayout.EAST);
 		
 		JTextArea logOutput = new JTextArea("mirko\n%n mirko\n%n  mirko\n a"); //todo issue with panel size, need to change main layout manager
 		logOutput.setEditable(false);
@@ -204,8 +247,44 @@ public class Window extends JFrame{
 		JScrollPane js = new JScrollPane(logOutput);
 		js.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		panel.add(js,BorderLayout.SOUTH);
+		panel.add(killThemAll, BorderLayout.WEST);
+		killThemAll.addActionListener((e)->{
+			//killThemAll
+			DefaultTableModel model = ipTable.getTable().model;
+			String[] adrese = new String[model.getRowCount()];
+			for(int i=0;i<model.getRowCount();++i)
+			{
+				adrese[i] = (String)model.getValueAt(i, 1);
+			}
+			/*for(int i=0;i<adrese.length;++i)
+			{
+				try
+				{
+					Socket S = new Socket(adrese[i],port2);
+					ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+					S.close();
+				}
+				catch(IOException ex)
+				{
+					ex.printStackTrace();
+				}
+			}*/
+			try 
+			{
+				Socket S = new Socket(InetAddress.getLocalHost().getHostAddress().toString(),port1);
+				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+				oos.writeInt(7);
+				oos.flush();
+				S.close();
+			} 
+			catch (Exception e1) 
+			{
+				e1.printStackTrace();
+			}
+		});
 		return panel;
 	}
+	
 	private JComponent getPictureTab() {
 		
 		JPanel panel = new JPanel(new BorderLayout());
@@ -219,7 +298,7 @@ public class Window extends JFrame{
 	{
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setSize(getWidth(),getHeight());
-		panel.add(new IpTable());
+		panel.add(ipTable);
 		return panel;
 	}
 	private JPanel groupComponents(JComponent... components)
@@ -238,44 +317,66 @@ public class Window extends JFrame{
 			throw new MinMaxValuesAreNotSet();
 		
 	}
-	private void btnOkClick()
+	private static int run = 0;
+	private void btnOkClick(int type)
 	{
 		try {
-			checkInputErrors();
+			switch (type) {
+			case 1:
+				checkInputErrors();
+				
+				double[] minMove = new double[] {0.5,0.5};
+				double[] maxMove = new double[] {0.5,0.5};
+				Parametars parametars = new Parametars(
+						structureType.getSelectedIndex(),
+						((double)queryFactor.getValue())/100.0,
+						((double)moveFactor.getValue())/100.0,
+						V.minValues,
+						V.maxValues,
+						Integer.parseInt(bucketNumber.getText()),
+						VMoves.minValues,
+						VMoves.maxValues
+						);
+				
+				DefaultTableModel model = ipTable.getTable().model;
+				String[] adrese = new String[model.getRowCount()];
+				for(int i=0;i<model.getRowCount();++i)
+				{
+					adrese[i] = (String)model.getValueAt(i, 1);
+				}
+				
+				
+				logOutput = new PrintWriter(System.err);
+				MasterMethod masterMethod = new MasterMethod(
+						parametars, adrese,dotFile, logOutput,port1,port2
+						);
+				Thread workerThread = new Thread(()-> {
+					MainWorker main = new MainWorker(port2,port1);
+					main.run();
+				});
+				Thread masterThread = new Thread(()->{
+					try {
+						masterMethod.run();
+					} catch (Exception e) {e.printStackTrace();}
+				});
+				if(Window.run == 0)
+					workerThread.start();
+				Window.run = 1;
+				if(type==1){
+					masterThread.start();
+					masterThread.join();
+				}
+				break;
+			case 2:
+				Thread workerThread2 = new Thread(()-> {
+					MainWorker main = new MainWorker(port2,port1);
+					main.run();
+				});
+				workerThread2.start();
+			default:
+				break;
+			}
 			
-			
-			double[] minMove = new double[] {0.5,0.5};
-			double[] maxMove = new double[] {0.5,0.5};
-			Parametars parametars = new Parametars(
-					structureType.getSelectedIndex(),
-					((double)queryFactor.getValue())/100.0,
-					((double)moveFactor.getValue())/100.0,
-					V.minValues,
-					V.maxValues,
-					Integer.parseInt(bucketNumber.getText()),
-					minMove,
-					maxMove
-					);
-			String[] adrese = new String[] {"192.168.1.4"};
-			int port1 = 1234+12;
-			int port2 = 2345;
-			
-			logOutput = new PrintWriter(System.out);
-			MasterMethod masterMethod = new MasterMethod(
-					parametars, adrese,dotFile, logOutput,port1,port2
-					);
-			Thread workerThread = new Thread(()-> {
-				MainWorker main = new MainWorker(port2,port1);
-				main.run();
-			});
-			Thread masterThread = new Thread(()->{
-				try {
-					masterMethod.run();
-				} catch (Exception e) {e.printStackTrace();}
-			});
-			workerThread.start();
-			masterThread.start();
-			masterThread.join();
 		}
 		catch(Exception ex){
 			JOptionPane.showMessageDialog(this,ex.getMessage());

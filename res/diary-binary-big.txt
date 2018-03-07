@@ -1,0 +1,517 @@
+Usao  ....
+10.140.150.5 10.140.150.5
+Sending parametars ...
+Bucket size:  100
+Move factor:  1,000000
+Query factor:  1,000000
+Structure type:  1
+Number of components:  2
+Min and max value  (1) -90,000000 <--> 90,000000
+Min and max value  (2) -180,000000 <--> 180,000000
+
+I see 1
+Primio parametre
+1
+1
+Primio 10.140.150.5
+Operation completed.
+1000000 / 
+Sending dots over the network.
+I see 2
+Loading ... 2000000
+Primio po�etne pozicije.
+Sending dots over the network.
+I see 2
+Loading ... 1550300
+Primio po�etne pozicije.
+1. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+3141 milisec for response.
+Query operation completed. 3438 milisec. Size 1629400
+I will perform move operation.
+I see 3
+Move operation completed. 12641 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+2. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+3234 milisec for response.
+Query operation completed. 3328 milisec. Size 1294468
+I will perform move operation.
+I see 3
+Move operation completed. 9750 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+3. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+2829 milisec for response.
+Query operation completed. 2985 milisec. Size 1326237
+I will perform move operation.
+I see 3
+Move operation completed. 8875 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+4. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+2703 milisec for response.
+Query operation completed. 2750 milisec. Size 1314663
+I will perform move operation.
+I see 3
+Move operation completed. 8844 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+5. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+3000 milisec for response.
+Query operation completed. 3047 milisec. Size 1293187
+I will perform move operation.
+I see 3
+Move operation completed. 9609 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+6. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+3344 milisec for response.
+Query operation completed. 3516 milisec. Size 1285070
+I will perform move operation.
+I see 3
+Move operation completed. 8938 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+7. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+453 milisec for response.
+Query operation completed. 500 milisec. Size 1306939
+I will perform move operation.
+I see 3
+Move operation completed. 11235 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+8. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+672 milisec for response.
+Query operation completed. 703 milisec. Size 1296316
+I will perform move operation.
+I see 3
+Move operation completed. 11751 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+9. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+2937 milisec for response.
+Query operation completed. 2984 milisec. Size 1322705
+I will perform move operation.
+I see 3
+Move operation completed. 8641 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+10. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+469 milisec for response.
+Query operation completed. 516 milisec. Size 1279874
+I will perform move operation.
+I see 3
+Move operation completed. 11047 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+11. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+641 milisec for response.
+Query operation completed. 672 milisec. Size 1313626
+I will perform move operation.
+I see 3
+Move operation completed. 12532 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+12. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+2906 milisec for response.
+Query operation completed. 2953 milisec. Size 1293113
+I will perform move operation.
+I see 3
+Move operation completed. 8688 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 15 milisec
+13. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+485 milisec for response.
+Query operation completed. 532 milisec. Size 1309284
+I will perform move operation.
+I see 3
+Move operation completed. 11094 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+14. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+656 milisec for response.
+Query operation completed. 703 milisec. Size 1329269
+I will perform move operation.
+I see 3
+Move operation completed. 12313 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+15. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+3125 milisec for response.
+Query operation completed. 3156 milisec. Size 1312331
+I will perform move operation.
+I see 3
+Move operation completed. 9704 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+16. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+469 milisec for response.
+Query operation completed. 516 milisec. Size 1284241
+I will perform move operation.
+I see 3
+Move operation completed. 11109 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+17. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+641 milisec for response.
+Query operation completed. 672 milisec. Size 1287598
+I will perform move operation.
+I see 3
+Move operation completed. 11563 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+18. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+2922 milisec for response.
+Query operation completed. 2953 milisec. Size 1279080
+I will perform move operation.
+I see 3
+Move operation completed. 8813 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+19. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+469 milisec for response.
+Query operation completed. 516 milisec. Size 1315021
+I will perform move operation.
+I see 3
+Move operation completed. 11110 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+20. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+625 milisec for response.
+Query operation completed. 672 milisec. Size 1288812
+I will perform move operation.
+I see 3
+Move operation completed. 11438 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+Total time: 257683
+Usao  ....
+10.140.150.5 10.140.150.5
+Sending parametars ...
+Bucket size:  100
+Move factor:  1,000000
+Query factor:  1,000000
+Structure type:  1
+Number of components:  2
+Min and max value  (1) -90,000000 <--> 90,000000
+Min and max value  (2) -180,000000 <--> 180,000000
+
+I see 1
+Primio parametre
+1
+1
+Primio 10.140.150.5
+Operation completed.
+1000000 / 
+Sending dots over the network.
+I see 2
+Loading ... 2000000
+Primio po�etne pozicije.
+Sending dots over the network.
+I see 2
+Loading ... 1550300
+Primio po�etne pozicije.
+1. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+734 milisec for response.
+Query operation completed. 765 milisec. Size 1629400
+I will perform move operation.
+I see 3
+Move operation completed. 13344 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+2. iteration
+I will perform query operation.
+I see 4
+Response from worker 10.140.150.5
+3079 milisec for response.
+Query operation completed. 3126 milisec. Size 1314202
+I will perform move operation.
+I see 3
+Move operation completed. 9281 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+3. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+453 milisec for response.
+Query operation completed. 500 milisec. Size 1289401
+I will perform move operation.
+I see 3
+Move operation completed. 11501 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+4. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+625 milisec for response.
+Query operation completed. 672 milisec. Size 1284674
+I will perform move operation.
+I see 3
+Move operation completed. 11141 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+5. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+2890 milisec for response.
+Query operation completed. 2922 milisec. Size 1310911
+I will perform move operation.
+I see 3
+Move operation completed. 9172 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+6. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+484 milisec for response.
+Query operation completed. 531 milisec. Size 1303027
+I will perform move operation.
+I see 3
+Move operation completed. 10876 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+7. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+640 milisec for response.
+Query operation completed. 687 milisec. Size 1316870
+I will perform move operation.
+I see 3
+Move operation completed. 11063 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+8. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+2953 milisec for response.
+Query operation completed. 2984 milisec. Size 1316878
+I will perform move operation.
+I see 3
+Move operation completed. 9251 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+9. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+484 milisec for response.
+Query operation completed. 531 milisec. Size 1331258
+I will perform move operation.
+I see 3
+Move operation completed. 10766 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+10. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+2516 milisec for response.
+Query operation completed. 2547 milisec. Size 1280560
+I will perform move operation.
+I see 3
+Move operation completed. 9173 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+11. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+3453 milisec for response.
+Query operation completed. 3500 milisec. Size 1327389
+I will perform move operation.
+I see 3
+Move operation completed. 8453 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+12. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+469 milisec for response.
+Query operation completed. 516 milisec. Size 1298260
+I will perform move operation.
+I see 3
+Move operation completed. 11297 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+13. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+656 milisec for response.
+Query operation completed. 687 milisec. Size 1321110
+I will perform move operation.
+I see 3
+Move operation completed. 12063 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+14. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+578 milisec for response.
+Query operation completed. 610 milisec. Size 1271638
+I will perform move operation.
+I see 3
+Move operation completed. 12219 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+15. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+281 milisec for response.
+Query operation completed. 312 milisec. Size 1324172
+I will perform move operation.
+I see 3
+Move operation completed. 9313 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+16. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+3500 milisec for response.
+Query operation completed. 3531 milisec. Size 1306650
+I will perform move operation.
+I see 3
+Move operation completed. 9219 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+17. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+3438 milisec for response.
+Query operation completed. 3485 milisec. Size 1295417
+I will perform move operation.
+I see 3
+Move operation completed. 8516 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+18. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+468 milisec for response.
+Query operation completed. 500 milisec. Size 1244513
+I will perform move operation.
+I see 3
+Move operation completed. 11516 milisec
+I will realocate wrong dots ...
+I see 5
+Realocation completed. 0 milisec
+19. iteration
+I will perform query operation.
+Response from worker 10.140.150.5
+I see 4
+640 milisec for response.
+Query operation completed. 671 milisec. Size 1297444
+I will perform move operation.
+I see 3

@@ -5,6 +5,7 @@ import hr.fer.zemris.network.Network;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
+import hr.fer.zemris.structures.dot.Functions;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -41,7 +42,7 @@ public class MasterMethod {
 	private double[][] minValues;
 	private double[][] maxValues;
 	
-	private ArrayBlockingQueue<Long> result = new ArrayBlockingQueue<Long>(5);
+	public static ArrayList<Long>[] result;
 	
 	public MasterMethod(Parametars parametars,
 			String[] workers, Path dotsPath, PrintWriter logOutput, int portMaster,int port) throws IOException, NumOfDotArguments{
@@ -58,9 +59,13 @@ public class MasterMethod {
 		this.maxValues = new double[workers.length][this.numOfComponents];
 		
 		this.cacheDots = new ArrayList[this.workersAddress.length];
+		
+		this.result    = new ArrayList[this.workersAddress.length];
+		
 		for(int i=0;i<this.cacheDots.length; ++i)
 		{
 			this.cacheDots[i] = new ArrayList<DotCache>();
+			this.result[i]    = new ArrayList<Long>();
 		}
 		
 	}
@@ -82,38 +87,74 @@ public class MasterMethod {
 		}
 		initParametars();
 		serverSocket.close();
+		createServerThread();
 		logOutput.write("All workers recieved parametars.");
 		logOutput.write("Sending dots to the workers");
+		long tMain = System.currentTimeMillis();
 		initDots(dotsPath);
-		for(int i=0;i<5;++i)
+		for(int i=0;i<20;++i)
 		{
 			System.out.print(String.format("%d. %s%n", i+1, "iteration"));
 			double rand = MasterMethod.rand.nextDouble();
-			if(rand < 1/*parametars.queryFactor*/)
+			
+			List<Long> result = new ArrayList<>();
+			boolean firstResult = true;
+			if(rand < parametars.queryFactor)
 			{
-				logOutput.write("I will perform query operation.");
+				System.out.println("I will perform query operation.");
 				//todo
-				double mini = 0;
-				double maxi = 10;
-				List<Thread> threads = new ArrayList<Thread>();
+				double mini = -89;
+				double maxi = 89;
+				long t1 = System.currentTimeMillis();
+				for(int k=0;k<numOfComponents;++k)
+				{
+					List<Thread> threads = new ArrayList<Thread>();
+					for(int j=0;j<workersAddress.length;++j)
+					{
+						if(!(minValues[j][k] > maxi  || maxValues[j][k] < mini))
+						{
+							Thread T = new QueryThread(j, workersAddress[j], port,1,mini,maxi);
+							threads.add(T);
+						}
+					}
+					for(Thread thread : threads)
+						thread.start();
+					for(Thread thread : threads)
+						thread.join();
+				}
+				long t3 = System.currentTimeMillis();
+				System.out.printf("%d milisec for response.%n",t3-t1);
 				for(int j=0;j<workersAddress.length;++j)
 				{
-					if(true)
+					if(!MasterMethod.result[j].isEmpty())
 					{
-						//kreiraj novu dretvu sa socketom
-						Thread T = new QueryThread(workersAddress[j], port,1,mini,maxi);
+						if(firstResult)
+						{
+							result = new ArrayList<>();
+							for(Long r : MasterMethod.result[j]){
+								result.add(r);
+							}
+							firstResult = false;
+						}
+						else
+						{
+							result = Functions.intersection(result, MasterMethod.result[j]);
+						}
+						MasterMethod.result[j].clear();
 					}
 				}
-				for(Thread thread : threads)
-					thread.start();
-				for(Thread thread : threads)
-					thread.join();
-				logOutput.write("Query operation completed.");
+				/*for(Long r : result){
+					System.out.printf("%d ",r);
+				}*/
+				long t2 = System.currentTimeMillis();
+				System.out.printf("Query operation completed. %d milisec. Size %d%n",t2-t1,result.size());
+				
 			}
-			if(rand < 1/*parametars.moveFactor*/)
+			if(rand < parametars.moveFactor)
 			{
-				logOutput.write("I will perform move operation.");
+				System.out.println("I will perform move operation.");
 				List<Thread> threads = new ArrayList<Thread>();
+				long t1 = System.currentTimeMillis();
 				for(int j=0;j<workersAddress.length;++j)
 				{
 					Thread T = new MoveThread(workersAddress[j],port); 
@@ -124,17 +165,77 @@ public class MasterMethod {
 					thread.start();
 				for(Thread thread : threads)
 					thread.join();
+				long t2 = System.currentTimeMillis();
+				System.out.printf("Move operation completed. %d milisec%n",t2-t1);
 			}
+			System.out.println("I will realocate wrong dots ...");
+			long t1 = System.currentTimeMillis();
+			for(String host : workersAddress){
+				Socket S = new Socket(host, port);
+				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+				oos.write(5);//oos.writeInt(5);
+				oos.flush();
+				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
+				int val = ois.read();
+				while(val!=-1){
+					val = ois.read();
+				}
+				S.close();
+			}
+			long t2 = System.currentTimeMillis();
+			System.out.printf("Realocation completed. %d milisec%n",t2-t1);
 		}
+		long tMainEnd = System.currentTimeMillis();
+		System.out.println("Total time: "+(tMainEnd-tMain));
+	}
+	private void createServerThread() {
+		Thread serverThread = new Thread(new Runnable(){
+			@Override
+			public void run()
+			{
+				try {
+					ServerSocket serverSocket = new ServerSocket(portMaster);
+					while(true){
+						Socket client = serverSocket.accept();
+						ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
+						int operationId = ois.read();
+						
+						switch (operationId) {
+						case 4: // response to the question about where to send a dot
+							Thread echoThread = new EchoThread(client);
+							echoThread.start();
+							break;
+						case 5: // sending how big am I 
+							int size     = ois.readInt();
+							int workerId = ois.read();
+							
+							break;
+						default:
+							serverSocket.close();
+							return;
+						}
+						client.close();
+					}
+					//serverSocket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		serverThread.start();
+		
 	}
 	private void initParametars() throws IOException 
 	{
+		System.out.println("Sending parametars ...");
+		System.out.println(parametars);
 		for(int i=0;i<workers.length;++i)
 		{
 			Socket S = new Socket(this.workers[i], this.port);
 			
 			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-			oos.writeInt(1);
+			oos.write(1);
 			oos.writeObject(parametars);
 			oos.flush();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
@@ -150,7 +251,7 @@ public class MasterMethod {
 			oos.close();
 			S.close();
 		}
-		
+		System.out.println("Operation completed.");
 	}
 	private void initConnection() throws UnknownHostException, IOException
 	{
@@ -200,7 +301,7 @@ public class MasterMethod {
 				dot.setValue(iter++, Double.parseDouble(strValue));
 			}
 			sendDot(dot, port);
-			if(numOfLine % 100000 == 0){
+			if(numOfLine % 1000000 == 0){
 				System.out.println(numOfLine + " / ");
 				sendsDot();
 			}
@@ -211,13 +312,14 @@ public class MasterMethod {
 	}
 	private void sendsDot() throws IOException
 	{
+		System.out.println("Sending dots over the network.");
 		for(int i=0;i<this.workers.length; ++i)
 		{
 			if(cacheDots[i].isEmpty())
 				continue;
 			Socket S = new Socket(this.workers[i], port);
 			ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(S.getOutputStream()));
-			oos.writeInt(2);
+			oos.write(2);
 			oos.writeInt(cacheDots[i].size());
 			for(DotCache dot : cacheDots[i])
 			{
@@ -247,6 +349,44 @@ public class MasterMethod {
 					cacheDots[j].add(new DotCache(dot.getId(),i,dot.getValue(i)));
 					break;
 				}
+			}
+		}
+	}
+	class EchoThread extends Thread
+	{
+		Socket client;
+		public EchoThread(Socket client) 
+		{
+			this.client = client;
+		}
+		public void run() 
+		{
+			ObjectInputStream ois;
+			try {
+				ois = new ObjectInputStream(client.getInputStream());
+				while(true)
+				{
+					int component = ois.read();
+					if(component == -1)
+					{
+						client.close();
+						return;
+					}
+					double value  = ois.readDouble();
+					for(int i=0;i<workersAddress.length;++i)
+					{
+						if(minValues[i][component] <= value && maxValues[i][component] >= value)
+						{
+							ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+							oos.writeBytes(workersAddress[i]);
+							oos.flush();
+							break;
+						}
+					}
+				}
+			}
+			catch(IOException ex){
+				ex.printStackTrace();
 			}
 		}
 	}

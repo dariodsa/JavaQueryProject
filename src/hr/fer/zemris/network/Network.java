@@ -1,9 +1,12 @@
 package hr.fer.zemris.network;
 
 import hr.fer.zemris.structures.dot.Dot;
+import hr.fer.zemris.thread.workers.MainWorker;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Network {
 
@@ -48,15 +51,21 @@ public class Network {
 	{
 		try{
 		ServerSocket serverSocket = new ServerSocket(port);
-		System.out.println("Waiting for client request");
 		Socket clientSocket = serverSocket.accept();
-		DataInputStream ois = new DataInputStream(clientSocket.getInputStream());
+		System.out.println("Waiting for client request");
+		BufferedInputStream ois = new BufferedInputStream(clientSocket.getInputStream());
+		List<Byte> b = new ArrayList<>();
 		while(true)
 		{
-			int message = (int)ois.readInt();
-			if(message%1000==0)System.out.println("I see ... "+message);
-			if(message==0) break;
+			byte B = (byte) ois.read();
+			if(B != -1)
+				b.add(B);
+			else break;
 		}
+		/*for(int i=0;i<b.size()/8;++i){
+			long ans = MainWorker.bytesToLong(b.subList(i*8, (i+1)*8));
+			System.out.println("I see "+ans);
+		}*/
 		ois.close();
 		System.out.println("Shutting down Socket server!!");
         serverSocket.close();

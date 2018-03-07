@@ -16,6 +16,10 @@ public class MyTableModel implements TableModel {
 		this.columns = columns;
 		this.columnClass = columnClass;
 	}
+	public void removeRow(int pos)
+	{
+		rows.remove(pos);
+	}
 	public void addRow(RowItem rowItem)
 	{
 		rows.add(rowItem);
@@ -53,14 +57,6 @@ public class MyTableModel implements TableModel {
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) 
 	{
-		/*switch (columnIndex) {
-		case 1:
-			
-			return new JButton("OK");
-
-		default:
-			break;
-		}*/
 		return this.rows.get(rowIndex).getItem(columnIndex);
 	}
 

@@ -1,6 +1,7 @@
 package hr.fer.zemris.graphics.component;
 
 import hr.fer.zemris.exceptions.ComputerIsNotFound;
+import hr.fer.zemris.exceptions.DotFileNotFound;
 import hr.fer.zemris.exceptions.DuplicateComputerName;
 import hr.fer.zemris.exceptions.InvalidIpAddress;
 import hr.fer.zemris.graphics.component.ip.*;
@@ -8,9 +9,17 @@ import hr.fer.zemris.network.*;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class IpTable extends JPanel {
 
@@ -19,6 +28,7 @@ public class IpTable extends JPanel {
 	 */
 	private static final long serialVersionUID = -6887805418581516885L;
 	private JButton btnAddIp;
+	private JButton btnLoadIp;
 	private DataTable table;
 	
 	public IpTable() 
@@ -26,6 +36,10 @@ public class IpTable extends JPanel {
 		setLayout(new BorderLayout());
 		initGUI();
 		
+	}
+	public DataTable getTable()
+	{
+		return this.table;
 	}
 	private void initGUI() 
 	{
@@ -37,13 +51,52 @@ public class IpTable extends JPanel {
 			} catch (Exception e1) {e1.printStackTrace();}
 		});
 		
-		
+		btnLoadIp = new JButton("Load IP address");
+		btnLoadIp.addActionListener((e)->{
+			JFileChooser fc = new JFileChooser(".");
+			int value = fc.showOpenDialog(this);
+			if(value == JFileChooser.APPROVE_OPTION){
+				Path ipAddresses = Paths.get(fc.getSelectedFile().getPath());
+				JOptionPane.showMessageDialog(this, "File loaded.");
+				
+				try {
+					List<String> lines = Files.readAllLines(ipAddresses);
+					for(String line : lines){
+						addNewComputer("", line);
+					}
+					
+				}
+				 catch (Exception e1) {
+					 JOptionPane.showMessageDialog(this,new DotFileNotFound(fc.getSelectedFile().getAbsolutePath()).getMessage());
+				}
+				
+				
+			}
+		});
 		
 		table = new DataTable();
 		
+		 
+		 
+		ButtonColumn buttonColumn = new ButtonColumn(table, new AbstractAction() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				JTable table = (JTable)e.getSource();
+		        int modelRow = Integer.valueOf( e.getActionCommand() );
+		        ((DefaultTableModel)table.getModel()).removeRow(modelRow);
+			}
+		}, table.model.findColumn("Delete"));
+		buttonColumn.setMnemonic(KeyEvent.VK_D);
+		
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		panel.add(btnAddIp,BorderLayout.WEST);
+		panel.add(btnLoadIp,BorderLayout.EAST);
 		JScrollPane pane = new JScrollPane(table);
 		
-		add(btnAddIp,BorderLayout.NORTH);
+		add(panel,BorderLayout.NORTH);
 		add(pane,BorderLayout.CENTER);
 	}
 	private void checkComputerName(String name) throws DuplicateComputerName
@@ -54,6 +107,34 @@ public class IpTable extends JPanel {
 			if(computerName.compareTo(name)==0)
 			{
 				throw new DuplicateComputerName(name);
+			}
+		}
+	}
+	private void addNewComputer(String name, String ipAddress)
+	{
+		JButton deleteButton = new JButton("Delete");
+		deleteButton.addActionListener((e)->{
+			removeComputer(name,ipAddress);
+		});
+		table.model.addRow(new Object[] {
+				name,
+				ipAddress,
+				"",
+				"7654",
+				deleteButton});
+		//table.repaint();
+		table.invalidate();
+	}
+	private void removeComputer(String name, String ipAddress) 
+	{
+		for(int i=0;i<table.model.getRowCount();++i)
+		{
+			String rowName = table.model.getColumnName(0);
+			String rowIpAddress = table.model.getColumnName(1);
+			if( name == rowName && ipAddress == rowIpAddress)
+			{
+				table.model.removeRow(i);
+				return;
 			}
 		}
 	}
@@ -76,12 +157,7 @@ public class IpTable extends JPanel {
 						throw new ComputerIsNotFound(addNewComputer.ipAddress.getText());
 					}
 				}
-				table.model.addRow(new RowItem(
-						addNewComputer.computerName.getText(),
-						addNewComputer.ipAddress.getText(),
-						"",
-						"7654",
-						new JButton("ok")));
+				addNewComputer(addNewComputer.computerName.getText(), addNewComputer.ipAddress.getText());
 				
 				table.repaint();
 			} catch (InvalidIpAddress | DuplicateComputerName | ComputerIsNotFound e) {
