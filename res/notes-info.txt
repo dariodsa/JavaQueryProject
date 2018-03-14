@@ -1,0 +1,3 @@
+svi big 66285 900 , 700
+2.8 ghz 4 gb ram
+2 cores 2 logical cores

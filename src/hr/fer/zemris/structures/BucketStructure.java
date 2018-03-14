@@ -1,6 +1,13 @@
 package hr.fer.zemris.structures;
 
+import java.awt.SecondaryLoop;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,37 +22,67 @@ import hr.fer.zemris.structures.dot.Dot;
 
 public class BucketStructure implements Structure {
 
-	//private arrray
-	
 	
 	private double minValue;
 	private double maxValue;
 	private int numOfBuckets;
-	private double sizePerBucket;
 	
 	private LinkedList<Pair>[] buckets;
-		
-	public BucketStructure(double minValue,double maxValue, int numOfBuckets) 
+	private double[] minValuesPerBucket;
+	
+	private double preferredValue;
+	
+	private final int PORT;
+	private String ipAddressLeft;
+	private String ipAddressRight;
+	
+	public BucketStructure(double minValue,double maxValue, int numOfBuckets, double preferredValue, String ipAddressLeft, String ipAddressRight, int port) 
 	{
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.numOfBuckets = numOfBuckets;
 		
-		double size = Math.abs(maxValue - minValue);
-		this.sizePerBucket = size / numOfBuckets;
-		
 		this.buckets = new LinkedList[numOfBuckets];
+		this.minValuesPerBucket = new double[numOfBuckets];
+		this.preferredValue = preferredValue;
+		
+		this.ipAddressLeft = ipAddressLeft;
+		this.ipAddressRight = ipAddressRight;
+		this.PORT = port;
+		
 		initBuckets();
 		
 	}
 	private int getBucket(double value)
 	{
-		return (int)(Math.abs(value - this.minValue) / sizePerBucket);
+		int low = 0;
+		int midd = 0;
+		int high = numOfBuckets - 1;
+		
+		while(low < high) {
+			midd = (low + high + 1) >> 1;
+		
+			if(minValuesPerBucket[midd] > value)
+				high = midd - 1;
+			else
+				low = midd;
+		}
+		if(low == numOfBuckets - 1)
+			return low;
+		if(minValuesPerBucket[low] <= value && minValuesPerBucket[low + 1] > value)
+			return low;
+		else return low + 1;
+		
 	}
+	
 	@Override
 	public void add(double newValue, Long dot)
 	{
 		int newBucket = getBucket(newValue);
+		this.buckets[newBucket].add(new Pair(dot,newValue));
+	}
+	public void add(double newValue, Long dot, int newBucket)
+	{
 		this.buckets[newBucket].add(new Pair(dot,newValue));
 	}
 	@Override
@@ -55,14 +92,130 @@ public class BucketStructure implements Structure {
 			throw new DimmensionException(newValue, minValue, maxValue); 
 		int oldBucket = getBucket(oldValue);
 		int newBucket = getBucket(newValue);
-		
+																	
 		if(newBucket != oldBucket)
 		{
 			this.buckets[oldBucket].remove(new Pair(dot,oldValue));
-			this.buckets[newBucket].add(new Pair(dot,newValue));
+			add(newValue, dot, newBucket);
 		}
 	}
-
+	
+	private void sendDots(String ipAddress, List<Pair> dots, double newBound, int leftOrRight)
+	{
+		try {
+			Socket S = new Socket(ipAddress, PORT);
+			ObjectOutputStream os = new ObjectOutputStream(S.getOutputStream());
+			os.write(11);
+			os.write(leftOrRight);
+			os.writeDouble(newBound);
+			os.writeInt(dots.size());
+			for(Pair P : dots) {
+				os.writeLong(P.id);
+				os.writeDouble(P.value);
+			}
+			os.flush();
+			ObjectInputStream is = new ObjectInputStream(S.getInputStream());
+			is.read();
+			S.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void balance(int bucket)
+	{
+		if(bucket == 0)
+		{
+			int numInBucket = buckets[bucket].size();
+			if(numInBucket > preferredValue * 2) {
+				//must be balanced
+				double minValue = minValuesPerBucket[bucket];
+				double maxValue = minValuesPerBucket[bucket + 1];
+				//predefined percents 10%
+				List<Pair> toDelete = new ArrayList<>();
+				List<Pair> toAdd = new ArrayList<>();
+				for(Pair P : buckets[bucket]) {
+					if(P.value < minValue * 1.1) {
+						//add(P.value, P.id, bucket - 1);
+						toAdd.add(P);
+						toDelete.add(P);
+					}
+					else if(P.value > 0.9 * maxValue) {
+						add(P.value, P.id, bucket + 1);
+						toDelete.add(P);
+					}
+				}
+				for(Pair P : toDelete)
+					buckets[bucket].remove(P);
+				
+				minValuesPerBucket[bucket] *= 1.1;
+				minValuesPerBucket[bucket + 1] *= 0.9;
+				this.minValue = minValuesPerBucket[0];
+				//need to connect to my left neighbor 
+				sendDots(ipAddressLeft, toAdd, minValuesPerBucket[0], 1);
+				
+			}
+		}
+		else if(bucket == numOfBuckets - 1)
+		{
+			int numInBucket = buckets[bucket].size();
+			if(numInBucket > preferredValue * 2) {
+				//must be balanced
+				double minValue = minValuesPerBucket[bucket];
+				double maxValue = this.maxValue;
+				//predefined percents 10%
+				List<Pair> toDelete = new ArrayList<>();
+				List<Pair> toAdd = new ArrayList<>();
+				for(Pair P : buckets[bucket]) {
+					if(P.value < minValue * 1.1) {
+						//add(P.value, P.id, bucket - 1);
+						toDelete.add(P);
+					}
+					else if(P.value > 0.9 * maxValue) {
+						//add(P.value, P.id, bucket + 1);
+						toAdd.add(P);
+						toDelete.add(P);
+					}
+				}
+				for(Pair P : toDelete)
+					buckets[bucket].remove(P);
+				
+				minValuesPerBucket[bucket] *= 1.1;
+				//minValuesPerBucket[bucket + 1] *= 0.9;
+				this.maxValue = this.maxValue * 0.9;
+				this.minValue = minValuesPerBucket[0];
+				//need to connect to my right neighbor 
+				sendDots(ipAddressLeft, toAdd, this.maxValue, 0);
+			}
+		}
+		else 
+		{
+			int numInBucket = buckets[bucket].size();
+			if(numInBucket > preferredValue * 2) {
+				//must be balanced
+				double minValue = minValuesPerBucket[bucket];
+				double maxValue = minValuesPerBucket[bucket + 1];
+				//predefined percents 10%
+				List<Pair> toDelete = new ArrayList<>();
+				for(Pair P : buckets[bucket]) {
+					if(P.value < minValue * 1.1) {
+						add(P.value, P.id, bucket - 1);
+						toDelete.add(P);
+					}
+					else if(P.value > 0.9 * maxValue) {
+						add(P.value, P.id, bucket + 1);
+						toDelete.add(P);
+					}
+				}
+				for(Pair P : toDelete)
+					buckets[bucket].remove(P);
+				minValuesPerBucket[bucket] *= 1.1;
+				minValuesPerBucket[bucket + 1] *= 0.9;
+			}
+		}
+	}
+	
 	@Override
 	public List<Long> query(double min, double max) throws IllegalArgumentException 
 	{
@@ -85,13 +238,17 @@ public class BucketStructure implements Structure {
 	public void delete(double value, Long dot)
 	{
 		int oldBucket = getBucket(value);
-		this.buckets[oldBucket].remove(dot);
+		this.buckets[oldBucket].remove(new Pair(dot, value));
 	}
 	private void initBuckets()
 	{
+		double minVal = this.minValue;
+		double step = (this.maxValue - this.minValue) / numOfBuckets;
 		for(int i=0; i<numOfBuckets; ++i)
 		{
 			this.buckets[i] = new LinkedList<>();
+			this.minValuesPerBucket[i] = minVal;
+			minVal += step;
 		}
 	}
 	@Override
