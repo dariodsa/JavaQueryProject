@@ -1,6 +1,8 @@
 package hr.fer.zemris.thread;
 
 import hr.fer.zemris.exceptions.NumOfDotArguments;
+import hr.fer.zemris.graphics.component.Line;
+import hr.fer.zemris.graphics.component.PPicture;
 import hr.fer.zemris.network.Network;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.dot.Dot;
@@ -26,6 +28,9 @@ import javax.swing.JOptionPane;
 public class MasterMethod {
 	
 	private static Random rand = new Random();
+	
+	private PPicture picture;
+	
 	private Parametars parametars;
 	private String[] workersAddress;
 	private InetAddress[] workers;
@@ -42,11 +47,14 @@ public class MasterMethod {
 	private double[][] minValues;
 	private double[][] maxValues;
 	
-	public static ArrayList<Long>[] result;
+	int numOfDots;
 	
-	public MasterMethod(Parametars parametars,
+	public static ArrayList<Integer>[] result;
+	
+	public MasterMethod(PPicture picture, Parametars parametars,
 			String[] workers, Path dotsPath, PrintWriter logOutput, int portMaster,int port) throws IOException, NumOfDotArguments{
 		
+		this.picture = picture;
 		this.port = port;
 		this.portMaster = portMaster;
 		this.parametars = parametars;
@@ -65,7 +73,7 @@ public class MasterMethod {
 		for(int i=0;i<this.cacheDots.length; ++i)
 		{
 			this.cacheDots[i] = new ArrayList<DotCache>();
-			this.result[i]    = new ArrayList<Long>();
+			this.result[i]    = new ArrayList<Integer>();
 		}
 		
 	}
@@ -97,7 +105,7 @@ public class MasterMethod {
 			System.out.print(String.format("%d. %s%n", i+1, "iteration"));
 			double rand = MasterMethod.rand.nextDouble();
 			
-			List<Long> result = new ArrayList<>();
+			List<Integer> result = new ArrayList<>();
 			boolean firstResult = true;
 			if(rand < parametars.queryFactor)
 			{
@@ -131,7 +139,7 @@ public class MasterMethod {
 						if(firstResult)
 						{
 							result = new ArrayList<>();
-							for(Long r : MasterMethod.result[j]){
+							for(Integer r : MasterMethod.result[j]){
 								result.add(r);
 							}
 							firstResult = false;
@@ -177,16 +185,51 @@ public class MasterMethod {
 				oos.flush();
 				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 				int val = ois.read();
+				System.out.println("Primio "+val);
+				S.close();
+			}
+			
+			for(String host : workersAddress){
+				Socket S = new Socket(host, port);
+				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+				oos.write(7);//oos.writeInt(5);
+				oos.flush();
+				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
+				int val = ois.read();
 				while(val!=-1){
 					val = ois.read();
 				}
 				S.close();
 			}
+			
 			long t2 = System.currentTimeMillis();
 			System.out.printf("Realocation completed. %d milisec%n",t2-t1);
 		}
 		long tMainEnd = System.currentTimeMillis();
 		System.out.println("Total time: "+(tMainEnd-tMain));
+		
+		for(int i=0;i<workers.length;++i)
+		{
+			Socket S = new Socket(workers[i], port);
+			ObjectOutputStream oo = new ObjectOutputStream(S.getOutputStream());
+			oo.write(12);
+			oo.flush();
+			ObjectInputStream oi = new ObjectInputStream(S.getInputStream());
+			int x1 = oi.readInt();
+			for(int j=0;j<x1;++j)
+			{
+				double d = oi.readDouble();
+				picture.addLine(new Line(d, -90, d, 90),1);
+			}
+			int x2 = oi.readInt();
+			for(int j=0;j<x2;++j)
+			{
+				double d = oi.readDouble();
+				picture.addLine(new Line(-180, d, 180, d),2);
+			}
+			S.close();
+		}
+		
 	}
 	private void createServerThread() {
 		Thread serverThread = new Thread(new Runnable(){
@@ -230,6 +273,12 @@ public class MasterMethod {
 	{
 		System.out.println("Sending parametars ...");
 		System.out.println(parametars);
+		
+		BufferedReader br = new BufferedReader(new FileReader(dotsPath.toString()));
+		numOfDots = 0;
+		while(br.readLine() != null)numOfDots++;
+		br.close();
+		
 		for(int i=0;i<workers.length;++i)
 		{
 			Socket S = new Socket(this.workers[i], this.port);
@@ -237,6 +286,17 @@ public class MasterMethod {
 			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
 			oos.write(1);
 			oos.writeObject(parametars);
+			
+			if(i == 0)
+				oos.writeObject(workersAddress[workers.length-1]);
+			else
+				oos.writeObject(workersAddress[i-1]);
+			if(i+1 == workers.length)
+				oos.writeObject(workersAddress[0]);
+			else
+				oos.writeObject(workersAddress[i+1]);
+			
+			oos.writeInt(numOfDots/workers.length/parametars.bucketSize);
 			oos.flush();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 			int val = ois.readInt();
@@ -286,26 +346,31 @@ public class MasterMethod {
 	{
 		//List<String> lines = Files.readAllLines(dotsPath);
 		BufferedReader br = new BufferedReader(new FileReader(dotsPath.toString()));
-		long numOfLine = 0;
+		int numOfLine = 0;
 		String line;
 		while((line = br.readLine()) != null) 
 		{
 			++numOfLine;
 			String[] strValues = line.split(",");
 			if(strValues.length != numOfComponents)
+			{
+				br.close();
 				throw new NumOfDotArguments((int)numOfLine);
+			}
 			int iter = 0;
 			Dot dot = new Dot(numOfComponents , numOfLine-1);
 			for(String strValue : strValues)
 			{
 				dot.setValue(iter++, Double.parseDouble(strValue));
 			}
+			picture.addDot(dot);
 			sendDot(dot, port);
 			if(numOfLine % 1000000 == 0){
 				System.out.println(numOfLine + " / ");
 				sendsDot();
 			}
 		}
+		numOfDots = numOfLine;
 		sendsDot();
 		br.close();
 		logOutput.println("Dots are sent over the network.");
@@ -321,17 +386,17 @@ public class MasterMethod {
 			ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(S.getOutputStream()));
 			oos.write(2);
 			oos.writeInt(cacheDots[i].size());
+			
 			for(DotCache dot : cacheDots[i])
 			{
-				oos.writeLong(dot.getId());
+				oos.writeInt(dot.getId());
 				oos.write(dot.getComponent());
 				oos.writeDouble(dot.getValue());
 			}
 			oos.flush();
 			cacheDots[i].clear();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
-			int val = ois.readInt();
-			if(val == 1){}
+			int val = ois.read();
 			ois.close();
 			oos.close();
 			S.close();

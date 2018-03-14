@@ -15,7 +15,7 @@ public interface Structure extends Iterable<Pair>{
 	 * @param Integer id of the Dot 
 	 * @return void
 	 */
-	public void add(double newValue, Long dot);
+	public void add(double newValue, int dot);
 	/*
 	 * Replace the oldValue with the newValue in the structure.
 	 * @param double oldValue
@@ -24,7 +24,7 @@ public interface Structure extends Iterable<Pair>{
 	 * @return void
 	 * @throws DimmensionException
 	 */
-	public void update(double oldValue, double newValue, Long dot) throws DimmensionException;
+	public void update(double oldValue, double newValue, int dot) throws DimmensionException;
 	
 	/*
 	 * Returns the List<Long> of ids which are in the specified range.
@@ -33,7 +33,7 @@ public interface Structure extends Iterable<Pair>{
 	 * @return List<Long>
 	 * @throws IllegialArgumentException
 	 */
-	public List<Long> query(double min, double max) throws IllegalArgumentException;
+	public List<Integer> query(double min, double max) throws IllegalArgumentException;
 	
-	public void delete(double value, Long dot);
+	public void delete(double value, int dot);
 }

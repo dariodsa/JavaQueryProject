@@ -16,12 +16,9 @@ public class Parametars implements Serializable{
 	public double[] minMove;
 	public double[] maxMove;
 	
-	private double preferredNum;
-	private String leftIp;
-	private String rightIp;
 
 	public Parametars(int structureType, double queryFactor, double moveFactor, double[]  minValues, double[] maxValues
-			        , int bucketSize, double[] minMove, double[] maxMove, String leftIp, String rightIp, double preferredNum)
+			        , int bucketSize, double[] minMove, double[] maxMove)
 	{
 		this.structureType = structureType;
 		this.queryFactor = queryFactor;
@@ -44,9 +41,6 @@ public class Parametars implements Serializable{
 		for(int i=0;i<maxMove.length;++i)
 			this.maxMove[i] = maxMove[i];
 		
-		this.leftIp = leftIp;
-		this.rightIp = rightIp;
-		this.preferredNum = preferredNum;
 	}
 	@Override
 	public String toString()

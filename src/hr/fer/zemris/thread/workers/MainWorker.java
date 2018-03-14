@@ -19,6 +19,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -31,41 +32,41 @@ public class MainWorker {
 	private int mainPort;
 	public int numOfComponents;
 	
-	Structure[] S;
-	//private HashMap<Long, Double>[] idInStructure;
+	public int preferredNum;
+	
+	String leftIp;
+	String rightIp;
+	
+	BucketStructure[] S;
 	
 	public MainWorker(int port,int mainPort)
 	{
 		this.port = port;
 		this.mainPort = mainPort;
 	}
-	private void init()
+	private void init(int preferredNum, String leftIp, String rightIp)
 	{
-		this.S = new Structure[parametars.minValues.length];
+		this.S = new BucketStructure[parametars.minValues.length];
 		this.numOfComponents = parametars.minValues.length;
-		/*this.idInStructure = new HashMap[numOfComponents];
-		for(int i=0;i<numOfComponents; ++i)
-		{
-			idInStructure[i] = new HashMap<Long, Double>();
-		}*/
-		
+		this.preferredNum = preferredNum;
 		for(int i=0,len = parametars.minValues.length; i < len; ++i)
 		{
 			System.out.println(parametars.structureType);
 			switch (parametars.structureType) {
 			case 0:
-				S[i] = new BucketStructure(parametars.minValues[i], parametars.maxValues[i], parametars.bucketSize);
+				S[i] = new BucketStructure(parametars.minValues[i], parametars.maxValues[i], parametars.bucketSize, 
+						preferredNum, leftIp, rightIp, port, i);
 				break;
-			default:
+			/*default:
 				S[i] = new BinaryTree();
-				break;
+				break;*/
 			}
 		}
 	}
 	
 	private List<DotCache>wrongDots = new ArrayList<>();
 	private List<Double> toRemoveValue = new ArrayList<>();
-	private List<Long> toRemoveId = new ArrayList<>();
+	private List<Integer> toRemoveId = new ArrayList<>();
 	private List<Double> toAdd = new ArrayList<>();
 	public void run()
 	{
@@ -76,57 +77,60 @@ public class MainWorker {
 				Socket client = serverSocket.accept();
 				ObjectInputStream ois = new ObjectInputStream( new BufferedInputStream(client.getInputStream()));
 				int id = ois.read();
-				System.out.printf("I see %d%n", id);
+				System.err.printf("I see %d%n", id);
 				switch (id) {
 				case 0:      // terminate thread and connection
 					serverSocket.close();
 					return;  
 				case 1:      // send parametars
-					System.out.println("Primio parametre");
+					System.err.println("Primio parametre");
 					parametars = (Parametars)ois.readObject();
 					masterAddress = (client.getRemoteSocketAddress()).toString();
-					init();
-					//Network.sendResponse(client.getLocalAddress(), mainPort, 1); // parametars sent
+					
+					String leftIp = (String)ois.readObject();
+					String rightIp = (String)ois.readObject();
+					this.leftIp = leftIp;
+					this.rightIp = rightIp;
+					
+					int num = ois.readInt();
+					init(num, leftIp, rightIp);
+					
 					ObjectOutputStream os = new ObjectOutputStream(client.getOutputStream());
 					os.writeInt(1);
 					os.close();
-					//client.close();
-					
 					break;   
 				case 2:      // init position of dots
-					int num = ois.readInt();
-					System.out.println("Loading ... "+num);
-					for(int i=0;i<num;++i)
+					int num2 = ois.readInt();
+					System.err.println("Loading ... "+num2);
+					for(int i=0;i<num2;++i)
 					{
-						long identi   = ois.readLong();
+						int identi   = ois.readInt();
 						int component = ois.read();
 						double value  = ois.readDouble();
-						//System.out.printf("%d %d %f%n", identi, component, value);
+						
 						S[component].add(value, identi);
-						//idInStructure[component].put(identi, value);
-						//if(i%10000==0)System.out.println(i+"/"+num);
+						
 					}
 					ObjectOutputStream os2 = new ObjectOutputStream(client.getOutputStream());
 					os2.writeInt(1);
 					os2.close();
-					System.out.println("Primio početne pozicije.");
+					System.err.println("Primio početne pozicije.");
 					
 					break;
 				case 3:      // please move  
 					for(int k=0;k<numOfComponents;++k)
 					{
-						System.out.println(k);
+						System.err.println("Move component => " + k);
 						
 						toRemoveId.clear();
 						toRemoveValue.clear();
 						toAdd.clear();
 						for(Pair P : S[k])
-						//for(Long idDot : idInStructure[k].keySet()) 
 						{
 								double oldValue = P.value;
-								long idDot = P.id;
+								int idDot = P.id;
 								double value = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
-								if(value < parametars.minValues[k] || value >= parametars.maxValues[k])
+								if(value < S[k].minValue || value >= S[k].maxValue)
 								{
 									wrongDots.add(new DotCache(idDot,k,oldValue));
 								}
@@ -135,7 +139,6 @@ public class MainWorker {
 									toRemoveId.add(idDot);
 									toRemoveValue.add(oldValue);
 									toAdd.add(value);
-									//idInStructure[k].replace(idDot, value);
 								}
 						}
 						for(int i=0, len = toRemoveId.size(); i<len; ++i)
@@ -155,90 +158,119 @@ public class MainWorker {
 					double min  = ois.readDouble();
 					double max  = ois.readDouble();
 					int component = ois.read();
-					//int idQuery = ois.readInt();
 					
-					List<Long> answer = S[component].query(min, max);
+					List<Integer> answer = S[component].query(min, max);
 					BufferedOutputStream oos = new BufferedOutputStream(client.getOutputStream());
-					//oos.writeInt(idQuery);
-					//oos.writeInt(answer.size());
-					byte[] res = longToByte(answer);
-					/*for(Long val : answer){
-						oos.writeLong(val);
-					}*/
+					
+					byte[] res = intToByte(answer);
 					oos.write(res);
 					oos.close();
+					
 					break;
 					
 				case 5:
-					HashMap<String, List<DotCache>> wrongPositionDots = new HashMap<>();
+					//HashMap<String, List<DotCache>> wrongPositionDots = new HashMap<>();
+					System.out.println("wrong dots " + wrongDots.size());
 				 	if(!wrongDots.isEmpty())
 				 	{
-				 		Socket S = new Socket(masterAddress, mainPort);
+				 		System.out.println("Usao, nisam zelio.");
+				 		Socket S = new Socket(this.leftIp, port);
 				 		ObjectOutputStream oos2 = new ObjectOutputStream(S.getOutputStream());
-				 		oos2.write(4);
-				 		for(DotCache dot : wrongDots)
-						{
-							long idDot = dot.getId();
-							int k = dot.getComponent();
-					 		double value = dot.getValue();
-					 		
-				 			oos2.write(k);
-							oos2.writeDouble(value);
-							oos2.flush();
-							ObjectInputStream ois2 = new ObjectInputStream(S.getInputStream());
-							String ipAddress = ois2.readUTF();
-							
-							System.out.println("Radilica : "+ipAddress);
-							if(!wrongPositionDots.containsKey(ipAddress))
-							{
-								wrongPositionDots.put(ipAddress, new ArrayList<>());
-							}
-							/*List<DotCache> list = wrongPositionDots.get(ipAddress);
-							list.add(new DotCache(idDot,k,value));
-							wrongPositionDots.replace(ipAddress, list);*/
-							wrongPositionDots.get(ipAddress).add(new DotCache(idDot,k,value));
-							
-						}
+				 		oos2.write(6);
+				 		oos2.writeInt(wrongDots.size());
+				 		for(DotCache D : wrongDots) {
+				 			oos2.writeInt(D.getId());
+				 			oos2.write(D.getComponent());
+				 			oos2.writeDouble(D.getValue());
+				 		}
+				 		oos2.flush();
+				 		ObjectInputStream ois4 = new ObjectInputStream(S.getInputStream());
+				 		ois4.read();
+				 		S.close();
 						wrongDots.clear();
 					}
-				 	ObjectOutputStream oos5 = new ObjectOutputStream(client.getOutputStream());
-					oos5.write(-1);
-					oos5.flush();
-				 	client.close();
-					Set<String> set = wrongPositionDots.keySet();
-					for(String address : set){
-						Socket S = new Socket(address, port);
-						ObjectOutputStream oos3 = new ObjectOutputStream(S.getOutputStream());
-						oos3.write(6);
-						int dotsSize = wrongPositionDots.get(address).size();
-						oos3.writeInt(dotsSize);
-						for(DotCache D : wrongPositionDots.get(address)){
-							
-							oos3.writeLong(D.getId());
-							oos3.write(D.getComponent());
-							oos3.writeDouble(D.getValue());
-							this.S[D.getComponent()].delete(D.getValue(), D.getId());
-							
-						}
-						oos3.flush();
-						ObjectInputStream ois3 = new ObjectInputStream(S.getInputStream());
-						int val = ois3.read();
-						if(val == 1){}
-						S.close();
-					}
+				 	ObjectOutputStream os6 = new ObjectOutputStream(client.getOutputStream());
+					os6.write(1);
+					System.out.println("Poslao jedan");
+					os6.close();
 					break;
 				case 6:
 					ObjectInputStream ois4 = new ObjectInputStream(client.getInputStream());
 					int size = ois4.readInt();
+					List<DotCache> wrongDots = new ArrayList<>();
 					for(int i=0;i<size;++i){
-						long dotId = ois4.readLong();
+						int dotId = ois4.readInt();
 						int compo  = ois4.read();
 						double value = ois4.readDouble();
-						S[compo].add(value, dotId);
-						
+						if(S[compo].minValue >= value && S[compo].maxValue > value)
+							S[compo].add(value, dotId);
+						else
+							wrongDots.add(new DotCache(dotId, compo, value));
 					}
 					ObjectOutputStream oos4 = new ObjectOutputStream(client.getOutputStream());
 					oos4.write(1);
+					Socket S1 = new Socket(this.leftIp, port);
+					ObjectOutputStream oos2 = new ObjectOutputStream(S1.getOutputStream());
+			 		oos2.write(6);
+			 		oos2.writeInt(wrongDots.size());
+			 		for(DotCache D : wrongDots) {
+			 			oos2.writeInt(D.getId());
+			 			oos2.write(D.getComponent());
+			 			oos2.writeDouble(D.getValue());
+			 		}
+			 		oos2.flush();
+			 		ObjectInputStream ois5 = new ObjectInputStream(S1.getInputStream());
+			 		ois5.read();
+					S1.close();
+					break;
+				case 7:
+					
+					for(int i=0;i<parametars.minValues.length;++i)
+					{
+						for(int j=0;j<parametars.bucketSize;++j)
+							S[i].balance(j);
+							
+					}
+					ObjectOutputStream os7 = new ObjectOutputStream(client.getOutputStream());
+					os7.write(1);
+					os7.close();
+					break;
+				case 11:
+					ObjectInputStream ois8 = new ObjectInputStream(client.getInputStream());
+					int compo = ois8.read();
+					int leftOrRight = ois8.read();
+					double newBound = ois8.readDouble();
+					int len = ois8.readInt();
+					List<Pair> list = new ArrayList<>();
+					for(int i=0;i<len;++i)
+					{
+						int idDot = ois8.readInt();
+						double val = ois8.readDouble();
+						list.add(new Pair(idDot, val));
+					}
+					S[compo].acceptNewDots(list, newBound, leftOrRight);
+					ObjectOutputStream os9 = new ObjectOutputStream(client.getOutputStream());
+					os9.write(1);
+					os9.close();
+					break;
+				case 12:
+					ObjectOutputStream os10 = new ObjectOutputStream(client.getOutputStream());
+					os10.writeInt(S[1].minValuesPerBucket.length);
+					int br = 0;
+					for(double x : S[1].minValuesPerBucket) {
+						os10.writeDouble(x);
+						System.out.println(S[1].buckets[br++].size()+ " " + preferredNum + " => " + x);
+						
+					}
+					br = 0;
+					os10.writeInt(S[0].minValuesPerBucket.length);
+					for(double x : S[0].minValuesPerBucket) {
+						os10.writeDouble(x);
+						System.out.println(S[0].buckets[br++].size()+ " " + preferredNum + " => " + x);
+					}
+					//os10.write(1);
+					System.out.println("done");
+					os10.close();
 					break;
 				default:
 					break;
@@ -251,27 +283,27 @@ public class MainWorker {
 		}
 		
 	}
-	public static byte[] longToByte(List<Long> input)
+	public static byte[] intToByte(List<Integer> input)
 	{
-	    ByteBuffer byteBuffer = ByteBuffer.allocate(input.size() * 8);        
-	    LongBuffer longBuffer = byteBuffer.asLongBuffer();
-	    long[] li = new long[input.size()];
+	    ByteBuffer byteBuffer = ByteBuffer.allocate(input.size() * 4);        
+	    IntBuffer intBuffer = byteBuffer.asIntBuffer();
+	    int[] li = new int[input.size()];
 	    int iter = 0;
-	    for(Long l: input){
+	    for(int l: input){
 	    	li[iter++] = l;
 	    }
-	    longBuffer.put(li);
+	    intBuffer.put(li);
 
 	    byte[] array = byteBuffer.array();
 
 	    return array;
 	}
-	public static long bytesToLong(byte[] bytes) {
-	    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+	public static int bytesToInt(byte[] bytes) {
+	    ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
 	    
 	    buffer.put(bytes);
 	    buffer.flip();//need flip 
-	    return buffer.getLong();
+	    return buffer.getInt();
 	}
 	private double move(double oldValue, double minMove, double maxMove, double minValue, double maxValue)
 	{

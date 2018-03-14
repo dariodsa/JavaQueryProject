@@ -41,7 +41,7 @@ public class Program
 	
 	private Random rand = new Random();
 	
-	private Structure[] S;
+	private BucketStructure[] S;
 	
 	public Program(int numOfArguments, Path dotsPath, int structureType, double queryFactor, double changeFactor) throws IOException, NumOfDotArguments, InvalidStructureType
 	{
@@ -53,7 +53,7 @@ public class Program
 		
 		this.dots = new ArrayList<>();
 		
-		this.S = new Structure[this.numOfArguments];
+		this.S = new BucketStructure[this.numOfArguments];
 		this.maxValue = new double[this.numOfArguments];
 		this.minValue = new double[this.numOfArguments];
 		
@@ -109,10 +109,7 @@ public class Program
 		
 		if(structureType==1)
 			for(int i=0;i<numOfArguments;++i)
-				S[i] = new BucketStructure(minValue[i], maxValue[i], numOfBuckets);
-		else if(structureType==2)
-			for(int i=0;i<numOfArguments;++i)
-				S[i] = new BinaryTree();
+				{}
 		else 
 			throw new InvalidStructureType(structureType);
 		
@@ -156,7 +153,7 @@ public class Program
 	{
 		while(num-->0)
 		{
-			List<Long>[] result = new ArrayList[numOfArguments];
+			List<Integer>[] result = new ArrayList[numOfArguments];
 			for(int i=0;i<numOfArguments;++i)
 			{
 				double diff = Math.abs(maxValue[i]-minValue[i] - 15);
@@ -165,7 +162,7 @@ public class Program
 				result[i] = new ArrayList<>();
 				result[i] = S[i].query(min, max);
 			}
-			List<Long> finalList = new ArrayList<>(result[0]);
+			List<Integer> finalList = new ArrayList<>(result[0]);
 			for(int i=1;i<numOfArguments;++i)
 				finalList = Functions.intersection(finalList, result[i]);
 		}

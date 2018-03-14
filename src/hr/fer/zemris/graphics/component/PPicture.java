@@ -20,6 +20,9 @@ public class PPicture extends JPanel {
 	
 	private List<Dot> dots = new ArrayList<>();
 	
+	private List<Line> lines1 = new ArrayList<>();
+	private List<Line> lines2 = new ArrayList<>();
+	
 	public PPicture(int width, int  height) 
 	{
 		setLayout(null);
@@ -29,6 +32,18 @@ public class PPicture extends JPanel {
 		//setSize(width, height);
 		this.width = width;
 		this.height = height;
+	}
+	public void addDot(Dot d) {
+		dots.add(d.clone());
+		repaint();
+	}
+	public void addLine(Line l,int type)
+	{
+		if(type == 1)
+			lines1.add(l.clone());
+		else
+			lines2.add(l.clone());
+		repaint();
 	}
 	public void updatePicture(List<Dot> dots)
 	{
@@ -60,6 +75,22 @@ public class PPicture extends JPanel {
         	//System.out.printf("%d %d -> %.2f %.2f%n",x,y,D.getValue(0),D.getValue(1));
         	//g.drawLine(0, 0, 850, 850);
         }
+		for(Line L : lines1)
+		{
+			g.setColor(Color.GREEN);
+			g.drawLine(getPixel(-180,180,width,L.getX1())
+					  ,getPixel(-90,90,height ,L.getY1())
+					  ,getPixel(-180,180,width, L.getX2())
+					  ,getPixel(-90,90,height, L.getY2()));
+		}
+		for(Line L : lines2)
+		{
+			g.setColor(Color.BLUE);
+			g.drawLine(getPixel(-180,180,width,L.getX1())
+					  ,getPixel(-90,90,height ,L.getY1())
+					  ,getPixel(-180,180,width, L.getX2())
+					  ,getPixel(-90,90,height, L.getY2()));
+		}
 		System.out.println("Draw finished.");
 	}
 	private int getPixel(double minValue,double maxValue, int size, double value)

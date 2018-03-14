@@ -77,7 +77,7 @@ public class Window extends JFrame{
 	
 	public Window(int width,int height)
 	{
-		super("Završni rad, Dario Sindicic");
+		super("Zavrï¿½ni rad, Dario Sindicic");
 		setSize(width, height);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		
@@ -241,12 +241,6 @@ public class Window extends JFrame{
 		
 		panel.add(jsRight,BorderLayout.EAST);
 		
-		JTextArea logOutput = new JTextArea("mirko\n%n mirko\n%n  mirko\n a"); //todo issue with panel size, need to change main layout manager
-		logOutput.setEditable(false);
-		logOutput.setVisible(true);
-		JScrollPane js = new JScrollPane(logOutput);
-		js.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		panel.add(js,BorderLayout.SOUTH);
 		panel.add(killThemAll, BorderLayout.WEST);
 		killThemAll.addActionListener((e)->{
 			//killThemAll
@@ -256,19 +250,7 @@ public class Window extends JFrame{
 			{
 				adrese[i] = (String)model.getValueAt(i, 1);
 			}
-			/*for(int i=0;i<adrese.length;++i)
-			{
-				try
-				{
-					Socket S = new Socket(adrese[i],port2);
-					ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-					S.close();
-				}
-				catch(IOException ex)
-				{
-					ex.printStackTrace();
-				}
-			}*/
+			
 			try 
 			{
 				Socket S = new Socket(InetAddress.getLocalHost().getHostAddress().toString(),port1);
@@ -350,7 +332,8 @@ public class Window extends JFrame{
 				
 				logOutput = new PrintWriter(System.err);
 				MasterMethod masterMethod = new MasterMethod(
-						parametars, adrese,dotFile, logOutput,port1,port2
+						
+						picture, parametars, adrese,dotFile, logOutput,port1,port2
 						);
 				Thread workerThread = new Thread(()-> {
 					MainWorker main = new MainWorker(port2,port1);
