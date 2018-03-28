@@ -25,6 +25,8 @@ public class BinaryTree extends TreeSet<Node>
 	
 	public double minValue;
 	public double maxValue;
+
+	
 	public BinaryTree(double minValue, double maxValue)
 	{
 		super();

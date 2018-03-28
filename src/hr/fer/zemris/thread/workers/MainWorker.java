@@ -10,6 +10,7 @@ import hr.fer.zemris.structures.Structure;
 import hr.fer.zemris.structures.binary.Node;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
+import hr.fer.zemris.thread.RelocateThread;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -35,11 +36,14 @@ public class MainWorker {
 	
 	public int preferredNum;
 	
-	String leftIp;
-	String rightIp;
+	private String leftWorker;
+	private String rightWorker;
 	
 	BucketStructure[] bucket;
 	BinaryTree[] binaryTree;
+	
+	private double[] minValues;
+	private double[] maxValues;
 	
 	public MainWorker(int port,int mainPort)
 	{
@@ -50,6 +54,14 @@ public class MainWorker {
 	{
 		this.S = new BucketStructure[parametars.minValues.length];
 		this.numOfComponents = parametars.minValues.length;
+		
+		this.minValues = new double[numOfComponents];
+		this.maxValues = new double[numOfComponents];
+		for(int i = 0; i < numOfComponents; ++i) {
+			this.minValues[i] = parametars.minValues[i];
+			this.maxValues[i] = parametars.maxValues[i];
+		}
+		
 		this.preferredNum = preferredNum;
 		for(int i=0,len = parametars.minValues.length; i < len; ++i)
 		{
@@ -65,20 +77,19 @@ public class MainWorker {
 			}
 		}
 		
-		wrongDots = new ArrayList[parametars.maxValues.length]; 
+		wrongDots = new ArrayList<DotCache>();
 		toRemoveValue = new ArrayList[parametars.maxValues.length];
 		toRemoveId = new ArrayList[parametars.maxValues.length];
 		toAdd = new ArrayList[parametars.maxValues.length];
 		for(int k = parametars.maxValues.length - 1; k >= 0; --k) {
-			wrongDots[k] = new ArrayList<DotCache>();
+			
 			toRemoveValue[k] = new ArrayList<Double>();
 			toRemoveId[k] = new ArrayList<Integer>();
 			toAdd[k] = new ArrayList<Double>();
 		}
 		
 	}
-	
-	private List<DotCache>[] wrongDots;
+	private List<DotCache> wrongDots;
 	private List<Double>[] toRemoveValue;
 	private List<Integer>[] toRemoveId;
 	private List<Double>[] toAdd;
@@ -101,10 +112,8 @@ public class MainWorker {
 					parametars = (Parametars)ois.readObject();
 					masterAddress = (client.getRemoteSocketAddress()).toString();
 					
-					String leftIp = (String)ois.readObject();
-					String rightIp = (String)ois.readObject();
-					this.leftIp = leftIp;
-					this.rightIp = rightIp;
+					this.leftWorker = (String)ois.readObject();
+					this.rightWorker = (String)ois.readObject();
 					
 					int num = ois.readInt();
 					init(num, leftIp, rightIp);
@@ -211,7 +220,7 @@ public class MainWorker {
 				case 6:
 					ObjectInputStream ois4 = new ObjectInputStream(client.getInputStream());
 					int size = ois4.readInt();
-					List<DotCache> wrongDots = new ArrayList<>();
+					wrongDots.clear();
 					for(int i=0;i<size;++i){
 						int dotId = ois4.readInt();
 						int compo  = ois4.read();
@@ -288,6 +297,7 @@ public class MainWorker {
 					break;
 				case 15:
 					//move BinaryTree
+					wrongDots.clear();
 					for(int k=0;k<numOfComponents;++k)
 					{
 						System.err.println("Move component => " + k);
@@ -326,8 +336,75 @@ public class MainWorker {
 					os15.close();
 					break;
 				case 16:
+					//relocate BinaryTree
+					List<DotCache> toLeft = new ArrayList<>();
+					List<DotCache> toRight = new ArrayList<>();
+					for(DotCache dot : wrongDots) {
+							if(dot.getValue() < minValues[dot.getComponent()]) {
+								toLeft.add(dot);
+							} else if(dot.getValue() > maxValues[dot.getComponent()]) {
+								toRight.add(dot);
+							}
+					}
+					Thread threadLeft;
+					Thread threadRight;
+					if(toLeft.size() > 0) {
+						threadLeft = new RelocateThread(leftWorker, port, 17, toLeft);
+					}
+					if(toRight.size() > 0) {
+						threadRight = new RelocateThread(rightWorker, port, 17, toRight);
+					}
 					
+					if(threadLeft != null) {
+						threadLeft.run();
+						threadLeft.join();
+					}
+					if(threadRight != null) {
+						threadRight.run();
+						threadRight.join();
+					}
+					ObjectOutputStream os16 = new ObjectOutputStream(client.getOutputStream());
+					os16.write(1);
+					os16.close();
 					break;
+				case 17:
+					ObjectInputStream ois17 = new ObjectInputStream(client.getInputStream());
+					int sizeOfList = ois17.readInt();
+					List<DotCache> toLeft2 = new ArrayList<>();
+					List<DotCache> toRight2 = new ArrayList<>();
+					for(int i = sizeOfList -1 ; i >= 0; --i) {
+						int dotComponent = ois17.readInt();
+						int dotId = ois17.readInt();
+						double dotValue = ois17.readDouble();
+						if(minValues[dotComponent] <= dotValue && dotValue < maxValues[dotComponent]) {
+							binaryTree[dotComponent].addNumberNode(dotValue, dotId);
+						} else if(minValues[dotComponent] > dotValue) {
+							toLeft2.add(new DotCache(dotId,dotComponent,dotValue));
+						} else {
+							toRight2.add(new DotCache(dotId,dotComponent,dotValue));
+						}
+					}
+					Thread threadLeft2;
+					Thread threadRight2;
+					if(toLeft2.size() > 0) {
+						threadLeft2 = new RelocateThread(leftWorker, port, 17, toLeft2);
+					}
+					if(toRight2.size() > 0) {
+						threadRight2 = new RelocateThread(rightWorker, port, 17, toRight2);
+					}
+					if(threadLeft2 != null) {
+						threadLeft2.run();
+						threadLeft2.join();
+					}
+					if(threadRight2 != null) {
+						threadRight2.run();
+						threadRight2.join();
+					}
+					ObjectOutputStream os17 = new ObjectOutputStream(client.getOutputStream());
+					os17.write(1);
+					os17.close();
+					break;
+					
 				default:
 					break;
 				}
