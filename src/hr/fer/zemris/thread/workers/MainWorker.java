@@ -7,7 +7,9 @@ import hr.fer.zemris.structures.BucketStructure;
 import hr.fer.zemris.structures.Pair;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.Structure;
+import hr.fer.zemris.structures.binary.NetworkNode;
 import hr.fer.zemris.structures.binary.Node;
+import hr.fer.zemris.structures.binary.NumberNode;
 import hr.fer.zemris.structures.binary.Orientation;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
@@ -83,9 +85,6 @@ public class MainWorker {
 					binaryTree[i].addNetworkNode(rightIp, maxValues[i], Orientation.RIGHT);
 				}
 				break;
-			/*default:
-				S[i] = new BinaryTree();
-				break;*/
 			}
 		}
 		
@@ -205,7 +204,7 @@ public class MainWorker {
 					for(int idDot : answer) {
 						oos.writeInt(idDot);
 					}
-					s
+					
 					oos.close();
 					
 					break;
@@ -313,6 +312,41 @@ public class MainWorker {
 					//os10.write(1);
 					System.out.println("done");
 					os10.close();
+					break;
+				case 14:
+					ObjectInputStream ois14 = new ObjectInputStream(client.getInputStream());
+					double minValue = ois14.readDouble();
+					double maxValue = ois14.readDouble();
+					int componentValue = ois14.read();
+					List<Node> results = binaryTree[componentValue].query(minValue, maxValue);
+					List<Integer> listInt = new ArrayList<>();
+					for(Node node : results) {
+						if(node instanceof NumberNode) {
+							listInt.add(node.getId());
+						} else {
+							//send request to the network
+							//List<Integer> listFromNetwork = new ArrayList<>();
+							NetworkNode networkNode =(NetworkNode)node;
+							try {
+								Socket S = new Socket(networkNode.getAddress(), port);
+								ObjectOutputStream oos14 = new ObjectOutputStream(S.getOutputStream());
+								oos14.write(14);
+								oos14.writeDouble(min);
+								oos14.writeDouble(max);
+								oos14.write(componentValue);
+								oos14.flush();
+								ObjectInputStream ois14a = new ObjectInputStream(S.getInputStream());
+								
+								int lenArray = ois14a.readInt();
+								for(int i = lenArray-1; i>=0; --i)
+								{
+									listInt.add(ois14a.readInt());
+								}
+								S.close();
+							} catch(Exception ex) {ex.printStackTrace();}
+						}
+					}
+					
 					break;
 				case 15:
 					//move BinaryTree

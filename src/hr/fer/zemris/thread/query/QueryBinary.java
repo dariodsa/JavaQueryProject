@@ -23,11 +23,9 @@ import hr.fer.zemris.thread.workers.MainWorker;
 
 public class QueryBinary extends Query {
 
-	private BinaryTree binaryTree;
 
-	public QueryBinary(Parametars parametars, String[] workersAddress, int port, BinaryTree binaryTree) {
+	public QueryBinary(Parametars parametars, String[] workersAddress, int port) {
 		super(parametars, workersAddress, port);
-		this.binaryTree = binaryTree;
 	}
 
 	@Override
@@ -35,51 +33,33 @@ public class QueryBinary extends Query {
 
 		List<Integer> result = new ArrayList<Integer>();
 		long t1 = System.currentTimeMillis();
-
-		for (int k = 0; k < numOfComponents; ++k) {
+		for(int k = 0; k < numOfComponents; ++k) {
+			try (Socket S=new Socket(workersAddress[workersAddress.length/2], port)){
+				
 			
-			
-			List<Node> results = binaryTree.query(min, max);
-			
-			List<Integer> tempList = new ArrayList<>(5000);
-			for(Node node : results) {
-				if(node instanceof NumberNode) {
-					if(k > 0) tempList.add(node.getId());
-					else result.add(node.getId());
-				} else {
-					//send request to the network
-					List<Integer> listFromNetwork = new ArrayList<>();
-					NetworkNode networkNode =(NetworkNode)node;
-					try {
-						Socket S = new Socket(networkNode.getAddress(), port);
-						ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-						oos.write(14);
-						oos.writeDouble(min);
-						oos.writeDouble(max);
-						oos.write(k);
-						oos.flush();
-						ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
-						
-						int len = ois.readInt();
-						for(int i = len-1; i>=0; --i)
-						{
-							listFromNetwork.add(ois.readInt());
-						}
-						S.close();
-					} catch (IOException e) {
-						e.printStackTrace();
+				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+				oos.write(14);
+				oos.writeDouble(min);
+				oos.writeDouble(max);
+				oos.write(k);
+				oos.flush();
+				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
+				
+				int len = ois.readInt();
+				List<Integer> list2 = new ArrayList<>();
+				if(k == 0)
+					for(int i = len-1; i>=0; --i)
+					{
+						result.add(ois.readInt());
 					}
-					
-					if(k == 0) {
-						for(int id : listFromNetwork) 
-							result.add(id);
-					} else for(int id : listFromNetwork) 
-						tempList.add(id);
-				}
-			}
-			if(k > 0) {
-				result = Functions.intersection(result, tempList);
-			}
+				else 
+					for(int i = len-1; i>=0; --i)
+					{
+						list2.add(ois.readInt());
+					}
+				result = Functions.intersection(result, list2);
+				S.close();
+			} catch(Exception e) {e.printStackTrace();}
 		}
 		return result;
 	}
