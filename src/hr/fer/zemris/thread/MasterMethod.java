@@ -185,11 +185,11 @@ public class MasterMethod {
 			oos.writeObject(parametars);
 			
 			if(i == 0)
-				oos.writeObject(workersAddress[workers.length-1]);
+				oos.writeObject("");
 			else
 				oos.writeObject(workersAddress[i-1]);
 			if(i+1 == workers.length)
-				oos.writeObject(workersAddress[0]);
+				oos.writeObject("");
 			else
 				oos.writeObject(workersAddress[i+1]);
 			

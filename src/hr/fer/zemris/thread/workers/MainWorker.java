@@ -10,6 +10,7 @@ import hr.fer.zemris.structures.Structure;
 import hr.fer.zemris.structures.binary.Node;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
+import hr.fer.zemris.structures.types.StructureType;
 import hr.fer.zemris.thread.RelocateThread;
 
 import java.io.BufferedInputStream;
@@ -52,7 +53,7 @@ public class MainWorker {
 	}
 	private void init(int preferredNum, String leftIp, String rightIp)
 	{
-		this.S = new BucketStructure[parametars.minValues.length];
+		
 		this.numOfComponents = parametars.minValues.length;
 		
 		this.minValues = new double[numOfComponents];
@@ -63,6 +64,9 @@ public class MainWorker {
 		}
 		
 		this.preferredNum = preferredNum;
+		
+		this.bucket = new BucketStructure[numOfComponents];
+		this.binaryTree = new BinaryTree[numOfComponents];
 		for(int i=0,len = parametars.minValues.length; i < len; ++i)
 		{
 			System.out.println(parametars.structureType);
@@ -133,7 +137,10 @@ public class MainWorker {
 						int component = ois.read();
 						double value  = ois.readDouble();
 						
-						S[component].add(value, identi);
+						if(parametars.structureType == StructureType.BUCKET)
+							bucket[component].add(value, identi);
+						if(parametars.structureType == StructureType.BINARY_TREE)
+							binaryTree[component].addNumberNode(value, identi);
 						
 					}
 					ObjectOutputStream os2 = new ObjectOutputStream(client.getOutputStream());
@@ -147,9 +154,9 @@ public class MainWorker {
 					{
 						System.err.println("Move component => " + k);
 						
-						toRemoveId.clear();
-						toRemoveValue.clear();
-						toAdd.clear();
+						toRemoveId[k].clear();
+						toRemoveValue[k].clear();
+						toAdd[k].clear();
 						for(Pair P : bucket[k])
 						{
 								double oldValue = P.value;
@@ -161,15 +168,15 @@ public class MainWorker {
 								}
 								else
 								{
-									toRemoveId.add(idDot);
-									toRemoveValue.add(oldValue);
-									toAdd.add(newValue);
+									toRemoveId[k].add(idDot);
+									toRemoveValue[k].add(oldValue);
+									toAdd[k].add(newValue);
 								}
 						}
-						for(int i=toRemoveId.size() - 1; i >= 0; --i)
+						for(int i=toRemoveId[k].size() - 1; i >= 0; --i)
 						{
 							try {
-								bucket[k].update(toRemoveValue.get(i), toAdd.get(i), toRemoveId.get(i));
+								bucket[k].update(toRemoveValue[k].get(i), toAdd[k].get(i), toRemoveId[k].get(i));
 							} catch (DimmensionException e) {
 								e.printStackTrace();
 							}
@@ -184,11 +191,15 @@ public class MainWorker {
 					double max  = ois.readDouble();
 					int component = ois.read();
 					
-					List<Integer> answer = S[component].query(min, max);
-					BufferedOutputStream oos = new BufferedOutputStream(client.getOutputStream());
+					List<Integer> answer = bucket[component].query(min, max);
+					ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
 					
-					byte[] res = intToByte(answer);
-					oos.write(res);
+					/*byte[] res = intToByte(answer);*/
+					oos.writeInt(answer.size());
+					for(int idDot : answer) {
+						oos.writeInt(idDot);
+					}
+					s
 					oos.close();
 					
 					break;
