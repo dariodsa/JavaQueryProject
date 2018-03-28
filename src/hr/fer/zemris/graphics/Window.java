@@ -10,8 +10,8 @@ import hr.fer.zemris.graphics.component.PPicture;
 import hr.fer.zemris.graphics.component.ip.MyTableModel;
 import hr.fer.zemris.graphics.component.statistics.StatisticsPanel;
 import hr.fer.zemris.graphics.constants.Constants;
-import hr.fer.zemris.graphics.constants.StructureType;
 import hr.fer.zemris.structures.Parametars;
+import hr.fer.zemris.structures.types.StructureType;
 import hr.fer.zemris.thread.MasterMethod;
 import hr.fer.zemris.thread.workers.MainWorker;
 
@@ -311,8 +311,10 @@ public class Window extends JFrame{
 				
 				double[] minMove = new double[] {0.5,0.5};
 				double[] maxMove = new double[] {0.5,0.5};
+				StructureType typeOfStrcuture = structureType.getSelectedIndex() == 0 ? StructureType.BUCKET : StructureType.BINARY_TREE;
+				
 				Parametars parametars = new Parametars(
-						structureType.getSelectedIndex(),
+						typeOfStrcuture,
 						((double)queryFactor.getValue())/100.0,
 						((double)moveFactor.getValue())/100.0,
 						V.minValues,

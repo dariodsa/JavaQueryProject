@@ -8,6 +8,9 @@ import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 import hr.fer.zemris.structures.dot.Functions;
+import hr.fer.zemris.thread.move.Move;
+import hr.fer.zemris.thread.move.MoveBinary;
+import hr.fer.zemris.thread.move.MoveBucket;
 import hr.fer.zemris.thread.query.Query;
 import hr.fer.zemris.thread.query.QueryBinary;
 import hr.fer.zemris.thread.query.QueryBucket;
@@ -36,6 +39,7 @@ public class MasterMethod {
 	
 	private Parametars parametars;
 	private Query query;
+	private Move move;
 	
 	private String[] workersAddress;
 	private InetAddress[] workers;
@@ -84,9 +88,11 @@ public class MasterMethod {
 		switch(parametars.structureType) {
 			case BUCKET:
 				query = new QueryBucket(parametars, workersAddress, port);
+				move = new MoveBucket(workersAddress, port, numOfComponents);
 				break;
 			case BINARY_TREE:
 				query = new QueryBinary(parametars, workers, port, binaryTree);
+				move = new MoveBinary(workers, port, numOfComponents);
 				break;
 		}
 		
@@ -109,7 +115,6 @@ public class MasterMethod {
 		}
 		initParametars();
 		serverSocket.close();
-		createServerThread();
 
 		long tMain = System.currentTimeMillis();
 		initDots(dotsPath);
@@ -118,58 +123,20 @@ public class MasterMethod {
 			System.out.print(String.format("%d. %s%n", i+1, "iteration"));
 			double rand = MasterMethod.rand.nextDouble();
 			
-			List<Integer> result = new ArrayList<>();
-			boolean firstResult = true;
 			if(rand < parametars.queryFactor)
 			{
 				double min = -90;
 				double max = +90;
-				query.performQuery(min, max);
+				List<Integer> result = query.performQuery(min, max);
+				System.out.println(result.size());
 			}
 			if(rand < parametars.moveFactor)
 			{
-				System.out.println("I will perform move operation.");
-				List<Thread> threads = new ArrayList<Thread>();
-				long t1 = System.currentTimeMillis();
-				for(int j=0;j<workersAddress.length;++j)
-				{
-					Thread T = new MoveThread(workersAddress[j],port); 
-					
-					threads.add(T);
-				}
-				for(Thread thread : threads)
-					thread.start();
-				for(Thread thread : threads)
-					thread.join();
-				long t2 = System.currentTimeMillis();
-				System.out.printf("Move operation completed. %d milisec%n",t2-t1);
+				move.move();
 			}
 			System.out.println("I will realocate wrong dots ...");
 			long t1 = System.currentTimeMillis();
-			for(String host : workersAddress){
-				Socket S = new Socket(host, port);
-				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-				oos.write(5);//oos.writeInt(5);
-				oos.flush();
-				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
-				int val = ois.read();
-				System.out.println("Primio "+val);
-				S.close();
-			}
-			
-			for(String host : workersAddress){
-				Socket S = new Socket(host, port);
-				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-				oos.write(7);//oos.writeInt(5);
-				oos.flush();
-				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
-				int val = ois.read();
-				while(val!=-1){
-					val = ois.read();
-				}
-				S.close();
-			}
-			
+			move.relocate();
 			long t2 = System.currentTimeMillis();
 			System.out.printf("Realocation completed. %d milisec%n",t2-t1);
 		}
@@ -197,44 +164,6 @@ public class MasterMethod {
 			}
 			S.close();
 		}
-		
-	}
-	private void createServerThread() {
-		Thread serverThread = new Thread(new Runnable(){
-			@Override
-			public void run()
-			{
-				try {
-					ServerSocket serverSocket = new ServerSocket(portMaster);
-					while(true){
-						Socket client = serverSocket.accept();
-						ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
-						int operationId = ois.read();
-						
-						switch (operationId) {
-						case 4: // response to the question about where to send a dot
-							Thread echoThread = new EchoThread(client);
-							echoThread.start();
-							break;
-						case 5: // sending how big am I 
-							int size     = ois.readInt();
-							int workerId = ois.read();
-							
-							break;
-						default:
-							serverSocket.close();
-							return;
-						}
-						client.close();
-					}
-					//serverSocket.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		});
-		serverThread.start();
 		
 	}
 	private void initParametars() throws IOException 
@@ -364,9 +293,8 @@ public class MasterMethod {
 			oos.flush();
 			cacheDots[i].clear();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
-			int val = ois.read();
+			ois.read();
 			ois.close();
-			oos.close();
 			S.close();
 		}
 	}

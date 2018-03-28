@@ -67,9 +67,11 @@ public class MainWorker {
 		{
 			System.out.println(parametars.structureType);
 			switch (parametars.structureType) {
-			case 0:
-				S[i] = new BucketStructure(parametars.minValues[i], parametars.maxValues[i], parametars.bucketSize, 
+			case BUCKET:
+				bucket[i] = new BucketStructure(parametars.minValues[i], parametars.maxValues[i], parametars.bucketSize, 
 						preferredNum, leftIp, rightIp, port, i);
+			case BINARY_TREE:
+				binaryTree[i] = new BinaryTree(parametars.minValues[i], parametars.maxValues[i]);
 				break;
 			/*default:
 				S[i] = new BinaryTree();
@@ -116,7 +118,7 @@ public class MainWorker {
 					this.rightWorker = (String)ois.readObject();
 					
 					int num = ois.readInt();
-					init(num, leftIp, rightIp);
+					init(num, leftWorker, rightWorker);
 					
 					ObjectOutputStream os = new ObjectOutputStream(client.getOutputStream());
 					os.writeInt(1);
@@ -356,11 +358,11 @@ public class MainWorker {
 					}
 					
 					if(threadLeft != null) {
-						threadLeft.run();
+						threadLeft.start();
 						threadLeft.join();
 					}
 					if(threadRight != null) {
-						threadRight.run();
+						threadRight.start();
 						threadRight.join();
 					}
 					ObjectOutputStream os16 = new ObjectOutputStream(client.getOutputStream());
@@ -393,11 +395,11 @@ public class MainWorker {
 						threadRight2 = new RelocateThread(rightWorker, port, 17, toRight2);
 					}
 					if(threadLeft2 != null) {
-						threadLeft2.run();
+						threadLeft2.start();
 						threadLeft2.join();
 					}
 					if(threadRight2 != null) {
-						threadRight2.run();
+						threadRight2.start();
 						threadRight2.join();
 					}
 					ObjectOutputStream os17 = new ObjectOutputStream(client.getOutputStream());
