@@ -101,6 +101,9 @@ public class MainWorker {
 	private List<Double> toRemoveValue;
 	private List<Integer> toRemoveId;
 	private List<Double> toAdd;
+	
+	private List<Pair> toRemove = new ArrayList<>();
+	
 	public void run()
 	{
 		try{
@@ -156,8 +159,7 @@ public class MainWorker {
 					{
 						System.err.println("Move component => " + k);
 						
-						toRemoveId.clear();
-						toRemoveValue.clear();
+						toRemove.clear();
 						toAdd.clear();
 						for(Pair P : bucket[k])
 						{
@@ -170,15 +172,14 @@ public class MainWorker {
 								}
 								else
 								{
-									toRemoveId.add(idDot);
-									toRemoveValue.add(oldValue);
+									toRemove.add(P);
 									toAdd.add(newValue);
 								}
 						}
-						for(int i=toRemoveId.size() - 1; i >= 0; --i)
+						for(int i=toRemove.size() - 1; i >= 0; --i)
 						{
 							try {
-								bucket[k].update(toRemoveValue.get(i), toAdd.get(i), toRemoveId.get(i));
+								bucket[k].update(toRemove.get(i), toAdd.get(i));
 							} catch (DimmensionException e) {
 								e.printStackTrace();
 							}
@@ -317,7 +318,7 @@ public class MainWorker {
 					int componentValue = ois.read();
 					System.out.printf("%f %f %d%n",minValue,maxValue,componentValue);
 					List<Node> results = binaryTree[componentValue].query(minValue, maxValue);
-					System.out.println(results.size());
+					System.out.println("SIZE: "+binaryTree[0].size());
 					List<Integer> listInt = new ArrayList<>();
 					for(Node node : results) {
 						if(node instanceof NumberNode) {

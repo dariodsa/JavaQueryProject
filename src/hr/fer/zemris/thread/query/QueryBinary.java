@@ -33,6 +33,7 @@ public class QueryBinary extends Query {
 	public List<Integer> performQuery(double min, double max) {
 
 		List<Integer> result = new ArrayList<Integer>();
+		
 		for(int k = 0; k < numOfComponents; ++k) {
 			try (Socket S=new Socket(workersAddress[workersAddress.length/2], port)){
 				

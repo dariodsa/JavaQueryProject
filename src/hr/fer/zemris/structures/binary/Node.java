@@ -21,5 +21,9 @@ public abstract class Node implements Comparable<Node>{
 	public void setValue(double value) {
 		this.value = value;
 	}
-	public abstract boolean equalsTo(Object o);
+	
+	@Override
+	public abstract int compareTo(Node n);
+	@Override
+	public abstract boolean equals(Object o);
 }

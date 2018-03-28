@@ -145,7 +145,7 @@ public class Program
 			{
 				double newValue = dots.get(i).getValue(j) + CHANGE_RATE * rand.nextGaussian();
 				
-				S[j].update(dots.get(i).getValue(j), newValue, dots.get(i).getId());
+				//S[j].update(dots.get(i).getValue(j), newValue, dots.get(i).getId());
 			}
 		}
 	}

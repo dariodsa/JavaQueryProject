@@ -10,13 +10,18 @@ public class NumberNode extends Node{
 	@Override
 	public int compareTo(Node node) {
 		
-		return Double.compare(this.getValue(), node.getValue());
+
+		return Double.compare(getValue(), node.getValue())==0?Integer.compare(getId(), node.getId()):Double.compare(getValue(), node.getValue());
 	}
 
 	@Override
-	public boolean equalsTo(Object o) {
+	public boolean equals(Object o) {
 		
-		return ((Node)o).getId() == getId();
+		if(o instanceof NumberNode) {
+			NumberNode n =(NumberNode)o;
+			return n.getId() == getId();
+		}
+		return false;
 	}
 	
 }

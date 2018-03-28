@@ -17,13 +17,15 @@ public class NetworkNode extends Node{
 	}
 
 	@Override
-	public boolean equalsTo(Object o) {
+	public boolean equals(Object o) {
 		
-		NumberNode node = (NumberNode)o;
-		if(node.getValue() < getValue() && orientation == Orientation.LEFT)
-			return true;
-		if(node.getValue() > getValue() && orientation == Orientation.RIGHT)
-			return true;
+		if(o instanceof NumberNode) { 
+			NumberNode node = (NumberNode)o;
+			if(node.getValue() < getValue() && orientation == Orientation.LEFT)
+				return true;
+			if(node.getValue() > getValue() && orientation == Orientation.RIGHT)
+				return true;
+		}
 		return false;
 	}
 

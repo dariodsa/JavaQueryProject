@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 import hr.fer.zemris.exceptions.DimmensionException;
 
@@ -23,6 +24,8 @@ public class BucketStructure implements Iterable<Pair> {
 	public LinkedList<Pair>[] buckets;
 	private double sizePerBucket;
 	
+	private static Stack<Pair> cache;
+	
 	public BucketStructure(double minValue,double maxValue, int numOfBuckets) 
 	{
 		this.minValue = minValue;
@@ -30,6 +33,8 @@ public class BucketStructure implements Iterable<Pair> {
 		this.numOfBuckets = numOfBuckets;
 		
 		this.buckets = new LinkedList[numOfBuckets];
+		
+		this.cache = new Stack<>();
 
 		double size = Math.abs(maxValue - minValue);
 		this.sizePerBucket = size / numOfBuckets;
@@ -53,17 +58,18 @@ public class BucketStructure implements Iterable<Pair> {
 		this.buckets[newBucket].add(new Pair(dot,newValue));
 	}
 	
-	public void update(double oldValue, double newValue, int dot) throws DimmensionException 
+	public void update(Pair old, double newValue) throws DimmensionException 
 	{
 		if(!(minValue <= newValue && newValue <= maxValue))
 			throw new DimmensionException(newValue, minValue, maxValue); 
-		int oldBucket = getBucket(oldValue);
+		int oldBucket = getBucket(old.value);
 		int newBucket = getBucket(newValue);
-																	
+		int id = old.id;
+		
 		if(newBucket != oldBucket)
 		{
-			this.buckets[oldBucket].remove(new Pair(dot,oldValue));
-			add(newValue, dot, newBucket);
+			this.buckets[oldBucket].remove(old);
+			add(newValue, id, newBucket);
 		}
 	}
 	/*
@@ -222,10 +228,10 @@ public class BucketStructure implements Iterable<Pair> {
 		}
 		return result;
 	}
-	public void delete(double value, int dot)
+	public void delete(Pair pair)
 	{
-		int oldBucket = getBucket(value);
-		this.buckets[oldBucket].remove(new Pair(dot, value));
+		int oldBucket = getBucket(pair.value);
+		this.buckets[oldBucket].remove(pair);
 	}
 	private void initBuckets()
 	{
