@@ -8,6 +8,7 @@ import hr.fer.zemris.structures.Pair;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.Structure;
 import hr.fer.zemris.structures.binary.Node;
+import hr.fer.zemris.structures.binary.Orientation;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 import hr.fer.zemris.structures.types.StructureType;
@@ -76,6 +77,11 @@ public class MainWorker {
 						preferredNum, leftIp, rightIp, port, i);
 			case BINARY_TREE:
 				binaryTree[i] = new BinaryTree(parametars.minValues[i], parametars.maxValues[i]);
+				if(leftIp.length() > 0) {
+					binaryTree[i].addNetworkNode(leftIp, minValues[i], Orientation.LEFT);
+				} else if(rightIp.length() > 0) {
+					binaryTree[i].addNetworkNode(rightIp, maxValues[i], Orientation.RIGHT);
+				}
 				break;
 			/*default:
 				S[i] = new BinaryTree();
