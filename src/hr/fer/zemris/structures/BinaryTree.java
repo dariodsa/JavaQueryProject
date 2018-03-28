@@ -22,9 +22,14 @@ public class BinaryTree extends TreeSet<Node>
 	 * 
 	 */
 	private static final long serialVersionUID = -4681002200497431623L;
-	public BinaryTree()
+	
+	public double minValue;
+	public double maxValue;
+	public BinaryTree(double minValue, double maxValue)
 	{
 		super();
+		this.minValue = minValue;
+		this.maxValue = maxValue;
 	}
 	public void updateNumberNode(double oldValue, double newValue, int dot)
 	{

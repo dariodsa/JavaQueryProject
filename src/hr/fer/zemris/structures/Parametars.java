@@ -2,9 +2,11 @@ package hr.fer.zemris.structures;
 
 import java.io.Serializable;
 
+import hr.fer.zemris.structures.types.StructureType;
+
 public class Parametars implements Serializable{
 	
-	public int structureType;
+	public StructureType structureType;
 	public int bucketSize;
 	
 	public double queryFactor;
@@ -17,7 +19,7 @@ public class Parametars implements Serializable{
 	public double[] maxMove;
 	
 
-	public Parametars(int structureType, double queryFactor, double moveFactor, double[]  minValues, double[] maxValues
+	public Parametars(StructureType structureType, double queryFactor, double moveFactor, double[]  minValues, double[] maxValues
 			        , int bucketSize, double[] minMove, double[] maxMove)
 	{
 		this.structureType = structureType;

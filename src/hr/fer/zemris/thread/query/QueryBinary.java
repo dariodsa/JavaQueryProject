@@ -1,14 +1,25 @@
 package hr.fer.zemris.thread.query;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.ListenerNotFoundException;
+
 import hr.fer.zemris.structures.BinaryTree;
 import hr.fer.zemris.structures.Parametars;
+import hr.fer.zemris.structures.binary.NetworkNode;
 import hr.fer.zemris.structures.binary.Node;
 import hr.fer.zemris.structures.binary.NumberNode;
 import hr.fer.zemris.structures.dot.Functions;
+import hr.fer.zemris.thread.MasterMethod;
 import hr.fer.zemris.thread.QueryThread;
+import hr.fer.zemris.thread.workers.MainWorker;
 
 public class QueryBinary extends Query {
 
@@ -38,6 +49,27 @@ public class QueryBinary extends Query {
 				} else {
 					//send request to the network
 					List<Integer> listFromNetwork = new ArrayList<>();
+					NetworkNode networkNode =(NetworkNode)node;
+					try {
+						Socket S = new Socket(networkNode.getAddress(), port);
+						ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+						oos.write(14);
+						oos.writeDouble(min);
+						oos.writeDouble(max);
+						oos.write(k);
+						oos.flush();
+						ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
+						
+						int len = ois.readInt();
+						for(int i = len-1; i>=0; --i)
+						{
+							listFromNetwork.add(ois.readInt());
+						}
+						S.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
 					if(k == 0) {
 						for(int id : listFromNetwork) 
 							result.add(id);

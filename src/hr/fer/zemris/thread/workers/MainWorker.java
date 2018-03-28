@@ -7,6 +7,7 @@ import hr.fer.zemris.structures.BucketStructure;
 import hr.fer.zemris.structures.Pair;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.Structure;
+import hr.fer.zemris.structures.binary.Node;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 
@@ -37,7 +38,8 @@ public class MainWorker {
 	String leftIp;
 	String rightIp;
 	
-	BucketStructure[] S;
+	BucketStructure[] bucket;
+	BinaryTree[] binaryTree;
 	
 	public MainWorker(int port,int mainPort)
 	{
@@ -62,12 +64,24 @@ public class MainWorker {
 				break;*/
 			}
 		}
+		
+		wrongDots = new ArrayList[parametars.maxValues.length]; 
+		toRemoveValue = new ArrayList[parametars.maxValues.length];
+		toRemoveId = new ArrayList[parametars.maxValues.length];
+		toAdd = new ArrayList[parametars.maxValues.length];
+		for(int k = parametars.maxValues.length - 1; k >= 0; --k) {
+			wrongDots[k] = new ArrayList<DotCache>();
+			toRemoveValue[k] = new ArrayList<Double>();
+			toRemoveId[k] = new ArrayList<Integer>();
+			toAdd[k] = new ArrayList<Double>();
+		}
+		
 	}
 	
-	private List<DotCache>wrongDots = new ArrayList<>();
-	private List<Double> toRemoveValue = new ArrayList<>();
-	private List<Integer> toRemoveId = new ArrayList<>();
-	private List<Double> toAdd = new ArrayList<>();
+	private List<DotCache>[] wrongDots;
+	private List<Double>[] toRemoveValue;
+	private List<Integer>[] toRemoveId;
+	private List<Double>[] toAdd;
 	public void run()
 	{
 		try{
@@ -125,12 +139,12 @@ public class MainWorker {
 						toRemoveId.clear();
 						toRemoveValue.clear();
 						toAdd.clear();
-						for(Pair P : S[k])
+						for(Pair P : bucket[k])
 						{
 								double oldValue = P.value;
 								int idDot = P.id;
-								double value = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
-								if(value < S[k].minValue || value >= S[k].maxValue)
+								double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
+								if(newValue < bucket[k].minValue || newValue > bucket[k].maxValue)
 								{
 									wrongDots.add(new DotCache(idDot,k,oldValue));
 								}
@@ -138,13 +152,13 @@ public class MainWorker {
 								{
 									toRemoveId.add(idDot);
 									toRemoveValue.add(oldValue);
-									toAdd.add(value);
+									toAdd.add(newValue);
 								}
 						}
-						for(int i=0, len = toRemoveId.size(); i<len; ++i)
+						for(int i=toRemoveId.size() - 1; i >= 0; --i)
 						{
 							try {
-								S[k].update(toRemoveValue.get(i), toAdd.get(i), toRemoveId.get(i));
+								bucket[k].update(toRemoveValue.get(i), toAdd.get(i), toRemoveId.get(i));
 							} catch (DimmensionException e) {
 								e.printStackTrace();
 							}
@@ -271,6 +285,48 @@ public class MainWorker {
 					//os10.write(1);
 					System.out.println("done");
 					os10.close();
+					break;
+				case 15:
+					//move BinaryTree
+					for(int k=0;k<numOfComponents;++k)
+					{
+						System.err.println("Move component => " + k);
+						
+						toRemoveId[k].clear();
+						toRemoveValue[k].clear();
+						toAdd[k].clear();
+						for(Node P : binaryTree[k])
+						{
+								double oldValue = P.getValue();
+								int idDot = P.getId();
+								if(idDot < 0) continue;
+								double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
+								if(newValue < binaryTree[k].minValue || newValue > binaryTree[k].maxValue)
+								{
+									wrongDots.add(new DotCache(idDot,k,oldValue));
+								}
+								else
+								{
+									toRemoveId[k].add(idDot);
+									toRemoveValue[k].add(oldValue);
+									toAdd[k].add(newValue);
+								}
+						}
+						for(int i=toRemoveId[k].size() - 1; i >= 0; --i)
+						{
+							try {
+								bucket[k].update(toRemoveValue[k].get(i), toAdd[k].get(i), toRemoveId[k].get(i));
+							} catch (DimmensionException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+					ObjectOutputStream os15 = new ObjectOutputStream(client.getOutputStream());
+					os15.write(1);
+					os15.close();
+					break;
+				case 16:
+					
 					break;
 				default:
 					break;

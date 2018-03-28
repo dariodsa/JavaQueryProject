@@ -8,6 +8,9 @@ import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 import hr.fer.zemris.structures.dot.Functions;
+import hr.fer.zemris.thread.query.Query;
+import hr.fer.zemris.thread.query.QueryBinary;
+import hr.fer.zemris.thread.query.QueryBucket;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -32,6 +35,8 @@ public class MasterMethod {
 	private PPicture picture;
 	
 	private Parametars parametars;
+	private Query query;
+	
 	private String[] workersAddress;
 	private InetAddress[] workers;
 	
@@ -76,6 +81,15 @@ public class MasterMethod {
 			this.result[i]    = new ArrayList<Integer>();
 		}
 		
+		switch(parametars.structureType) {
+			case BUCKET:
+				query = new QueryBucket(parametars, workersAddress, port);
+				break;
+			case BINARY_TREE:
+				query = new QueryBinary(parametars, workers, port, binaryTree);
+				break;
+		}
+		
 	}
 	public void run() throws IOException, NumOfDotArguments, InterruptedException {
 		
@@ -108,7 +122,9 @@ public class MasterMethod {
 			boolean firstResult = true;
 			if(rand < parametars.queryFactor)
 			{
-				Query.perform(parametars,);
+				double min = -90;
+				double max = +90;
+				query.performQuery(min, max);
 			}
 			if(rand < parametars.moveFactor)
 			{
