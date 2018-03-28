@@ -4,15 +4,15 @@ import java.io.Serializable;
 
 public class Dot implements Serializable{
 	
-	private long id;
+	private int id;
 	private double[] values;
 	
-	public Dot(int numOfArguments, long id)
+	public Dot(int numOfArguments, int id)
 	{
 		this.values = new double[numOfArguments];
 		this.id = id;
 	}
-	public long getId()
+	public int getId()
 	{
 		return this.id;
 	}
@@ -56,7 +56,7 @@ public class Dot implements Serializable{
 		for(int i=0;i<values.length;++i)
 		{
 			ans += i!=0?", ":"";
-			ans += new Double(values[i]).toString();
+			ans += values[i];
 		}
 		ans += ")";
 		return ans;

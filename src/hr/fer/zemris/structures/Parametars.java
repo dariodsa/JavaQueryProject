@@ -15,6 +15,7 @@ public class Parametars implements Serializable{
 	
 	public double[] minMove;
 	public double[] maxMove;
+	
 
 	public Parametars(int structureType, double queryFactor, double moveFactor, double[]  minValues, double[] maxValues
 			        , int bucketSize, double[] minMove, double[] maxMove)
@@ -39,6 +40,7 @@ public class Parametars implements Serializable{
 			this.minMove[i] = minMove[i];
 		for(int i=0;i<maxMove.length;++i)
 			this.maxMove[i] = maxMove[i];
+		
 	}
 	@Override
 	public String toString()
