@@ -16,7 +16,7 @@ import hr.fer.zemris.structures.binary.NumberNode;
 import hr.fer.zemris.structures.binary.Orientation;
 import hr.fer.zemris.structures.dot.Dot;
 
-public class BinaryTree extends TreeSet<Node> implements Structure
+public class BinaryTree extends TreeSet<Node> 
 {
 	/**
 	 * 
@@ -28,8 +28,8 @@ public class BinaryTree extends TreeSet<Node> implements Structure
 	}
 	public void updateNumberNode(double oldValue, double newValue, int dot)
 	{
-		delete(oldValue, dot);
-		add(newValue, dot);
+		deleteNumberNode(oldValue, dot);
+		addNumberNode(newValue, dot);
 	}
 	
 	public void deleteNumberNode(double oldValue, int dot) 
@@ -43,17 +43,17 @@ public class BinaryTree extends TreeSet<Node> implements Structure
 	public void addNetworkNode(String address, double value, Orientation orientation) {
 		add(new NetworkNode(value, address, orientation));
 	}
-	public List<Integer> query(double min, double max) throws IllegalArgumentException
+	public List<Node> query(double min, double max) throws IllegalArgumentException
 	{
 		if(max<min)
 			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
 		
-		SortedSet<Pair> sortedMap = this.subSet(new Pair(0,min), new Pair(0,max));
-		List<Integer> resultList = new ArrayList<>();
+		SortedSet<Node> sortedMap = this.subSet(new NumberNode(min,-2), new NumberNode(max,-2));
+		List<Node> resultList = new ArrayList<>();
 		
-		for(Pair P : sortedMap)
+		for(Node P : sortedMap)
 		{
-			resultList.add(P.id);
+			resultList.add(P);
 		}
 		return resultList;
 	}
