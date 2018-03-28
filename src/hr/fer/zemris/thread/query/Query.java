@@ -1,5 +1,6 @@
 package hr.fer.zemris.thread.query;
 
+import java.net.ServerSocket;
 import java.util.List;
 
 import hr.fer.zemris.structures.Parametars;

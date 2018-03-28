@@ -75,10 +75,12 @@ public class MainWorker {
 			System.out.println(parametars.structureType);
 			switch (parametars.structureType) {
 			case BUCKET:
-				bucket[i] = new BucketStructure(parametars.minValues[i], parametars.maxValues[i], parametars.bucketSize, 
-						preferredNum, leftIp, rightIp, port, i);
+				bucket[i] = new BucketStructure(parametars.minValues[i], parametars.maxValues[i], parametars.bucketSize);
+				binaryTree[i] = null;
+				break;
 			case BINARY_TREE:
 				binaryTree[i] = new BinaryTree(parametars.minValues[i], parametars.maxValues[i]);
+				bucket[i] = null;
 				if(leftIp.length() > 0) {
 					binaryTree[i].addNetworkNode(leftIp, minValues[i], Orientation.LEFT);
 				} else if(rightIp.length() > 0) {
@@ -89,21 +91,16 @@ public class MainWorker {
 		}
 		
 		wrongDots = new ArrayList<DotCache>();
-		toRemoveValue = new ArrayList[parametars.maxValues.length];
-		toRemoveId = new ArrayList[parametars.maxValues.length];
-		toAdd = new ArrayList[parametars.maxValues.length];
-		for(int k = parametars.maxValues.length - 1; k >= 0; --k) {
-			
-			toRemoveValue[k] = new ArrayList<Double>();
-			toRemoveId[k] = new ArrayList<Integer>();
-			toAdd[k] = new ArrayList<Double>();
-		}
+		toRemoveValue = new ArrayList<Double>();
+		toRemoveId = new ArrayList<Integer>();
+		toAdd = new ArrayList<Double>();
+		
 		
 	}
 	private List<DotCache> wrongDots;
-	private List<Double>[] toRemoveValue;
-	private List<Integer>[] toRemoveId;
-	private List<Double>[] toAdd;
+	private List<Double> toRemoveValue;
+	private List<Integer> toRemoveId;
+	private List<Double> toAdd;
 	public void run()
 	{
 		try{
@@ -159,9 +156,9 @@ public class MainWorker {
 					{
 						System.err.println("Move component => " + k);
 						
-						toRemoveId[k].clear();
-						toRemoveValue[k].clear();
-						toAdd[k].clear();
+						toRemoveId.clear();
+						toRemoveValue.clear();
+						toAdd.clear();
 						for(Pair P : bucket[k])
 						{
 								double oldValue = P.value;
@@ -173,15 +170,15 @@ public class MainWorker {
 								}
 								else
 								{
-									toRemoveId[k].add(idDot);
-									toRemoveValue[k].add(oldValue);
-									toAdd[k].add(newValue);
+									toRemoveId.add(idDot);
+									toRemoveValue.add(oldValue);
+									toAdd.add(newValue);
 								}
 						}
-						for(int i=toRemoveId[k].size() - 1; i >= 0; --i)
+						for(int i=toRemoveId.size() - 1; i >= 0; --i)
 						{
 							try {
-								bucket[k].update(toRemoveValue[k].get(i), toAdd[k].get(i), toRemoveId[k].get(i));
+								bucket[k].update(toRemoveValue.get(i), toAdd.get(i), toRemoveId.get(i));
 							} catch (DimmensionException e) {
 								e.printStackTrace();
 							}
@@ -209,7 +206,7 @@ public class MainWorker {
 					
 					break;
 					
-				case 5:
+				/*case 5:
 					//HashMap<String, List<DotCache>> wrongPositionDots = new HashMap<>();
 					System.out.println("wrong dots " + wrongDots.size());
 				 	if(!wrongDots.isEmpty())
@@ -293,8 +290,8 @@ public class MainWorker {
 					ObjectOutputStream os9 = new ObjectOutputStream(client.getOutputStream());
 					os9.write(1);
 					os9.close();
-					break;
-				case 12:
+					break;*/
+				/*case 12: drawing 
 					ObjectOutputStream os10 = new ObjectOutputStream(client.getOutputStream());
 					os10.writeInt(S[1].minValuesPerBucket.length);
 					int br = 0;
@@ -312,27 +309,29 @@ public class MainWorker {
 					//os10.write(1);
 					System.out.println("done");
 					os10.close();
-					break;
+					break;*/
 				case 14:
-					ObjectInputStream ois14 = new ObjectInputStream(client.getInputStream());
-					double minValue = ois14.readDouble();
-					double maxValue = ois14.readDouble();
-					int componentValue = ois14.read();
+					
+					double minValue = ois.readDouble();
+					double maxValue = ois.readDouble();
+					int componentValue = ois.read();
+					System.out.printf("%f %f %d%n",minValue,maxValue,componentValue);
 					List<Node> results = binaryTree[componentValue].query(minValue, maxValue);
+					System.out.println(results.size());
 					List<Integer> listInt = new ArrayList<>();
 					for(Node node : results) {
 						if(node instanceof NumberNode) {
 							listInt.add(node.getId());
 						} else {
-							//send request to the network
+							System.out.println("Send request to the network");
 							//List<Integer> listFromNetwork = new ArrayList<>();
 							NetworkNode networkNode =(NetworkNode)node;
 							try {
 								Socket S = new Socket(networkNode.getAddress(), port);
 								ObjectOutputStream oos14 = new ObjectOutputStream(S.getOutputStream());
 								oos14.write(14);
-								oos14.writeDouble(min);
-								oos14.writeDouble(max);
+								oos14.writeDouble(minValue);
+								oos14.writeDouble(maxValue);
 								oos14.write(componentValue);
 								oos14.flush();
 								ObjectInputStream ois14a = new ObjectInputStream(S.getInputStream());
@@ -346,7 +345,13 @@ public class MainWorker {
 							} catch(Exception ex) {ex.printStackTrace();}
 						}
 					}
-					
+					ObjectOutputStream oos14 = new ObjectOutputStream(client.getOutputStream());
+					oos14.writeInt(results.size());
+					for(int res : listInt) {
+						oos14.writeInt(res);
+					}
+					oos14.flush();
+					oos14.close();
 					break;
 				case 15:
 					//move BinaryTree
@@ -355,9 +360,9 @@ public class MainWorker {
 					{
 						System.err.println("Move component => " + k);
 						
-						toRemoveId[k].clear();
-						toRemoveValue[k].clear();
-						toAdd[k].clear();
+						toRemoveId.clear();
+						toRemoveValue.clear();
+						toAdd.clear();
 						for(Node P : binaryTree[k])
 						{
 								double oldValue = P.getValue();
@@ -370,18 +375,14 @@ public class MainWorker {
 								}
 								else
 								{
-									toRemoveId[k].add(idDot);
-									toRemoveValue[k].add(oldValue);
-									toAdd[k].add(newValue);
+									toRemoveId.add(idDot);
+									toRemoveValue.add(oldValue);
+									toAdd.add(newValue);
 								}
 						}
-						for(int i=toRemoveId[k].size() - 1; i >= 0; --i)
+						for(int i=toRemoveId.size() - 1; i >= 0; --i)
 						{
-							try {
-								bucket[k].update(toRemoveValue[k].get(i), toAdd[k].get(i), toRemoveId[k].get(i));
-							} catch (DimmensionException e) {
-								e.printStackTrace();
-							}
+							binaryTree[k].updateNumberNode(toRemoveValue.get(i), toAdd.get(i), toRemoveId.get(i));
 						}
 					}
 					ObjectOutputStream os15 = new ObjectOutputStream(client.getOutputStream());
@@ -399,8 +400,8 @@ public class MainWorker {
 								toRight.add(dot);
 							}
 					}
-					Thread threadLeft;
-					Thread threadRight;
+					Thread threadLeft = null;
+					Thread threadRight = null;
 					if(toLeft.size() > 0) {
 						threadLeft = new RelocateThread(leftWorker, port, 17, toLeft);
 					}
@@ -421,14 +422,14 @@ public class MainWorker {
 					os16.close();
 					break;
 				case 17:
-					ObjectInputStream ois17 = new ObjectInputStream(client.getInputStream());
-					int sizeOfList = ois17.readInt();
+					//ObjectInputStream ois17 = new ObjectInputStream(client.getInputStream());
+					int sizeOfList = ois.readInt();
 					List<DotCache> toLeft2 = new ArrayList<>();
 					List<DotCache> toRight2 = new ArrayList<>();
 					for(int i = sizeOfList -1 ; i >= 0; --i) {
-						int dotComponent = ois17.readInt();
-						int dotId = ois17.readInt();
-						double dotValue = ois17.readDouble();
+						int dotComponent = ois.readInt();
+						int dotId = ois.readInt();
+						double dotValue = ois.readDouble();
 						if(minValues[dotComponent] <= dotValue && dotValue < maxValues[dotComponent]) {
 							binaryTree[dotComponent].addNumberNode(dotValue, dotId);
 						} else if(minValues[dotComponent] > dotValue) {
@@ -437,8 +438,8 @@ public class MainWorker {
 							toRight2.add(new DotCache(dotId,dotComponent,dotValue));
 						}
 					}
-					Thread threadLeft2;
-					Thread threadRight2;
+					Thread threadLeft2 = null;
+					Thread threadRight2 = null;
 					if(toLeft2.size() > 0) {
 						threadLeft2 = new RelocateThread(leftWorker, port, 17, toLeft2);
 					}

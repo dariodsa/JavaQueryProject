@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ public class QueryBinary extends Query {
 	public List<Integer> performQuery(double min, double max) {
 
 		List<Integer> result = new ArrayList<Integer>();
-		long t1 = System.currentTimeMillis();
 		for(int k = 0; k < numOfComponents; ++k) {
 			try (Socket S=new Socket(workersAddress[workersAddress.length/2], port)){
 				
@@ -43,6 +43,7 @@ public class QueryBinary extends Query {
 				oos.writeDouble(max);
 				oos.write(k);
 				oos.flush();
+				System.out.printf("%f %f %d iz query%n",min,max,k);
 				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 				
 				int len = ois.readInt();

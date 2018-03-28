@@ -21,52 +21,25 @@ public class BucketStructure implements Iterable<Pair> {
 	private int numOfBuckets;
 	
 	public LinkedList<Pair>[] buckets;
-	public double[] minValuesPerBucket;
+	private double sizePerBucket;
 	
-	private int preferredValue;
-	
-	private final int PORT;
-	private int id;
-	private String ipAddressLeft;
-	private String ipAddressRight;
-	
-	public BucketStructure(double minValue,double maxValue, int numOfBuckets, int preferredValue, String ipAddressLeft, String ipAddressRight, int port, int id) 
+	public BucketStructure(double minValue,double maxValue, int numOfBuckets) 
 	{
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.numOfBuckets = numOfBuckets;
 		
 		this.buckets = new LinkedList[numOfBuckets];
-		this.minValuesPerBucket = new double[numOfBuckets];
-		this.preferredValue = preferredValue;
+
+		double size = Math.abs(maxValue - minValue);
+		this.sizePerBucket = size / numOfBuckets;
 		
-		this.ipAddressLeft = ipAddressLeft;
-		this.ipAddressRight = ipAddressRight;
-		this.PORT = port;
-		this.id = id;
 		initBuckets();
 		
 	}
 	private int getBucket(double value)
 	{
-		int low = 0;
-		int midd = 0;
-		int high = numOfBuckets - 1;
-		
-		while(low < high) {
-			midd = (low + high + 1) >> 1;
-		
-			if(minValuesPerBucket[midd] > value)
-				high = midd - 1;
-			else
-				low = midd;
-		}
-		if(low == numOfBuckets - 1)
-			return low;
-		if(minValuesPerBucket[low] <= value && minValuesPerBucket[low + 1] > value)
-			return low;
-		else return low + 1;
-		
+		return (int)(Math.abs(value - this.minValue) / sizePerBucket);
 	}
 	
 	
@@ -93,7 +66,7 @@ public class BucketStructure implements Iterable<Pair> {
 			add(newValue, dot, newBucket);
 		}
 	}
-	
+	/*
 	public void acceptNewDots(List<Pair> dots, double newBound, int leftOrRight) 
 	{
 		if(leftOrRight == 0)
@@ -229,7 +202,7 @@ public class BucketStructure implements Iterable<Pair> {
 			}
 		}
 		
-	}
+	}*/
 	
 	public List<Integer> query(double min, double max) throws IllegalArgumentException 
 	{
@@ -256,19 +229,14 @@ public class BucketStructure implements Iterable<Pair> {
 	}
 	private void initBuckets()
 	{
-		double minVal = this.minValue;
-		double step = (this.maxValue - this.minValue) / numOfBuckets;
 		for(int i=0; i<numOfBuckets; ++i)
 		{
 			this.buckets[i] = new LinkedList<>();
-			this.minValuesPerBucket[i] = minVal;
-			minVal += step;
 		}
 	}
 	public Iterator<Pair> iterator() {
 		
 		Iterator<Pair> it = new Iterator<Pair>(){
-			private int numPosition = 0;
 			private int buckPosition = 0;
 			private Iterator<Pair> iterator = buckets[buckPosition].iterator();
 			@Override

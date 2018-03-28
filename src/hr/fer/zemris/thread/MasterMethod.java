@@ -91,7 +91,7 @@ public class MasterMethod {
 				move = new MoveBucket(workersAddress, port, numOfComponents);
 				break;
 			case BINARY_TREE:
-				query = new QueryBinary(parametars, workers, port, binaryTree);
+				query = new QueryBinary(parametars, workers, port);
 				move = new MoveBinary(workers, port, numOfComponents);
 				break;
 		}
@@ -133,16 +133,17 @@ public class MasterMethod {
 			if(rand < parametars.moveFactor)
 			{
 				move.move();
+				System.out.println("I will realocate wrong dots ...");
+				long t1 = System.currentTimeMillis();
+				move.relocate();
+				long t2 = System.currentTimeMillis();
+				System.out.printf("Realocation completed. %d milisec%n",t2-t1);
 			}
-			System.out.println("I will realocate wrong dots ...");
-			long t1 = System.currentTimeMillis();
-			move.relocate();
-			long t2 = System.currentTimeMillis();
-			System.out.printf("Realocation completed. %d milisec%n",t2-t1);
+			
 		}
 		long tMainEnd = System.currentTimeMillis();
 		System.out.println("Total time: "+(tMainEnd-tMain));
-		
+		/*
 		for(int i=0;i<workers.length;++i)
 		{
 			Socket S = new Socket(workers[i], port);
@@ -163,7 +164,7 @@ public class MasterMethod {
 				picture.addLine(new Line(-180, d, 180, d),2);
 			}
 			S.close();
-		}
+		}*/
 		
 	}
 	private void initParametars() throws IOException 
