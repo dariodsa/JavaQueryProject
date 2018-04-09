@@ -48,6 +48,7 @@ public class MainWorker {
 	private double[] maxValues;
 	
 	private String[] workers;
+	private Thread[] relocationThreads;
 	private double[][] minValuesWorkers;
 	private double[][] maxValuesWorkers;
 	
@@ -128,6 +129,7 @@ public class MainWorker {
 					this.rightWorker = (String)ois.readObject();
 					
 					int numOfWorker = ois.read();
+					
 					this.workers = new String[numOfWorker];
 					this.minValuesWorkers = new double[numOfWorker][parametars.maxValues.length];
 					this.maxValuesWorkers = new double[numOfWorker][parametars.maxValues.length];
@@ -138,6 +140,10 @@ public class MainWorker {
 							this.minValuesWorkers[i][j] = ois.readDouble();
 							this.maxValuesWorkers[i][j] = ois.readDouble();
 						}
+					}
+					this.relocationThreads = new Thread[numOfWorker];
+					for(int i = 0;i < numOfWorker; ++i) {
+						relocationThreads[i] = new RelocateThread(this.workers[i], port, 17, null);
 					}
 					
 					init(leftWorker, rightWorker);
@@ -420,16 +426,16 @@ public class MainWorker {
 					os15.close();
 					break;
 				case 16:
-					//relocate BinaryTree
-					List<DotCache> toLeft = new ArrayList<>();
-					List<DotCache> toRight = new ArrayList<>();
-					for(DotCache dot : wrongDots) {
-							if(dot.getValue() < minValues[dot.getComponent()]) {
-								toLeft.add(dot);
-							} else if(dot.getValue() > maxValues[dot.getComponent()]) {
-								toRight.add(dot);
-							}
+					//relocate Structure
+					List<DotCache>[] listToMove = new ArrayList[workers.length];
+					for(int i = 0; i < workers.length; ++i) {
+						listToMove[i] = new ArrayList<>();
 					}
+					for(DotCache dot : wrongDots) {
+						int workerId=getWorker(dot);
+						listToMove[workerId].add(dot);
+					}
+					
 					Thread threadLeft = null;
 					Thread threadRight = null;
 					if(toLeft.size() > 0) {
@@ -499,6 +505,15 @@ public class MainWorker {
 			ex.printStackTrace();
 		}
 		
+	}
+	private int getWorker(DotCache dot) {
+		for(int i = 0, len = workers.length; i < len; ++i) {
+			if(minValuesWorkers[i][dot.getComponent()] <= dot.getValue() &&
+			   maxValuesWorkers[i][dot.getComponent()] >= dot.getValue()) {
+				return i;
+			}
+		}
+		return 0;
 	}
 	public static byte[] intToByte(List<Integer> input)
 	{
