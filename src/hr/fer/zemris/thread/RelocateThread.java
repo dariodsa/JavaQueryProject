@@ -26,7 +26,7 @@ public class RelocateThread extends Thread {
 	public void setList(List<DotCache> list) {
 		this.list = list;
 	}
-	public void run()
+	public synchronized void run()
 	{
 		while(true) {
 			try {

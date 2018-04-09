@@ -93,7 +93,9 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 		if(newBucket != oldBucket)
 		{
 			this.buckets[oldBucket].remove(old);
-			add(newValue, id, newBucket);
+			old.setValue(newValue);
+			
+			this.buckets[newBucket].add(old);
 		} else {
 			int index = this.buckets[oldBucket].indexOf(old);
 			this.buckets[oldBucket].get(index).setValue(newValue);
@@ -243,7 +245,7 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
 		int firstBucket = getBucket(min);
 		int lastBucket = getBucket(max);
-		System.out.println(min+"("+firstBucket +")"+ " " +max+" ("+lastBucket+")");
+		//System.out.println(min+"("+firstBucket +")"+ " " +max+" ("+lastBucket+")");
 		List<Integer> result = new ArrayList<>();
 		for(int i=firstBucket; i<=lastBucket; ++i)
 		{

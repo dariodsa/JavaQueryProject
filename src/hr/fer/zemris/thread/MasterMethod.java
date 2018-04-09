@@ -9,8 +9,7 @@ import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 import hr.fer.zemris.structures.dot.Functions;
 import hr.fer.zemris.thread.move.Move;
-import hr.fer.zemris.thread.move.MoveBinary;
-import hr.fer.zemris.thread.move.MoveBucket;
+
 import hr.fer.zemris.thread.query.Query;
 import hr.fer.zemris.thread.query.QueryBinary;
 import hr.fer.zemris.thread.query.QueryBucket;
@@ -39,7 +38,6 @@ public class MasterMethod {
 	
 	private Parametars parametars;
 	private Query query;
-	private Move move;
 	
 	private String[] workersAddress;
 	private InetAddress[] workers;
@@ -56,9 +54,13 @@ public class MasterMethod {
 	private double[][] minValues;
 	private double[][] maxValues;
 	
+	private Move[] moveThreads; 
+	
 	int numOfDots;
 	
 	public static ArrayList<Integer>[] result;
+	
+	public static int moveFinish;
 	
 	public MasterMethod(PPicture picture, Parametars parametars,
 			String[] workers, Path dotsPath, PrintWriter logOutput, int portMaster,int port) throws IOException, NumOfDotArguments{
@@ -84,16 +86,25 @@ public class MasterMethod {
 			this.cacheDots[i] = new ArrayList<DotCache>();
 			this.result[i]    = new ArrayList<Integer>();
 		}
-		
+		int moveNum = 0;
+		int relocNum = 0;
 		switch(parametars.structureType) {
 			case BUCKET:
 				query = new QueryBucket(parametars, workersAddress, port);
-				move = new MoveBucket(workersAddress, port, numOfComponents);
+				moveNum = 3;
+				relocNum = 16;
 				break;
 			case BINARY_TREE:
 				query = new QueryBinary(parametars, workers, port);
-				move = new MoveBinary(workers, port, numOfComponents);
+				moveNum = 15;
+				relocNum = 16;
 				break;
+		}
+		
+		this.moveThreads = new Move[this.workersAddress.length];
+		for(int i = 0;i < workersAddress.length; ++i) {
+			moveThreads[i] = new Move(this.workersAddress[i], port, portMaster, moveNum, relocNum,this);
+			moveThreads[i].start();
 		}
 		
 	}
@@ -132,12 +143,40 @@ public class MasterMethod {
 			}
 			if(rand < parametars.moveFactor)
 			{
-				move.move();
-				System.out.println("I will realocate wrong dots ...");
-				long t1 = System.currentTimeMillis();
-				move.relocate();
-				long t2 = System.currentTimeMillis();
-				System.out.printf("Realocation completed. %d milisec%n",t2-t1);
+				moveFinish = 0;
+				System.out.println("move");
+				for(int j=0;j<workersAddress.length;++j) {
+					moveThreads[j].STATUS = 1;
+					synchronized (moveThreads[j]) {
+						try {
+							moveThreads[j].notify();
+						} catch(IllegalMonitorStateException ex) {System.out.println(ex.getMessage());}
+					}
+					synchronized (this) {
+						System.out.println("waiting.");
+						this.wait();
+						System.out.println("waiting exit..");
+					}
+				}
+				
+				
+				System.out.println("Done.");
+				moveFinish = 0;
+				for(int j=0;j<workersAddress.length;++j) {
+					moveThreads[j].STATUS = 2;
+					synchronized (moveThreads[j]) {
+						try {
+							moveThreads[j].notify();
+						} catch(IllegalMonitorStateException ex) {System.out.println(ex.getMessage());}
+					}
+					synchronized (this) {
+						System.out.println("waiting.");
+						this.wait();
+						System.out.println("waiting exit..");
+					}
+				}
+				
+				System.out.println("Done.");
 			}
 			
 		}

@@ -16,6 +16,7 @@ import hr.fer.zemris.structures.dot.DotCache;
 import hr.fer.zemris.structures.types.StructureType;
 import hr.fer.zemris.thread.RelocateThread;
 
+import java.awt.Robot;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ObjectInputStream;
@@ -112,6 +113,9 @@ public class MainWorker {
 			ServerSocket serverSocket = new ServerSocket(port);
 			while(true)
 			{
+				Robot robot = new Robot();
+				robot.mouseMove(50, 50);
+				robot.mouseMove(60, 50);
 				Socket client = serverSocket.accept();
 				ObjectInputStream ois = new ObjectInputStream( new BufferedInputStream(client.getInputStream()));
 				int id = ois.read();
