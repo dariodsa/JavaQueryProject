@@ -54,6 +54,7 @@ public class QueryBucket extends Query{
 					else
 					{
 						result = Functions.intersection(result, MasterMethod.result[j]);
+						//result.retainAll(MasterMethod.result[j]);
 					}
 					MasterMethod.result[j].clear();
 				}

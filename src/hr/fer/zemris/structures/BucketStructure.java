@@ -26,8 +26,6 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 	
 	private static Stack<Pair> cache;
 	
-	private List<Integer> result = new ArrayList<>(500000);
-	
 	public BucketStructure(double minValue,double maxValue, int numOfBuckets) 
 	{
 		this.minValue = minValue;
@@ -108,7 +106,7 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 		int firstBucket = getBucket(min);
 		int lastBucket = getBucket(max);
 		//System.out.println(min+"("+firstBucket +")"+ " " +max+" ("+lastBucket+")");
-		result.clear();
+		List<Integer>result = new ArrayList<>(500000);
 		for(int i=firstBucket; i<=lastBucket; ++i)
 		{
 			for(Pair id : buckets[i])
