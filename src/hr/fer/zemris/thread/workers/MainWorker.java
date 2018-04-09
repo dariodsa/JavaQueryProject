@@ -54,6 +54,7 @@ public class MainWorker {
 	private double[][] maxValuesWorkers;
 	
 	
+	
 	public MainWorker(int port,int mainPort)
 	{
 		this.port = port;
@@ -94,28 +95,20 @@ public class MainWorker {
 		}
 		
 		wrongDots = new ArrayList<DotCache>();
-		toRemoveValue = new ArrayList<Double>();
-		toRemoveId = new ArrayList<Integer>();
-		toAdd = new ArrayList<Double>();
 		
 		
 	}
-	private List<DotCache> wrongDots;
-	private List<Double> toRemoveValue;
-	private List<Integer> toRemoveId;
-	private List<Double> toAdd;
-	
-	private List<Pair> toRemove = new ArrayList<>();
-	
+	private static List<DotCache> wrongDots;
+	private static List<NumberNode> toRemoveNode = new ArrayList<>();
+	private static List<Pair> toRemove = new ArrayList<>();
+	private static List<Double> newValue = new ArrayList<>();
 	public void run()
 	{
 		try{
 			ServerSocket serverSocket = new ServerSocket(port);
 			while(true)
 			{
-				Robot robot = new Robot();
-				robot.mouseMove(50, 50);
-				robot.mouseMove(60, 50);
+				
 				Socket client = serverSocket.accept();
 				ObjectInputStream ois = new ObjectInputStream( new BufferedInputStream(client.getInputStream()));
 				int id = ois.read();
@@ -184,7 +177,7 @@ public class MainWorker {
 						System.err.println("Move component => " + k);
 						
 						toRemove.clear();
-						toAdd.clear();
+						
 						boolean oldState = false;
 						boolean newState = false;
 						boolean stateSet = false;
@@ -246,119 +239,30 @@ public class MainWorker {
 					oos.close();
 					
 					break;
-					
-				/*case 5:
-					//HashMap<String, List<DotCache>> wrongPositionDots = new HashMap<>();
-					System.out.println("wrong dots " + wrongDots.size());
-				 	if(!wrongDots.isEmpty())
-				 	{
-				 		System.out.println("Usao, nisam zelio.");
-				 		Socket S = new Socket(this.leftIp, port);
-				 		ObjectOutputStream oos2 = new ObjectOutputStream(S.getOutputStream());
-				 		oos2.write(6);
-				 		oos2.writeInt(wrongDots.size());
-				 		for(DotCache D : wrongDots) {
-				 			oos2.writeInt(D.getId());
-				 			oos2.write(D.getComponent());
-				 			oos2.writeDouble(D.getValue());
-				 		}
-				 		oos2.flush();
-				 		ObjectInputStream ois4 = new ObjectInputStream(S.getInputStream());
-				 		ois4.read();
-				 		S.close();
-						wrongDots.clear();
+				case 5:      // terminate data
+					if(binaryTree != null) {
+						for(int i=0;i<binaryTree.length;++i) {
+							binaryTree[i] = null;
+						}
 					}
-				 	ObjectOutputStream os6 = new ObjectOutputStream(client.getOutputStream());
-					os6.write(1);
-					System.out.println("Poslao jedan");
-					os6.close();
+					if(bucket != null) {
+						for(int i=0;i<bucket.length;++i) {
+							bucket[i] = null;
+						}
+					}
+					ObjectOutputStream os5 = new ObjectOutputStream(client.getOutputStream());
+					os5.write(1);
+					os5.close();
 					break;
-				case 6:
-					ObjectInputStream ois4 = new ObjectInputStream(client.getInputStream());
-					int size = ois4.readInt();
-					wrongDots.clear();
-					for(int i=0;i<size;++i){
-						int dotId = ois4.readInt();
-						int compo  = ois4.read();
-						double value = ois4.readDouble();
-						if(S[compo].minValue >= value && S[compo].maxValue > value)
-							S[compo].add(value, dotId);
-						else
-							wrongDots.add(new DotCache(dotId, compo, value));
-					}
-					ObjectOutputStream oos4 = new ObjectOutputStream(client.getOutputStream());
-					oos4.write(1);
-					Socket S1 = new Socket(this.leftIp, port);
-					ObjectOutputStream oos2 = new ObjectOutputStream(S1.getOutputStream());
-			 		oos2.write(6);
-			 		oos2.writeInt(wrongDots.size());
-			 		for(DotCache D : wrongDots) {
-			 			oos2.writeInt(D.getId());
-			 			oos2.write(D.getComponent());
-			 			oos2.writeDouble(D.getValue());
-			 		}
-			 		oos2.flush();
-			 		ObjectInputStream ois5 = new ObjectInputStream(S1.getInputStream());
-			 		ois5.read();
-					S1.close();
-					break;
-				case 7:
-					
-					for(int i=0;i<parametars.minValues.length;++i)
-					{
-						for(int j=0;j<parametars.bucketSize;++j)
-							S[i].balance(j);
-							
-					}
-					ObjectOutputStream os7 = new ObjectOutputStream(client.getOutputStream());
-					os7.write(1);
-					os7.close();
-					break;
-				case 11:
-					ObjectInputStream ois8 = new ObjectInputStream(client.getInputStream());
-					int compo = ois8.read();
-					int leftOrRight = ois8.read();
-					double newBound = ois8.readDouble();
-					int len = ois8.readInt();
-					List<Pair> list = new ArrayList<>();
-					for(int i=0;i<len;++i)
-					{
-						int idDot = ois8.readInt();
-						double val = ois8.readDouble();
-						list.add(new Pair(idDot, val));
-					}
-					S[compo].acceptNewDots(list, newBound, leftOrRight);
-					ObjectOutputStream os9 = new ObjectOutputStream(client.getOutputStream());
-					os9.write(1);
-					os9.close();
-					break;*/
-				/*case 12: drawing 
-					ObjectOutputStream os10 = new ObjectOutputStream(client.getOutputStream());
-					os10.writeInt(S[1].minValuesPerBucket.length);
-					int br = 0;
-					for(double x : S[1].minValuesPerBucket) {
-						os10.writeDouble(x);
-						System.out.println(S[1].buckets[br++].size()+ " " + preferredNum + " => " + x);
-						
-					}
-					br = 0;
-					os10.writeInt(S[0].minValuesPerBucket.length);
-					for(double x : S[0].minValuesPerBucket) {
-						os10.writeDouble(x);
-						System.out.println(S[0].buckets[br++].size()+ " " + preferredNum + " => " + x);
-					}
-					//os10.write(1);
-					System.out.println("done");
-					os10.close();
-					break;*/
-				case 14:
+				
+				case 14:  //query
 					
 					double minValue = ois.readDouble();
 					double maxValue = ois.readDouble();
 					int componentValue = ois.read();
 					System.out.printf("%f %f %d%n",minValue,maxValue,componentValue);
-					List<Node> results = binaryTree[componentValue].query(minValue, maxValue);
-					System.out.println("SIZE: "+binaryTree[0].size());
+					SortedSet<Node> results = binaryTree[componentValue].query(minValue, maxValue);
+					System.out.println("SIZE: "+results.size());
 					List<Integer> listInt = new ArrayList<>();
 					for(Node node : results) {
 						if(node instanceof NumberNode) {
@@ -401,11 +305,10 @@ public class MainWorker {
 					{
 						System.err.println("Move component => " + k);
 						
-						toRemoveId.clear();
-						toRemoveValue.clear();
-						toAdd.clear();
-						for(Node P : binaryTree[k])
+						for(Node _P : binaryTree[k])
 						{
+								if(_P instanceof NetworkNode) continue;	
+								NumberNode P =(NumberNode)_P;
 								double oldValue = P.getValue();
 								int idDot = P.getId();
 								if(idDot < 0) continue;
@@ -416,15 +319,16 @@ public class MainWorker {
 								}
 								else
 								{
-									toRemoveId.add(idDot);
-									toRemoveValue.add(oldValue);
-									toAdd.add(newValue);
+									toRemoveNode.add(P);
+									MainWorker.newValue.add(newValue);
 								}
 						}
-						for(int i=toRemoveId.size() - 1; i >= 0; --i)
+						for(int i=toRemoveNode.size() - 1; i >= 0; --i)
 						{
-							binaryTree[k].updateNumberNode(toRemoveValue.get(i), toAdd.get(i), toRemoveId.get(i));
+							binaryTree[k].updateNumberNode(toRemoveNode.get(i),newValue.get(i));
 						}
+						toRemoveNode.clear();
+						newValue.clear();
 					}
 					ObjectOutputStream os15 = new ObjectOutputStream(client.getOutputStream());
 					os15.write(1);
@@ -436,6 +340,7 @@ public class MainWorker {
 					for(int i = 0; i < workers.length; ++i) {
 						listToMove[i] = new ArrayList<>();
 					}
+					System.out.println("RELOCATION: "+wrongDots.size());
 					for(DotCache dot : wrongDots) {
 						int workerId=getWorker(dot);
 						listToMove[workerId].add(dot);
@@ -451,7 +356,7 @@ public class MainWorker {
 						}
 					}
 					
-					
+					wrongDots.clear();
 					ObjectOutputStream os16 = new ObjectOutputStream(client.getOutputStream());
 					os16.write(1);
 					os16.close();

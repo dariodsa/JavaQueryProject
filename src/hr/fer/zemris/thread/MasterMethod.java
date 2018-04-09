@@ -18,6 +18,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -136,10 +137,11 @@ public class MasterMethod {
 			
 			if(rand < parametars.queryFactor)
 			{
-				double min = -90;
-				double max = +90;
+				double min = -40;
+				double max = +40;
 				List<Integer> result = query.performQuery(min, max);
-				System.out.println(result.size());
+				System.out.println("Result: " + result.size());
+				result.clear();
 			}
 			if(rand < parametars.moveFactor)
 			{
@@ -182,6 +184,20 @@ public class MasterMethod {
 		}
 		long tMainEnd = System.currentTimeMillis();
 		System.out.println("Total time: "+(tMainEnd-tMain));
+		for(int j=0;j<workersAddress.length;++j) {
+			Socket S = new Socket(this.workers[j], port);
+			OutputStream oos = new ObjectOutputStream(S.getOutputStream());
+			oos.write(5);
+			oos.flush();
+			InputStream ois = new ObjectInputStream(S.getInputStream());
+			int val = ois.read();
+			if(val==1) 
+			{
+				S.close();
+				return;
+			}
+			S.close();
+		}
 		/*
 		for(int i=0;i<workers.length;++i)
 		{
