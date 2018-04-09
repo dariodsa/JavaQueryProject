@@ -455,36 +455,24 @@ public class MainWorker {
 				case 17:
 					//ObjectInputStream ois17 = new ObjectInputStream(client.getInputStream());
 					int sizeOfList = ois.readInt();
-					List<DotCache> toLeft2 = new ArrayList<>();
-					List<DotCache> toRight2 = new ArrayList<>();
+					
 					for(int i = sizeOfList -1 ; i >= 0; --i) {
 						int dotComponent = ois.readInt();
 						int dotId = ois.readInt();
 						double dotValue = ois.readDouble();
-						if(minValues[dotComponent] <= dotValue && dotValue < maxValues[dotComponent]) {
-							binaryTree[dotComponent].addNumberNode(dotValue, dotId);
-						} else if(minValues[dotComponent] > dotValue) {
-							toLeft2.add(new DotCache(dotId,dotComponent,dotValue));
-						} else {
-							toRight2.add(new DotCache(dotId,dotComponent,dotValue));
+						
+						switch(parametars.structureType) {
+							case BUCKET:
+								bucket[dotComponent].add(dotValue, dotId);
+								break;
+							case BINARY_TREE:
+								binaryTree[dotComponent].addNumberNode(dotValue, dotId);
+								break;
+							default:
+								break;
 						}
 					}
-					Thread threadLeft2 = null;
-					Thread threadRight2 = null;
-					if(toLeft2.size() > 0) {
-						threadLeft2 = new RelocateThread(leftWorker, port, 17, toLeft2);
-					}
-					if(toRight2.size() > 0) {
-						threadRight2 = new RelocateThread(rightWorker, port, 17, toRight2);
-					}
-					if(threadLeft2 != null) {
-						threadLeft2.start();
-						threadLeft2.join();
-					}
-					if(threadRight2 != null) {
-						threadRight2.start();
-						threadRight2.join();
-					}
+					System.out.println("Accept new dots.");
 					ObjectOutputStream os17 = new ObjectOutputStream(client.getOutputStream());
 					os17.write(1);
 					os17.close();
