@@ -21,7 +21,7 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 	
 	private int numOfBuckets;
 	
-	public ArrayList<Pair>[] buckets;
+	public LinkedList<Pair>[] buckets;
 	private double sizePerBucket;
 	
 	private static Stack<Pair> cache;
@@ -32,7 +32,7 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 		this.maxValue = maxValue;
 		this.numOfBuckets = numOfBuckets;
 		
-		this.buckets = new ArrayList[numOfBuckets];
+		this.buckets = new LinkedList[numOfBuckets];
 		
 		BucketStructure.cache = new Stack<>();
 
@@ -76,7 +76,7 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 	{
 		for(int i=0; i<numOfBuckets; ++i)
 		{
-			this.buckets[i] = new ArrayList<>(120);
+			this.buckets[i] = new LinkedList<>();
 		}
 	}
 	public void update(Pair old, double newValue) throws DimmensionException 
@@ -88,6 +88,7 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 		
 		if(newBucket != oldBucket)
 		{
+		
 			this.buckets[oldBucket].remove(old);
 			old.setValue(newValue);
 			old.state = !old.state;

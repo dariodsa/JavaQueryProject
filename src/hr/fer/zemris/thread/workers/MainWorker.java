@@ -175,7 +175,7 @@ public class MainWorker {
 					for(int k=0;k<numOfComponents;++k)
 					{
 						System.err.println("Move component => " + k);
-						
+						wrongDots.clear();
 						toRemove.clear();
 						
 						boolean oldState = false;
@@ -196,6 +196,7 @@ public class MainWorker {
 										continue;
 									double oldValue = P.value;
 									int idDot = P.id;
+									
 									double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
 									if(newValue < bucket[k].minValue || newValue > bucket[k].maxValue)
 									{
