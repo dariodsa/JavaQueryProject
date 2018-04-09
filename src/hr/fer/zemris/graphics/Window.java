@@ -7,7 +7,6 @@ import hr.fer.zemris.graphics.component.IpTable;
 import hr.fer.zemris.graphics.component.MultiValueChoose;
 import hr.fer.zemris.graphics.component.MultiValueSliderChoose;
 import hr.fer.zemris.graphics.component.PPicture;
-import hr.fer.zemris.graphics.component.ip.MyTableModel;
 import hr.fer.zemris.graphics.component.statistics.StatisticsPanel;
 import hr.fer.zemris.graphics.constants.Constants;
 import hr.fer.zemris.structures.Parametars;
@@ -77,7 +76,7 @@ public class Window extends JFrame{
 	
 	public Window(int width,int height)
 	{
-		super("Zavr�ni rad, Dario Sindicic");
+		super("Završni rad, Dario Sindicic");
 		setSize(width, height);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		
@@ -175,16 +174,14 @@ public class Window extends JFrame{
 		minMaxValue.setEnabled(false);
 		minMaxMove.setEnabled(false);
 		minMaxValue.addActionListener((e)->{
-			MultiValueChoose M = new MultiValueChoose("naziv", "poruka", numOfComponent);
+			MultiValueChoose M = new MultiValueChoose("Min/Max", "min / max po komponentama", numOfComponent);
 			int result = JOptionPane.showConfirmDialog(this, M);
 			if(result == JOptionPane.YES_OPTION)
 			{
-				double[] minValues; 
-				double[] maxValues;
+				
 				try {
-					minValues = M.getMinValue();
-					maxValues = M.getMaxValue();
-					V.setMinMaxValue(minValues, maxValues);
+					MasterMethod.parametars.minValues = M.getMinValue();
+					MasterMethod.parametars.maxValues = M.getMaxValue();
 				} catch (Exception e1) {
 					JOptionPane.showMessageDialog(this, e1.getMessage());
 				}
@@ -196,14 +193,21 @@ public class Window extends JFrame{
 			int result = JOptionPane.showConfirmDialog(this, M);
 			if(result == JOptionPane.YES_OPTION)
 			{
-				double[] minValues; 
-				double[] maxValues;
 				try {
-					minValues = M.getMinValue();
-					maxValues = M.getMaxValue();
-					VMoves.setMinMaxValue(minValues, maxValues);
+					MasterMethod.parametars.maxMove = new double[numOfComponent];
+					MasterMethod.parametars.minMove = new double[numOfComponent];
+					if(M.getType() == 0) {
+						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.minMove[i] = 0;
+						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.maxMove[i] = 0.01;
+					} else if(M.getType() == 1) {
+						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.minMove[i] = 0.15;
+						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.maxMove[i] = 0.30;
+					} else if(M.getType() == 2) {
+						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.minMove[i] = 0.4;
+						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.maxMove[i] = 0.5;
+					}
 				} catch (Exception e1) {
-					JOptionPane.showMessageDialog(this, e1.getMessage());
+					e1.printStackTrace();
 				}
 				
 			}
@@ -295,8 +299,6 @@ public class Window extends JFrame{
 	{
 		if(dotFile == null)
 			throw new DotFileIsNotSet();
-		if(V.maxValues == null || V.minValues == null)
-			throw new MinMaxValuesAreNotSet();
 		
 	}
 	private static int run = 0;
@@ -307,22 +309,18 @@ public class Window extends JFrame{
 		try {
 			switch (type) {
 			case 1:
+				Window.run++;
+				
 				checkInputErrors();
 				
-				double[] minMove = new double[] {0.5,0.5};
-				double[] maxMove = new double[] {0.5,0.5};
 				StructureType typeOfStrcuture = structureType.getSelectedIndex() == 0 ? StructureType.BUCKET : StructureType.BINARY_TREE;
 				
-				Parametars parametars = new Parametars(
-						typeOfStrcuture,
-						((double)queryFactor.getValue())/100.0,
-						((double)moveFactor.getValue())/100.0,
-						V.minValues,
-						V.maxValues,
-						Integer.parseInt(bucketNumber.getText()),
-						VMoves.minValues,
-						VMoves.maxValues
-						);
+				MasterMethod.parametars.structureType = typeOfStrcuture;
+				MasterMethod.parametars.queryFactor = ((double)queryFactor.getValue())/100.0;
+				MasterMethod.parametars.moveFactor = ((double)moveFactor.getValue())/100.0;
+				MasterMethod.parametars.bucketSize = Integer.parseInt(bucketNumber.getText());
+				MasterMethod.dotsPath = dotFile;
+				
 				
 				DefaultTableModel model = ipTable.getTable().model;
 				String[] adrese = new String[model.getRowCount()];
@@ -335,7 +333,7 @@ public class Window extends JFrame{
 				logOutput = new PrintWriter(System.err);
 				MasterMethod masterMethod = new MasterMethod(
 						
-						picture, parametars, adrese,dotFile, logOutput,port1,port2
+						adrese,dotFile,port1,port2
 						);
 				Thread workerThread = new Thread(()-> {
 					MainWorker main = new MainWorker(port2,port1);

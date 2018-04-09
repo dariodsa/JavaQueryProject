@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -35,9 +36,9 @@ public class MasterMethod {
 	
 	private static Random rand = new Random();
 	
-	private PPicture picture;
+	//private PPicture picture;
 	
-	private Parametars parametars;
+	public static Parametars parametars = new Parametars();
 	private Query query;
 	
 	private String[] workersAddress;
@@ -45,8 +46,7 @@ public class MasterMethod {
 	
 	private int portMaster;
 	private int numOfComponents;
-	private Path dotsPath;
-	private PrintWriter logOutput;
+	public static Path dotsPath;
 
 	private List<DotCache>[] cacheDots;
 	
@@ -63,17 +63,15 @@ public class MasterMethod {
 	
 	public static int moveFinish;
 	
-	public MasterMethod(PPicture picture, Parametars parametars,
-			String[] workers, Path dotsPath, PrintWriter logOutput, int portMaster,int port) throws IOException, NumOfDotArguments{
+	public MasterMethod( String[] workers, Path dotsPath, int portMaster,int port) throws IOException, NumOfDotArguments{
 		
-		this.picture = picture;
+		
 		this.port = port;
 		this.portMaster = portMaster;
-		this.parametars = parametars;
 		this.workersAddress = workers;
 		this.numOfComponents = parametars.minValues.length;
 		this.dotsPath = dotsPath;
-		this.logOutput = logOutput;
+		
 		
 		this.minValues = new double[workers.length][this.numOfComponents];
 		this.maxValues = new double[workers.length][this.numOfComponents];
@@ -109,6 +107,7 @@ public class MasterMethod {
 		}
 		
 	}
+	
 	public void run() throws IOException, NumOfDotArguments, InterruptedException {
 		
 		ServerSocket serverSocket = new ServerSocket(portMaster);
@@ -320,7 +319,7 @@ public class MasterMethod {
 			{
 				dot.setValue(iter++, Double.parseDouble(strValue));
 			}
-			picture.addDot(dot);
+			//picture.addDot(dot);
 			sendDot(dot, port);
 			if(numOfLine % 1000000 == 0){
 				System.out.println(numOfLine + " / ");
@@ -330,7 +329,7 @@ public class MasterMethod {
 		numOfDots = numOfLine;
 		sendsDot();
 		br.close();
-		logOutput.println("Dots are sent over the network.");
+		//logOutput.println("Dots are sent over the network.");
 	}
 	private void sendsDot() throws IOException
 	{
