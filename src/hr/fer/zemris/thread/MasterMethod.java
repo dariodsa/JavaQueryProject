@@ -172,11 +172,6 @@ public class MasterMethod {
 		System.out.println("Sending parametars ...");
 		System.out.println(parametars);
 		
-		BufferedReader br = new BufferedReader(new FileReader(dotsPath.toString()));
-		numOfDots = 0;
-		while(br.readLine() != null)numOfDots++;
-		br.close();
-		
 		for(int i=0;i<workers.length;++i)
 		{
 			Socket S = new Socket(this.workers[i], this.port);
@@ -194,7 +189,16 @@ public class MasterMethod {
 			else
 				oos.writeObject(workersAddress[i+1]);
 			
-			oos.writeInt(numOfDots/workers.length/parametars.bucketSize);
+			oos.write(workers.length);
+			for(int j=0;j<workers.length; ++j) {
+				oos.writeObject(this.workersAddress[j]);
+				for(int k=0;k<numOfComponents; ++k) {
+					oos.writeDouble(minValues[j][k]);
+					oos.writeDouble(maxValues[j][k]);
+				}
+			}
+			
+			
 			oos.flush();
 			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 			int val = ois.readInt();

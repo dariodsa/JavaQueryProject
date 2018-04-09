@@ -13,7 +13,7 @@ import java.util.Stack;
 import hr.fer.zemris.exceptions.DimmensionException;
 
 
-public class BucketStructure implements Iterable<Pair> {
+public class BucketStructure /*implements Iterable<Pair>*/ {
 
 	
 	public double minValue;
@@ -21,7 +21,7 @@ public class BucketStructure implements Iterable<Pair> {
 	
 	private int numOfBuckets;
 	
-	public LinkedList<Pair>[] buckets;
+	public ArrayList<Pair>[] buckets;
 	private double sizePerBucket;
 	
 	private static Stack<Pair> cache;
@@ -32,7 +32,7 @@ public class BucketStructure implements Iterable<Pair> {
 		this.maxValue = maxValue;
 		this.numOfBuckets = numOfBuckets;
 		
-		this.buckets = new LinkedList[numOfBuckets];
+		this.buckets = new ArrayList[numOfBuckets];
 		
 		this.cache = new Stack<>();
 
@@ -51,13 +51,35 @@ public class BucketStructure implements Iterable<Pair> {
 	public void add(double newValue, int dot)
 	{
 		int newBucket = getBucket(newValue);
-		this.buckets[newBucket].add(new Pair(dot,newValue));
+		//this.buckets[newBucket].add(new Pair(dot,newValue));
+		add(newValue, dot, newBucket);
 	}
 	public void add(double newValue, int dot, int newBucket)
 	{
-		this.buckets[newBucket].add(new Pair(dot,newValue));
+		if(cache.isEmpty()) {
+			this.buckets[newBucket].add(new Pair(dot,newValue));
+		} else {
+			Pair p = cache.pop();
+			p.setId(dot);
+			p.setValue(newValue);
+			this.buckets[newBucket].add(p);
+		}
 	}
-	
+	public void delete(Pair pair)
+	{
+		int oldBucket = getBucket(pair.value);
+		
+		
+		cache.add(pair);
+		this.buckets[oldBucket].remove(pair);
+	}
+	private void initBuckets()
+	{
+		for(int i=0; i<numOfBuckets; ++i)
+		{
+			this.buckets[i] = new ArrayList<>(120);
+		}
+	}
 	public void update(Pair old, double newValue) throws DimmensionException 
 	{
 		if(!(minValue <= newValue && newValue <= maxValue))
@@ -66,10 +88,15 @@ public class BucketStructure implements Iterable<Pair> {
 		int newBucket = getBucket(newValue);
 		int id = old.id;
 		
+		old.state = !old.state;
+		
 		if(newBucket != oldBucket)
 		{
 			this.buckets[oldBucket].remove(old);
 			add(newValue, id, newBucket);
+		} else {
+			int index = this.buckets[oldBucket].indexOf(old);
+			this.buckets[oldBucket].get(index).setValue(newValue);
 		}
 	}
 	/*
@@ -228,44 +255,31 @@ public class BucketStructure implements Iterable<Pair> {
 		}
 		return result;
 	}
-	public void delete(Pair pair)
-	{
-		int oldBucket = getBucket(pair.value);
-		this.buckets[oldBucket].remove(pair);
-	}
-	private void initBuckets()
-	{
-		for(int i=0; i<numOfBuckets; ++i)
+	private int buckPosition = 0;
+	private int positionInside = 0;
+	
+	public boolean hasNext() {
+		while(true)
 		{
-			this.buckets[i] = new LinkedList<>();
+			if(positionInside + 1 < buckets[buckPosition].size()) {
+				++positionInside;
+				return true;
+			}
+			if(!buckets[buckPosition].isEmpty()) {
+				positionInside = 0;
+				return true;
+			}
+			else{
+				++buckPosition;
+				if(numOfBuckets <= buckPosition)
+					return false;
+				
+			}
 		}
 	}
-	public Iterator<Pair> iterator() {
-		
-		Iterator<Pair> it = new Iterator<Pair>(){
-			private int buckPosition = 0;
-			private Iterator<Pair> iterator = buckets[buckPosition].iterator();
-			@Override
-			public boolean hasNext() {
-				while(true)
-				{
-					if(iterator.hasNext())
-						return true;
-					else{
-						++buckPosition;
-						if(numOfBuckets <= buckPosition)
-							return false;
-						iterator = buckets[buckPosition].iterator();
-					}
-				}
-			}
 
-			@Override
-			public Pair next() {
-				return iterator.next();
-			}
-			
-		};
-		return it;
+	public Pair next() {
+		return buckets[buckPosition].get(positionInside);
 	}
+			
 }

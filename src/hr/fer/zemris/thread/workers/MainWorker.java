@@ -38,8 +38,6 @@ public class MainWorker {
 	private int mainPort;
 	public int numOfComponents;
 	
-	public int preferredNum;
-	
 	private String leftWorker;
 	private String rightWorker;
 	
@@ -49,12 +47,17 @@ public class MainWorker {
 	private double[] minValues;
 	private double[] maxValues;
 	
+	private String[] workers;
+	private double[][] minValuesWorkers;
+	private double[][] maxValuesWorkers;
+	
+	
 	public MainWorker(int port,int mainPort)
 	{
 		this.port = port;
 		this.mainPort = mainPort;
 	}
-	private void init(int preferredNum, String leftIp, String rightIp)
+	private void init(String leftIp, String rightIp)
 	{
 		
 		this.numOfComponents = parametars.minValues.length;
@@ -65,8 +68,6 @@ public class MainWorker {
 			this.minValues[i] = parametars.minValues[i];
 			this.maxValues[i] = parametars.maxValues[i];
 		}
-		
-		this.preferredNum = preferredNum;
 		
 		this.bucket = new BucketStructure[numOfComponents];
 		this.binaryTree = new BinaryTree[numOfComponents];
@@ -126,8 +127,20 @@ public class MainWorker {
 					this.leftWorker = (String)ois.readObject();
 					this.rightWorker = (String)ois.readObject();
 					
-					int num = ois.readInt();
-					init(num, leftWorker, rightWorker);
+					int numOfWorker = ois.read();
+					this.workers = new String[numOfWorker];
+					this.minValuesWorkers = new double[numOfWorker][parametars.maxValues.length];
+					this.maxValuesWorkers = new double[numOfWorker][parametars.maxValues.length];
+					
+					for(int i=0;i<numOfWorker;++i) {
+						this.workers[i] = (String) ois.readObject();
+						for(int j=0;j<minValuesWorkers[0].length;++j) {
+							this.minValuesWorkers[i][j] = ois.readDouble();
+							this.maxValuesWorkers[i][j] = ois.readDouble();
+						}
+					}
+					
+					init(leftWorker, rightWorker);
 					
 					ObjectOutputStream os = new ObjectOutputStream(client.getOutputStream());
 					os.writeInt(1);
@@ -161,29 +174,45 @@ public class MainWorker {
 						
 						toRemove.clear();
 						toAdd.clear();
-						for(Pair P : bucket[k])
+						boolean oldState = false;
+						boolean newState = false;
+						boolean stateSet = false;
+						
+						for(int i=0;i<bucket[k].buckets.length; ++i)
 						{
-								double oldValue = P.value;
-								int idDot = P.id;
-								double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
-								if(newValue < bucket[k].minValue || newValue > bucket[k].maxValue)
+								for(int j=0;j<bucket[k].buckets[i].size();++j) 
 								{
-									wrongDots.add(new DotCache(idDot,k,oldValue));
-								}
-								else
-								{
-									toRemove.add(P);
-									toAdd.add(newValue);
+									Pair P = bucket[k].buckets[i].get(j);
+									if(!stateSet) {
+										oldState = P.state;
+										newState = !oldState;
+										stateSet = true;
+									}
+									if(P.state == newState)
+										continue;
+									double oldValue = P.value;
+									int idDot = P.id;
+									double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
+									if(newValue < bucket[k].minValue || newValue > bucket[k].maxValue)
+									{
+										wrongDots.add(new DotCache(idDot,k,oldValue));
+									}
+									else
+									{
+										//toRemove.add(P);
+										//toAdd.add(newValue);
+										bucket[k].update(P, newValue);
+									}
 								}
 						}
-						for(int i=toRemove.size() - 1; i >= 0; --i)
+						/*for(int i=toRemove.size() - 1; i >= 0; --i)
 						{
 							try {
 								bucket[k].update(toRemove.get(i), toAdd.get(i));
 							} catch (DimmensionException e) {
 								e.printStackTrace();
 							}
-						}
+						}*/
 					}
 					ObjectOutputStream os3 = new ObjectOutputStream(client.getOutputStream());
 					os3.write(1);
