@@ -48,7 +48,7 @@ public class MainWorker {
 	private double[] maxValues;
 	
 	private String[] workers;
-	private Thread[] relocationThreads;
+	private RelocateThread[] relocationThreads;
 	private double[][] minValuesWorkers;
 	private double[][] maxValuesWorkers;
 	
@@ -141,9 +141,10 @@ public class MainWorker {
 							this.maxValuesWorkers[i][j] = ois.readDouble();
 						}
 					}
-					this.relocationThreads = new Thread[numOfWorker];
+					this.relocationThreads = new RelocateThread[numOfWorker];
 					for(int i = 0;i < numOfWorker; ++i) {
-						relocationThreads[i] = new RelocateThread(this.workers[i], port, 17, null);
+						relocationThreads[i] = new RelocateThread(this.workers[i], port, 17);
+						relocationThreads[i].start();
 					}
 					
 					init(leftWorker, rightWorker);
@@ -435,24 +436,18 @@ public class MainWorker {
 						int workerId=getWorker(dot);
 						listToMove[workerId].add(dot);
 					}
+					for(int i=0;i<workers.length; ++i) {
+						if(!listToMove[i].isEmpty()) {
+							relocationThreads[i].setList(wrongDots);
+						}
+					}
+					for(int i=0;i<workers.length; ++i) {
+						if(!listToMove[i].isEmpty()) {
+							relocationThreads[i].notify();
+						}
+					}
 					
-					Thread threadLeft = null;
-					Thread threadRight = null;
-					if(toLeft.size() > 0) {
-						threadLeft = new RelocateThread(leftWorker, port, 17, toLeft);
-					}
-					if(toRight.size() > 0) {
-						threadRight = new RelocateThread(rightWorker, port, 17, toRight);
-					}
 					
-					if(threadLeft != null) {
-						threadLeft.start();
-						threadLeft.join();
-					}
-					if(threadRight != null) {
-						threadRight.start();
-						threadRight.join();
-					}
 					ObjectOutputStream os16 = new ObjectOutputStream(client.getOutputStream());
 					os16.write(1);
 					os16.close();

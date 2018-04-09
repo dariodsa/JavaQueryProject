@@ -17,38 +17,48 @@ public class RelocateThread extends Thread {
 	private int type;
 	private List<DotCache> list;
 	
-	public RelocateThread(String address, int port, int type, List<DotCache> list)
+	public RelocateThread(String address, int port, int type)
 	{
 		this.address = address;
 		this.port = port;
 		this.type = type;
+	}
+	public void setList(List<DotCache> list) {
 		this.list = list;
 	}
 	public void run()
 	{
-		try {
-			Socket S = new Socket(address, port);
-			int listSize = list.size();
-			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-			oos.write(type);
-			
-			oos.writeInt(listSize);
-			for(DotCache dot :list) {
-				oos.writeInt(dot.getComponent());
-				oos.writeInt(dot.getId());
-				oos.writeDouble(dot.getValue());
+		while(true) {
+			try {
+				this.wait();
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			oos.flush();
-			InputStream ois = new ObjectInputStream(S.getInputStream());
-			int val = ois.read();
-			if(val==1) 
-			{
+			try {
+				Socket S = new Socket(address, port);
+				int listSize = list.size();
+				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+				oos.write(type);
+				
+				oos.writeInt(listSize);
+				for(DotCache dot :list) {
+					oos.writeInt(dot.getComponent());
+					oos.writeInt(dot.getId());
+					oos.writeDouble(dot.getValue());
+				}
+				oos.flush();
+				InputStream ois = new ObjectInputStream(S.getInputStream());
+				int val = ois.read();
+				if(val==1) 
+				{
+					S.close();
+					return;
+				}
 				S.close();
-				return;
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			S.close();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		
 	}
