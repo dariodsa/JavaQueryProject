@@ -47,7 +47,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class Window extends JFrame{
 	
-	int port1 = 3456;
+	int port1 = 3457;
 	int port2 = 4567;
 	
 	private JSlider moveFactor;
@@ -60,16 +60,13 @@ public class Window extends JFrame{
 	private JLabel moveFactorValue;
 	private JLabel queryFactorValue;
 	private JComboBox<String> structureType;
-	
-	private Values V = new Values();
-	private Values VMoves = new Values();
+
 	
 	private int numOfComponent = 0;
 	
 	public PPicture picture;
 	public IpTable ipTable = new IpTable();
 	
-	private PrintWriter logOutput;
 	
 	private JButton killThemAll = new JButton("Prepare for new iteration");
 	private StatisticsPanel statisticsPanel;
@@ -309,7 +306,6 @@ public class Window extends JFrame{
 		try {
 			switch (type) {
 			case 1:
-				Window.run++;
 				
 				checkInputErrors();
 				
@@ -329,8 +325,6 @@ public class Window extends JFrame{
 					adrese[i] = (String)model.getValueAt(i, 1);
 				}
 				
-				
-				logOutput = new PrintWriter(System.err);
 				MasterMethod masterMethod = new MasterMethod(
 						
 						adrese,dotFile,port1,port2
