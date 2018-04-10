@@ -1,14 +1,6 @@
 package hr.fer.zemris.structures;
- 
-import java.io.ObjectOutputStream.PutField;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.Stack;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import hr.fer.zemris.structures.BinaryTree;
@@ -27,13 +19,15 @@ public class BinaryTree extends TreeSet<Node>
 	public double minValue;
 	public double maxValue;
 	public static Stack<NumberNode> cache;
+	static {
+		BinaryTree.cache = new Stack<>();
+	}
 	
 	public BinaryTree(double minValue, double maxValue)
 	{
 		super();
 		this.minValue = minValue;
 		this.maxValue = maxValue;
-		BinaryTree.cache = new Stack<>();
 	}
 	public void updateNumberNode(NumberNode node, double newValue)
 	{

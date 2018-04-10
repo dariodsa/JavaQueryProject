@@ -1,11 +1,7 @@
 package hr.fer.zemris.structures;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Iterator;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -26,6 +22,10 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 	
 	private static Stack<Pair> cache;
 	
+	static {
+		BucketStructure.cache = new Stack<>();
+	}
+	
 	public BucketStructure(double minValue,double maxValue, int numOfBuckets) 
 	{
 		this.minValue = minValue;
@@ -34,7 +34,7 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 		
 		this.buckets = new LinkedList[numOfBuckets];
 		
-		BucketStructure.cache = new Stack<>();
+		
 
 		double size = Math.abs(maxValue - minValue);
 		this.sizePerBucket = size / numOfBuckets;

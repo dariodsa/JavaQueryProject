@@ -1,35 +1,26 @@
 package hr.fer.zemris.thread.workers;
 
-import hr.fer.zemris.exceptions.DimmensionException;
-import hr.fer.zemris.network.Network;
 import hr.fer.zemris.structures.BinaryTree;
 import hr.fer.zemris.structures.BucketStructure;
 import hr.fer.zemris.structures.Pair;
 import hr.fer.zemris.structures.Parametars;
-import hr.fer.zemris.structures.Structure;
 import hr.fer.zemris.structures.binary.NetworkNode;
 import hr.fer.zemris.structures.binary.Node;
 import hr.fer.zemris.structures.binary.NumberNode;
 import hr.fer.zemris.structures.binary.Orientation;
-import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 import hr.fer.zemris.structures.types.StructureType;
 import hr.fer.zemris.thread.RelocateThread;
 
-import java.awt.Robot;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.nio.LongBuffer;
 import java.util.*;
-import java.util.function.BiConsumer;
+
 
 public class MainWorker {
 	
@@ -101,9 +92,7 @@ public class MainWorker {
 		
 	}
 	private static List<DotCache> wrongDots;
-	private static List<NumberNode> toRemoveNode = new ArrayList<>();
-	private static List<Pair> toRemove = new ArrayList<>();
-	private static List<Double> newValue = new ArrayList<>();
+	
 	public void run()
 	{
 		try{
@@ -310,18 +299,17 @@ public class MainWorker {
 						BinaryTree B = new BinaryTree(binaryTree[k].minValue, binaryTree[k].maxValue);
 						for(Node _P : binaryTree[k])
 						{
-								if(_P instanceof NetworkNode) {
+								if(_P.getId() == -1) {
 									B.add(_P);
 									continue;
 								}
 								NumberNode P =(NumberNode)_P;
 								double oldValue = P.getValue();
-								int idDot = P.getId();
-								//if(idDot < 0) continue;
+								
 								double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
 								if(newValue < binaryTree[k].minValue || newValue > binaryTree[k].maxValue)
 								{
-									wrongDots.add(new DotCache(idDot,k,oldValue));
+									wrongDots.add(new DotCache(P.getId(),k,oldValue));
 								}
 								else
 								{
@@ -440,10 +428,11 @@ public class MainWorker {
 	}
 	private double move(double oldValue, double minMove, double maxMove, double minValue, double maxValue)
 	{
-		double rand = minMove + (maxMove-minMove) * MainWorker.rand.nextDouble();
+		double RAND = MainWorker.rand.nextDouble();
+		double rand = minMove + (maxMove-minMove) * RAND;
 		double diff = Math.abs(maxValue-minValue);
 		double move = rand * diff / 2.0;
-		move = System.currentTimeMillis()%2 == 0 ? -move : move; 
+		move = RAND <= 0.5 ? -move : move; 
 		double newValue = oldValue + move;
 		newValue -= minValue;
 	
