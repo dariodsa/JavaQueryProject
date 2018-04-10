@@ -33,6 +33,8 @@ import java.util.function.BiConsumer;
 
 public class MainWorker {
 	
+	public static Random rand = new Random();
+	
 	private String masterAddress;
 	private int port;
 	private Parametars parametars;
@@ -176,7 +178,7 @@ public class MainWorker {
 					{
 						System.err.println("Move component => " + k);
 						wrongDots.clear();
-						toRemove.clear();
+						//toRemove.clear();
 						
 						boolean oldState = false;
 						boolean newState = false;
@@ -305,14 +307,17 @@ public class MainWorker {
 					for(int k=0;k<numOfComponents;++k)
 					{
 						System.err.println("Move component => " + k);
-						
+						BinaryTree B = new BinaryTree(binaryTree[k].minValue, binaryTree[k].maxValue);
 						for(Node _P : binaryTree[k])
 						{
-								if(_P instanceof NetworkNode) continue;	
+								if(_P instanceof NetworkNode) {
+									B.add(_P);
+									continue;
+								}
 								NumberNode P =(NumberNode)_P;
 								double oldValue = P.getValue();
 								int idDot = P.getId();
-								if(idDot < 0) continue;
+								//if(idDot < 0) continue;
 								double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
 								if(newValue < binaryTree[k].minValue || newValue > binaryTree[k].maxValue)
 								{
@@ -320,16 +325,19 @@ public class MainWorker {
 								}
 								else
 								{
-									toRemoveNode.add(P);
-									MainWorker.newValue.add(newValue);
+									//toRemoveNode.add(P);
+									//MainWorker.newValue.add(newValue);
+									P.setValue(newValue);
+									B.add(P);
 								}
 						}
-						for(int i=toRemoveNode.size() - 1; i >= 0; --i)
+						binaryTree[k] = B;
+						/*for(int i=toRemoveNode.size() - 1; i >= 0; --i)
 						{
 							binaryTree[k].updateNumberNode(toRemoveNode.get(i),newValue.get(i));
 						}
 						toRemoveNode.clear();
-						newValue.clear();
+						newValue.clear();*/
 					}
 					ObjectOutputStream os15 = new ObjectOutputStream(client.getOutputStream());
 					os15.write(1);
@@ -432,7 +440,7 @@ public class MainWorker {
 	}
 	private double move(double oldValue, double minMove, double maxMove, double minValue, double maxValue)
 	{
-		double rand = minMove + (maxMove-minMove) * new Random().nextDouble();
+		double rand = minMove + (maxMove-minMove) * MainWorker.rand.nextDouble();
 		double diff = Math.abs(maxValue-minValue);
 		double move = rand * diff / 2.0;
 		move = System.currentTimeMillis()%2 == 0 ? -move : move; 
