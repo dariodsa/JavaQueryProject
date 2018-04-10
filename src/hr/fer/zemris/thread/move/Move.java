@@ -61,6 +61,7 @@ public class Move extends Thread{
 		long t1 = System.currentTimeMillis();
 		try {
 			Socket S = new Socket(workersAddress, port);
+			
 			OutputStream oos = new ObjectOutputStream(S.getOutputStream());
 			oos.write(moveNum);
 			oos.flush();
