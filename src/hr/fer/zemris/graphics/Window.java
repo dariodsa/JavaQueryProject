@@ -299,6 +299,7 @@ public class Window extends JFrame{
 		
 	}
 	private static int run = 0;
+	public static MasterMethod masterMethod;
 	private void btnOkClick(int type)
 	{
 		
@@ -324,11 +325,14 @@ public class Window extends JFrame{
 				{
 					adrese[i] = (String)model.getValueAt(i, 1);
 				}
-				
-				MasterMethod masterMethod = new MasterMethod(
-						
+				if(run == 1) {
+					masterMethod.run();
+					break;
+				}
+				masterMethod = new MasterMethod(
 						adrese,dotFile,port1,port2
 						);
+				
 				Thread workerThread = new Thread(()-> {
 					MainWorker main = new MainWorker(port2,port1);
 					main.run();

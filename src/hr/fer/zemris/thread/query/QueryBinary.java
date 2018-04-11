@@ -28,11 +28,11 @@ public class QueryBinary extends Query {
 	public QueryBinary(Parametars parametars, String[] workersAddress, int port) {
 		super(parametars, workersAddress, port);
 	}
-
+	private static List<Integer> result = new ArrayList<Integer>(50000);
 	@Override
 	public List<Integer> performQuery(double min, double max) {
 
-		List<Integer> result = new ArrayList<Integer>();
+		result.clear();
 		
 		for(int k = 0; k < numOfComponents; ++k) {
 			try (Socket S=new Socket(workersAddress[workersAddress.length/2], port)){
@@ -47,19 +47,28 @@ public class QueryBinary extends Query {
 				System.out.printf("%f %f %d iz query%n",min,max,k);
 				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 				
-				int len = ois.readInt();
+				
 				List<Integer> list2 = new ArrayList<>();
 				if(k == 0)
-					for(int i = len-1; i>=0; --i)
+					while(true)
 					{
-						result.add(ois.readInt());
+						int val = ois.readInt();
+						if(val == -1) break;
+						result.add(val);
 					}
-				else 
-					for(int i = len-1; i>=0; --i)
+				else {
+					while(true)
 					{
-						list2.add(ois.readInt());
+						
+						int val = ois.readInt();
+						if(val == -1)break;
+						list2.add(val);
 					}
-				result = Functions.intersection(result, list2);
+					result = Functions.intersection(result, list2);
+				}
+				list2.clear();
+				ois.close();
+				oos.close();
 				S.close();
 			} catch(Exception e) {e.printStackTrace();}
 		}

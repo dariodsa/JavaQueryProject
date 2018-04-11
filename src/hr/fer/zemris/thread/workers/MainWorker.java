@@ -72,11 +72,11 @@ public class MainWorker {
 			System.out.println(parametars.structureType);
 			switch (parametars.structureType) {
 			case BUCKET:
-				bucket[i] = new BucketStructure(parametars.minValues[i], parametars.maxValues[i], parametars.bucketSize);
+				bucket[i] = new BucketStructure(minValuesWorkers[MOJ_ID][i], maxValuesWorkers[MOJ_ID][i], parametars.bucketSize);
 				binaryTree[i] = null;
 				break;
 			case BINARY_TREE:
-				binaryTree[i] = new BinaryTree(parametars.minValues[i], parametars.maxValues[i]);
+				binaryTree[i] = new BinaryTree(minValuesWorkers[MOJ_ID][i], maxValuesWorkers[MOJ_ID][i]);
 				bucket[i] = null;
 				if(leftIp.length() > 0) {
 					binaryTree[i].addNetworkNode(leftIp, minValues[i], Orientation.LEFT);
@@ -92,7 +92,7 @@ public class MainWorker {
 		
 	}
 	private static List<DotCache> wrongDots;
-	
+	private int MOJ_ID;
 	public void run()
 	{
 		try{
@@ -109,6 +109,7 @@ public class MainWorker {
 					serverSocket.close();
 					return;  
 				case 1:      // send parametars
+					MOJ_ID = ois.read();
 					System.err.println("Primio parametre");
 					parametars = (Parametars)ois.readObject();
 					masterAddress = (client.getRemoteSocketAddress()).toString();
@@ -163,10 +164,13 @@ public class MainWorker {
 					
 					break;
 				case 3:      // please move  
+					wrongDots.clear();
+					
 					for(int k=0;k<numOfComponents;++k)
 					{
+						System.out.println("Granice: "+bucket[k].minValue +" " +bucket[k].maxValue);
 						System.err.println("Move component => " + k);
-						wrongDots.clear();
+						
 						//toRemove.clear();
 						
 						boolean oldState = false;
@@ -219,17 +223,35 @@ public class MainWorker {
 					double max  = ois.readDouble();
 					int component = ois.read();
 					
-					List<Integer> answer = bucket[component].query(min, max);
-					ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+					//int[] answer = bucket[component].query(min, max);
+					int firstBucket = bucket[component].getBucket(min);
+					int lastBucket = bucket[component].getBucket(max);
+					//System.out.println(min+"("+firstBucket +")"+ " " +max+" ("+lastBucket+")");
 					
-					/*byte[] res = intToByte(answer);*/
-					oos.writeInt(answer.size());
-					for(int idDot : answer) {
-						oos.writeInt(idDot);
+					int cnt = 0;
+					for(int i=firstBucket; i<=lastBucket; ++i)
+					{
+						for(Pair ida : bucket[component].buckets[i])
+						{
+							if(ida.value >= min && ida.value <= max) {
+								++cnt;
+							} 
+						}
 					}
+					System.out.println("SIZE : " + cnt);
+					ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+					oos.writeInt(cnt);
 					
+					for(int i=firstBucket; i<=lastBucket; ++i)
+					{
+						for(Pair ida : bucket[component].buckets[i])
+						{
+							if(ida.value >= min && ida.value <= max) {
+								oos.writeInt(ida.id);
+							} 
+						}
+					}
 					oos.close();
-					
 					break;
 				case 5:      // terminate data
 					if(binaryTree != null) {
@@ -255,38 +277,41 @@ public class MainWorker {
 					System.out.printf("%f %f %d%n",minValue,maxValue,componentValue);
 					SortedSet<Node> results = binaryTree[componentValue].query(minValue, maxValue);
 					System.out.println("SIZE: "+results.size());
-					List<Integer> listInt = new ArrayList<>();
+					ObjectOutputStream oos14 = new ObjectOutputStream(client.getOutputStream());
 					for(Node node : results) {
 						if(node instanceof NumberNode) {
-							listInt.add(node.getId());
+							//listInt.add(node.getId());
+							oos14.writeInt(node.getId());
 						} else {
 							System.out.println("Send request to the network");
 							//List<Integer> listFromNetwork = new ArrayList<>();
 							NetworkNode networkNode =(NetworkNode)node;
 							try {
 								Socket S = new Socket(networkNode.getAddress(), port);
-								ObjectOutputStream oos14 = new ObjectOutputStream(S.getOutputStream());
-								oos14.write(14);
-								oos14.writeDouble(minValue);
-								oos14.writeDouble(maxValue);
-								oos14.write(componentValue);
-								oos14.flush();
+								ObjectOutputStream oos14a = new ObjectOutputStream(S.getOutputStream());
+								oos14a.write(14);
+								oos14a.writeDouble(minValue);
+								oos14a.writeDouble(maxValue);
+								oos14a.write(componentValue);
+								oos14a.flush();
 								ObjectInputStream ois14a = new ObjectInputStream(S.getInputStream());
 								
 								int lenArray = ois14a.readInt();
 								for(int i = lenArray-1; i>=0; --i)
 								{
-									listInt.add(ois14a.readInt());
+									//listInt.add(ois14a.readInt());
+									oos14.writeInt(ois14a.readInt());
 								}
 								S.close();
 							} catch(Exception ex) {ex.printStackTrace();}
 						}
 					}
-					ObjectOutputStream oos14 = new ObjectOutputStream(client.getOutputStream());
-					oos14.writeInt(results.size());
+					oos14.writeInt(-1);
+					/*oos14.writeInt(listInt.size());
 					for(int res : listInt) {
 						oos14.writeInt(res);
 					}
+					listInt = null;*/
 					oos14.flush();
 					oos14.close();
 					break;

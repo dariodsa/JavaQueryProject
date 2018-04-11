@@ -1,7 +1,9 @@
 package hr.fer.zemris.thread.query;
 
 import java.net.ServerSocket;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import hr.fer.zemris.structures.Parametars;
 
@@ -13,6 +15,7 @@ public abstract class Query {
 	protected int numOfComponents;
 	
 	protected String[] workersAddress;
+
 	
 	public Query(Parametars parametars, String[] workersAddress, int port) {
 		this.parametars = parametars;

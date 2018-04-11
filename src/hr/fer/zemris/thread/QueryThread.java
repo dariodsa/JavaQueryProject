@@ -4,6 +4,7 @@ import hr.fer.zemris.thread.workers.MainWorker;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
@@ -26,8 +27,7 @@ public class QueryThread extends Thread {
 		this.component = component;
 		this.min = min;
 		this.max = max;
-	}
-	byte[] bi = new byte[8192]; 
+	} 
 	public void run()
 	{
 		try {
@@ -38,21 +38,19 @@ public class QueryThread extends Thread {
 			oos.writeDouble(max);
 			oos.write(component);
 			oos.flush();
-			BufferedInputStream ois = new BufferedInputStream(S.getInputStream());
+			ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 			
 			System.out.println("Response from worker "+address);
-			while(true)
+			int len = ois.readInt();
+			
+			for(int i=0;i<len;++i)
 			{
-				int len = ois.read(bi);
-				if(len == -1)break;
-				for(int i=0;i<len;i+=4)
-				{
-					int dotId = MainWorker.bytesToInt(new byte[] {bi[i],bi[i+1],bi[i+2],bi[i+3]});
-					MasterMethod.result[this.id].add(dotId);
-				}
+				int dotId = ois.readInt();
+				MasterMethod.result[this.id].add(dotId);
+			}
 				//MasterMethod.result[this.id].add(id);
 				
-			}
+			
 			S.close();
 		} catch (IOException e) {
 			e.printStackTrace();

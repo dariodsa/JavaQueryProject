@@ -78,12 +78,12 @@ public class MasterMethod {
 		
 		this.cacheDots = new ArrayList[this.workersAddress.length];
 		
-		this.result    = new ArrayList[this.workersAddress.length];
+		result    = new ArrayList[this.workersAddress.length];
 		
 		for(int i=0;i<this.cacheDots.length; ++i)
 		{
 			this.cacheDots[i] = new ArrayList<DotCache>();
-			this.result[i]    = new ArrayList<Integer>();
+			result[i]    = new ArrayList<Integer>();
 		}
 		int moveNum = 0;
 		int relocNum = 0;
@@ -138,9 +138,9 @@ public class MasterMethod {
 			{
 				double min = -40;
 				double max = +40;
-				List<Integer> result = query.performQuery(min, max);
-				System.out.println("Result: " + result.size());
-				result.clear();
+				int size = query.performQuery(min, max).size();
+				System.out.println("Result: " + size);
+				
 			}
 			if(rand < parametars.moveFactor)
 			{
@@ -232,6 +232,7 @@ public class MasterMethod {
 			
 			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
 			oos.write(1);
+			oos.write(i);
 			oos.writeObject(parametars);
 			
 			if(i == 0)

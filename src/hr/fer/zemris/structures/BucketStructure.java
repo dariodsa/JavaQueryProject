@@ -42,9 +42,12 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 		initBuckets();
 		
 	}
-	private int getBucket(double value)
+	public int getBucket(double value)
 	{
-		return (int)(Math.abs(value - this.minValue) / sizePerBucket);
+		int val = (int)(Math.abs(value - this.minValue) / sizePerBucket);
+		if(val == numOfBuckets) System.out.println(val);
+		if(val == numOfBuckets) return val-1;
+		return val;
 	}
 	
 	
@@ -68,8 +71,8 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 	public void delete(Pair pair)
 	{
 		int oldBucket = getBucket(pair.value);
-		
-		cache.push(pair);
+		if(cache.size() < 10000)
+			cache.push(pair);
 		this.buckets[oldBucket].remove(pair);
 	}
 	private void initBuckets()
@@ -98,25 +101,6 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 			this.buckets[oldBucket].get(index).setValue(newValue);
 			this.buckets[oldBucket].get(index).state = !this.buckets[oldBucket].get(index).state;
 		}
-	}
-	
-	public List<Integer> query(double min, double max) throws IllegalArgumentException 
-	{
-		if(max<min)
-			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
-		int firstBucket = getBucket(min);
-		int lastBucket = getBucket(max);
-		//System.out.println(min+"("+firstBucket +")"+ " " +max+" ("+lastBucket+")");
-		List<Integer>result = new ArrayList<>(500000);
-		for(int i=firstBucket; i<=lastBucket; ++i)
-		{
-			for(Pair id : buckets[i])
-			{
-				if(id.value >= min && id.value <= max)
-					result.add(id.id);
-			}
-		}
-		return result;
 	}
 	private int buckPosition = 0;
 	private int positionInside = 0;
