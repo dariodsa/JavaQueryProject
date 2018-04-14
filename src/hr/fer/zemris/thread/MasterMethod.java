@@ -87,26 +87,7 @@ public class MasterMethod {
 			result[i]    = new ArrayList<MyInteger>();
 			cache[i] = new Stack<MyInteger>();
 		}
-		int moveNum = 0;
-		int relocNum = 0;
-		switch(parametars.structureType) {
-			case BUCKET:
-				query = new QueryBucket(parametars, workersAddress, port);
-				moveNum = 3;
-				relocNum = 16;
-				break;
-			case BINARY_TREE:
-				query = new QueryBinary(parametars, workers, port);
-				moveNum = 15;
-				relocNum = 16;
-				break;
-		}
 		
-		this.moveThreads = new Move[this.workersAddress.length];
-		for(int i = 0;i < workersAddress.length; ++i) {
-			moveThreads[i] = new Move(this.workersAddress[i], port, portMaster, moveNum, relocNum,this);
-			moveThreads[i].start();
-		}
 		
 	}
 	
@@ -227,7 +208,26 @@ public class MasterMethod {
 	{
 		System.out.println("Sending parametars ...");
 		System.out.println(parametars);
+		int moveNum = 0;
+		int relocNum = 0;
+		switch(parametars.structureType) {
+			case BUCKET:
+				query = new QueryBucket(parametars, workersAddress, port);
+				moveNum = 3;
+				relocNum = 16;
+				break;
+			case BINARY_TREE:
+				query = new QueryBinary(parametars, workersAddress, port);
+				moveNum = 15;
+				relocNum = 16;
+				break;
+		}
 		
+		this.moveThreads = new Move[this.workersAddress.length];
+		for(int i = 0;i < workersAddress.length; ++i) {
+			moveThreads[i] = new Move(this.workersAddress[i], port, portMaster, moveNum, relocNum,this);
+			moveThreads[i].start();
+		}
 		for(int i=0;i<workers.length;++i)
 		{
 			Socket S = new Socket(this.workers[i], this.port);

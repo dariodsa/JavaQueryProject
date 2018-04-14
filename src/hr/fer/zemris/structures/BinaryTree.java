@@ -1,6 +1,7 @@
 package hr.fer.zemris.structures;
 import java.util.SortedSet;
 import java.util.Stack;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import hr.fer.zemris.structures.BinaryTree;
@@ -16,6 +17,7 @@ public class BinaryTree extends TreeSet<Node>
 	 */
 	private static final long serialVersionUID = -4681002200497431623L;
 	
+	
 	public double minValue;
 	public double maxValue;
 	public static Stack<NumberNode> cache;
@@ -28,6 +30,7 @@ public class BinaryTree extends TreeSet<Node>
 		super();
 		this.minValue = minValue;
 		this.maxValue = maxValue;
+		
 	}
 	public void updateNumberNode(NumberNode node, double newValue)
 	{
@@ -60,7 +63,6 @@ public class BinaryTree extends TreeSet<Node>
 	{
 		if(max<min)
 			throw new IllegalArgumentException("In the function query, max param was lower than min. %nMAX: "+max+" , MIN: "+min);
-		
 		SortedSet<Node> sortedMap = this.subSet(new NumberNode(min,-2), new NumberNode(max,-2));
 		return sortedMap;
 

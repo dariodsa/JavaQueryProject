@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hr.fer.zemris.thread.MasterMethod;
-import hr.fer.zemris.thread.MoveThread;
 
 public class Move extends Thread{
 	
@@ -66,12 +65,7 @@ public class Move extends Thread{
 			oos.write(moveNum);
 			oos.flush();
 			InputStream ois = new ObjectInputStream(S.getInputStream());
-			int val = ois.read();
-			if(val==1) 
-			{
-				S.close();
-				return;
-			}
+			ois.readAllBytes();
 			S.close();
 		} catch (IOException e) {
 			e.printStackTrace();

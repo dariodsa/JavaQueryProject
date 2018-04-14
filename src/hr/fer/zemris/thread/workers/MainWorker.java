@@ -93,6 +93,8 @@ public class MainWorker {
 	}
 	private static List<DotCache> wrongDots;
 	private int MOJ_ID;
+	
+	private static byte[] moj = new byte[1000];
 	public void run()
 	{
 		try{
@@ -103,7 +105,7 @@ public class MainWorker {
 				Socket client = serverSocket.accept();
 				ObjectInputStream ois = new ObjectInputStream( new BufferedInputStream(client.getInputStream()));
 				int id = ois.read();
-				System.err.printf("I see %d%n", id);
+				System.out.printf("I see %d%n", id);
 				switch (id) {
 				case 0:      // terminate thread and connection
 					serverSocket.close();
@@ -215,7 +217,7 @@ public class MainWorker {
 						}*/
 					}
 					ObjectOutputStream os3 = new ObjectOutputStream(client.getOutputStream());
-					os3.write(1);
+					os3.write(moj);
 					os3.close();
 					break;
 				case 4:      // please query 
@@ -306,6 +308,7 @@ public class MainWorker {
 							} catch(Exception ex) {ex.printStackTrace();}
 						}
 					}
+					results.clear();
 					oos14.writeInt(-1);
 					/*oos14.writeInt(listInt.size());
 					for(int res : listInt) {
@@ -321,11 +324,13 @@ public class MainWorker {
 					for(int k=0;k<numOfComponents;++k)
 					{
 						System.err.println("Move component => " + k);
-						BinaryTree B = new BinaryTree(binaryTree[k].minValue, binaryTree[k].maxValue);
+						
+						List<Node>nodes = new ArrayList<>(binaryTree[k].size());
 						for(Node _P : binaryTree[k])
 						{
 								if(_P.getId() == -1) {
-									B.add(_P);
+									//B.add(_P);
+									nodes.add(_P);
 									continue;
 								}
 								NumberNode P =(NumberNode)_P;
@@ -341,19 +346,18 @@ public class MainWorker {
 									//toRemoveNode.add(P);
 									//MainWorker.newValue.add(newValue);
 									P.setValue(newValue);
-									B.add(P);
+									//B.add(P);
+									nodes.add(P);
 								}
 						}
-						binaryTree[k] = B;
-						/*for(int i=toRemoveNode.size() - 1; i >= 0; --i)
-						{
-							binaryTree[k].updateNumberNode(toRemoveNode.get(i),newValue.get(i));
-						}
-						toRemoveNode.clear();
-						newValue.clear();*/
+						binaryTree[k].clear();
+						for(Node n : nodes) binaryTree[k].add(n);
+						
+						
 					}
 					ObjectOutputStream os15 = new ObjectOutputStream(client.getOutputStream());
-					os15.write(1);
+					os15.write(moj);
+					os15.flush();
 					os15.close();
 					break;
 				case 16:
