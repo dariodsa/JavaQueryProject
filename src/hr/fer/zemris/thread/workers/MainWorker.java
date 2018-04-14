@@ -279,7 +279,7 @@ public class MainWorker {
 					System.out.println("SIZE: "+results.size());
 					ObjectOutputStream oos14 = new ObjectOutputStream(client.getOutputStream());
 					for(Node node : results) {
-						if(node instanceof NumberNode) {
+						if(node.getClass() == NumberNode.class) {
 							//listInt.add(node.getId());
 							oos14.writeInt(node.getId());
 						} else {

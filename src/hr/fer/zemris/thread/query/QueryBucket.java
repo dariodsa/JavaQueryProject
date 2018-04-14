@@ -6,18 +6,19 @@ import java.util.List;
 import hr.fer.zemris.structures.dot.*;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.thread.MasterMethod;
+import hr.fer.zemris.thread.MyInteger;
 import hr.fer.zemris.thread.QueryThread;
 
 public class QueryBucket extends Query{
 	
-	private static List<Integer> result = new ArrayList<Integer>(50000);
+	private static List<MyInteger> result = new ArrayList<>(50000);
 	
 	public QueryBucket(Parametars parametars, String[] workersAddress, int port) {
 		super(parametars,workersAddress, port);
 	}
 
 	@Override
-	public List<Integer> performQuery(double min, double max) {
+	public List<MyInteger> performQuery(double min, double max) {
 		System.out.println("I will perform query operation.");
 		
 		result.clear();
@@ -50,8 +51,8 @@ public class QueryBucket extends Query{
 					
 					if(k == 0)
 					{
-						for(Integer r : MasterMethod.result[j]){
-							result.add(r.intValue());
+						for(MyInteger r : MasterMethod.result[j]){
+							result.add(r);
 						}
 					}
 					else
@@ -59,7 +60,9 @@ public class QueryBucket extends Query{
 						result = Functions.intersection(result, MasterMethod.result[j]);
 						//result.retainAll(MasterMethod.result[j]);
 					}
-					
+					for(MyInteger m : MasterMethod.result[j]) {
+						MasterMethod.cache[j].push(m);
+					}
 					MasterMethod.result[j].clear();
 					
 				}

@@ -59,8 +59,8 @@ public class MasterMethod {
 	
 	int numOfDots;
 	
-	public static ArrayList<Integer>[] result;
-	
+	public static ArrayList<MyInteger>[] result;
+	public static Stack<MyInteger>[] cache;
 	public static int moveFinish;
 	
 	public MasterMethod( String[] workers, Path dotsPath, int portMaster,int port) throws IOException, NumOfDotArguments{
@@ -79,11 +79,13 @@ public class MasterMethod {
 		this.cacheDots = new ArrayList[this.workersAddress.length];
 		
 		result    = new ArrayList[this.workersAddress.length];
+		cache     = new Stack[this.workersAddress.length];
 		
 		for(int i=0;i<this.cacheDots.length; ++i)
 		{
 			this.cacheDots[i] = new ArrayList<DotCache>();
-			result[i]    = new ArrayList<Integer>();
+			result[i]    = new ArrayList<MyInteger>();
+			cache[i] = new Stack<MyInteger>();
 		}
 		int moveNum = 0;
 		int relocNum = 0;

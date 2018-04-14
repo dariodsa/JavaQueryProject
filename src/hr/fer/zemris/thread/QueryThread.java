@@ -46,7 +46,10 @@ public class QueryThread extends Thread {
 			for(int i=0;i<len;++i)
 			{
 				int dotId = ois.readInt();
-				MasterMethod.result[this.id].add(dotId);
+				if(MasterMethod.cache[this.id].isEmpty())
+					MasterMethod.result[this.id].add(new MyInteger(dotId));
+				else 
+					MasterMethod.result[this.id].add(MasterMethod.cache[this.id].pop().setValue(dotId));
 			}
 				//MasterMethod.result[this.id].add(id);
 				

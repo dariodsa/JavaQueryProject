@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import hr.fer.zemris.structures.Parametars;
+import hr.fer.zemris.thread.MyInteger;
 
 public abstract class Query {
 	
@@ -24,5 +25,5 @@ public abstract class Query {
 		this.port = port;
 	}
 	
-	public abstract List<Integer> performQuery(double min, double max);
+	public abstract List<MyInteger> performQuery(double min, double max);
 }

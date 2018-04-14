@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import javax.management.ListenerNotFoundException;
 
@@ -19,6 +20,7 @@ import hr.fer.zemris.structures.binary.Node;
 import hr.fer.zemris.structures.binary.NumberNode;
 import hr.fer.zemris.structures.dot.Functions;
 import hr.fer.zemris.thread.MasterMethod;
+import hr.fer.zemris.thread.MyInteger;
 import hr.fer.zemris.thread.QueryThread;
 import hr.fer.zemris.thread.workers.MainWorker;
 
@@ -28,9 +30,11 @@ public class QueryBinary extends Query {
 	public QueryBinary(Parametars parametars, String[] workersAddress, int port) {
 		super(parametars, workersAddress, port);
 	}
-	private static List<Integer> result = new ArrayList<Integer>(50000);
+	private static List<MyInteger> result = new ArrayList<>(50000);
+	
+	private static Stack<MyInteger> cache = new Stack<>();
 	@Override
-	public List<Integer> performQuery(double min, double max) {
+	public List<MyInteger> performQuery(double min, double max) {
 
 		result.clear();
 		
@@ -48,13 +52,15 @@ public class QueryBinary extends Query {
 				ObjectInputStream ois = new ObjectInputStream(S.getInputStream());
 				
 				
-				List<Integer> list2 = new ArrayList<>();
+				List<MyInteger> list2 = new ArrayList<>();
 				if(k == 0)
 					while(true)
 					{
 						int val = ois.readInt();
 						if(val == -1) break;
-						result.add(val);
+						if(cache.isEmpty())
+							result.add(new MyInteger(val));
+						else result.add(cache.pop().setValue(val));
 					}
 				else {
 					while(true)
@@ -62,10 +68,15 @@ public class QueryBinary extends Query {
 						
 						int val = ois.readInt();
 						if(val == -1)break;
-						list2.add(val);
+						//list2.add(new MyInteger(val));
+						if(cache.isEmpty())
+							list2.add(new MyInteger(val));
+						else list2.add(cache.pop().setValue(val));
 					}
 					result = Functions.intersection(result, list2);
 				}
+				for(MyInteger m : list2)
+					cache.push(m);
 				list2.clear();
 				ois.close();
 				oos.close();
