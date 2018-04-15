@@ -26,40 +26,36 @@ public class RelocateThread extends Thread {
 	public void setList(List<DotCache> list) {
 		this.list = list;
 	}
-	public synchronized void run()
+	public void run()
 	{
-		while(true) {
-			try {
-				this.wait();
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+		System.out.println("Usao u relocate thread");
+		try {
+			Socket S = new Socket(address, port);
+			System.out.println(address);
+			int listSize = list.size();
+			ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
+			oos.write(17);
+			System.out.println(type);
+			System.out.println("Imam vezu");
+			oos.writeInt(listSize);
+			for(DotCache dot :list) {
+				oos.writeInt(dot.getComponent());
+				oos.writeInt(dot.getId());
+				oos.writeDouble(dot.getValue());
 			}
-			try {
-				Socket S = new Socket(address, port);
-				int listSize = list.size();
-				ObjectOutputStream oos = new ObjectOutputStream(S.getOutputStream());
-				oos.write(type);
-				
-				oos.writeInt(listSize);
-				for(DotCache dot :list) {
-					oos.writeInt(dot.getComponent());
-					oos.writeInt(dot.getId());
-					oos.writeDouble(dot.getValue());
-				}
-				oos.flush();
-				InputStream ois = new ObjectInputStream(S.getInputStream());
-				int val = ois.read();
-				if(val==1) 
-				{
-					S.close();
-					return;
-				}
+			oos.flush();
+			System.out.println("NJega cekam " + port);
+			InputStream ois = new ObjectInputStream(S.getInputStream());
+			int val = ois.read();
+			System.out.println("Gotov");
+			if(val==1) 
+			{
 				S.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+				return;
 			}
+			S.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		
 	}
 }

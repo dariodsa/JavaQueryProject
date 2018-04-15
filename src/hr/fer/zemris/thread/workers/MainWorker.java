@@ -12,6 +12,7 @@ import hr.fer.zemris.structures.dot.DotCache;
 import hr.fer.zemris.structures.types.StructureType;
 import hr.fer.zemris.thread.RelocateThread;
 
+import java.awt.Robot;
 import java.io.BufferedInputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -42,7 +43,6 @@ public class MainWorker {
 	private double[] maxValues;
 	
 	private String[] workers;
-	private RelocateThread[] relocationThreads;
 	private double[][] minValuesWorkers;
 	private double[][] maxValuesWorkers;
 	
@@ -101,18 +101,23 @@ public class MainWorker {
 			ServerSocket serverSocket = new ServerSocket(port);
 			while(true)
 			{
-				
+				System.out.println("Cekam dalje ...");
+				Robot robot = new Robot();
+			    robot.mouseMove(100, 100);
+			    robot.mouseMove(400, 400);
 				Socket client = serverSocket.accept();
 				ObjectInputStream ois = new ObjectInputStream( new BufferedInputStream(client.getInputStream()));
+				System.out.println("Dosao accept");
 				int id = ois.read();
 				System.out.printf("I see %d%n", id);
+				robot.mouseMove(300, 300);
 				switch (id) {
 				case 0:      // terminate thread and connection
 					serverSocket.close();
 					return;  
 				case 1:      // send parametars
 					MOJ_ID = ois.read();
-					System.err.println("Primio parametre");
+					System.out.println("Primio parametre");
 					parametars = (Parametars)ois.readObject();
 					masterAddress = (client.getRemoteSocketAddress()).toString();
 					
@@ -132,11 +137,7 @@ public class MainWorker {
 							this.maxValuesWorkers[i][j] = ois.readDouble();
 						}
 					}
-					this.relocationThreads = new RelocateThread[numOfWorker];
-					for(int i = 0;i < numOfWorker; ++i) {
-						relocationThreads[i] = new RelocateThread(this.workers[i], port, 17);
-						relocationThreads[i].start();
-					}
+					
 					
 					init(leftWorker, rightWorker);
 					
@@ -146,7 +147,7 @@ public class MainWorker {
 					break;   
 				case 2:      // init position of dots
 					int num2 = ois.readInt();
-					System.err.println("Loading ... "+num2);
+					System.out.println("Loading ... "+num2);
 					for(int i=0;i<num2;++i)
 					{
 						int identi   = ois.readInt();
@@ -162,7 +163,7 @@ public class MainWorker {
 					ObjectOutputStream os2 = new ObjectOutputStream(client.getOutputStream());
 					os2.writeInt(1);
 					os2.close();
-					System.err.println("Primio početne pozicije.");
+					System.out.println("Primio početne pozicije.");
 					
 					break;
 				case 3:      // please move  
@@ -171,7 +172,7 @@ public class MainWorker {
 					for(int k=0;k<numOfComponents;++k)
 					{
 						System.out.println("Granice: "+bucket[k].minValue +" " +bucket[k].maxValue);
-						System.err.println("Move component => " + k);
+						System.out.println("Move component => " + k);
 						
 						//toRemove.clear();
 						
@@ -197,7 +198,7 @@ public class MainWorker {
 									double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
 									if(newValue < bucket[k].minValue || newValue > bucket[k].maxValue)
 									{
-										wrongDots.add(new DotCache(idDot,k,oldValue));
+										wrongDots.add(new DotCache(idDot,k,newValue));
 									}
 									else
 									{
@@ -217,7 +218,7 @@ public class MainWorker {
 						}*/
 					}
 					ObjectOutputStream os3 = new ObjectOutputStream(client.getOutputStream());
-					os3.write(moj);
+					os3.write(1);
 					os3.close();
 					break;
 				case 4:      // please query 
@@ -323,7 +324,7 @@ public class MainWorker {
 					wrongDots.clear();
 					for(int k=0;k<numOfComponents;++k)
 					{
-						System.err.println("Move component => " + k);
+						System.out.println("Move component => " + k);
 						
 						List<Node>nodes = new ArrayList<>(binaryTree[k].size());
 						for(Node _P : binaryTree[k])
@@ -339,7 +340,7 @@ public class MainWorker {
 								double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
 								if(newValue < binaryTree[k].minValue || newValue > binaryTree[k].maxValue)
 								{
-									wrongDots.add(new DotCache(P.getId(),k,oldValue));
+									wrongDots.add(new DotCache(P.getId(),k,newValue));
 								}
 								else
 								{
@@ -356,7 +357,7 @@ public class MainWorker {
 						
 					}
 					ObjectOutputStream os15 = new ObjectOutputStream(client.getOutputStream());
-					os15.write(moj);
+					os15.write(1);
 					os15.flush();
 					os15.close();
 					break;
@@ -370,19 +371,33 @@ public class MainWorker {
 					for(DotCache dot : wrongDots) {
 						int workerId=getWorker(dot);
 						listToMove[workerId].add(dot);
-					}
-					for(int i=0;i<workers.length; ++i) {
-						if(!listToMove[i].isEmpty()) {
-							relocationThreads[i].setList(wrongDots);
-						}
-					}
-					for(int i=0;i<workers.length; ++i) {
-						if(!listToMove[i].isEmpty()) {
-							relocationThreads[i].notify();
-						}
+						//System.out.println(dot.getValue() + " " +workerId +" " +this.minValuesWorkers[workerId][dot.getComponent()] +" " +this.maxValuesWorkers[workerId][dot.getComponent()]);
 					}
 					
+					
+					RelocateThread[] relocationThreads = new RelocateThread[workers.length];
+					for(int i = 0;i < workers.length; ++i) {
+						relocationThreads[i] = new RelocateThread(this.workers[i], port, 17);
+						
+					}
+					
+					for(int i=0;i<workers.length; ++i) {
+						if(!listToMove[i].isEmpty()) {
+							System.out.println(workers[i] +" "+ listToMove[i].size());
+							relocationThreads[i].setList(listToMove[i]);
+							relocationThreads[i].start();
+							relocationThreads[i].join();
+						}
+					}
+					System.out.println("Sve dretve gotove");
+					/*for(int i=0;i<workers.length; ++i) {
+						if(!listToMove[i].isEmpty()) {
+							
+						}
+					}*/
+					
 					wrongDots.clear();
+					System.out.println("cekam odogovor od " +client.getInetAddress().getHostAddress());
 					ObjectOutputStream os16 = new ObjectOutputStream(client.getOutputStream());
 					os16.write(1);
 					os16.close();
@@ -410,6 +425,7 @@ public class MainWorker {
 					System.out.println("Accept new dots.");
 					ObjectOutputStream os17 = new ObjectOutputStream(client.getOutputStream());
 					os17.write(1);
+					os17.flush();
 					os17.close();
 					break;
 					

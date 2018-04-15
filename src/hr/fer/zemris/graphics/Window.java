@@ -9,6 +9,7 @@ import hr.fer.zemris.graphics.component.MultiValueSliderChoose;
 import hr.fer.zemris.graphics.component.PPicture;
 import hr.fer.zemris.graphics.component.statistics.StatisticsPanel;
 import hr.fer.zemris.graphics.constants.Constants;
+import hr.fer.zemris.structures.MOVES;
 import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.types.StructureType;
 import hr.fer.zemris.thread.MasterMethod;
@@ -195,13 +196,16 @@ public class Window extends JFrame{
 					MasterMethod.parametars.minMove = new double[numOfComponent];
 					if(M.getType() == 0) {
 						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.minMove[i] = 0;
-						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.maxMove[i] = 0.01;
+						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.maxMove[i] = 0.005;
+						MasterMethod.parametars.move = MOVES.SmallMove;
 					} else if(M.getType() == 1) {
 						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.minMove[i] = 0.15;
 						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.maxMove[i] = 0.30;
+						MasterMethod.parametars.move = MOVES.MediumMove;
 					} else if(M.getType() == 2) {
 						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.minMove[i] = 0.4;
 						for(int i=0;i<numOfComponent;++i) MasterMethod.parametars.maxMove[i] = 0.5;
+						MasterMethod.parametars.move = MOVES.BigMove;
 					}
 				} catch (Exception e1) {
 					e1.printStackTrace();

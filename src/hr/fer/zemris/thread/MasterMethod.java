@@ -8,6 +8,7 @@ import hr.fer.zemris.structures.Parametars;
 import hr.fer.zemris.structures.dot.Dot;
 import hr.fer.zemris.structures.dot.DotCache;
 import hr.fer.zemris.structures.dot.Functions;
+import hr.fer.zemris.structures.types.StructureType;
 import hr.fer.zemris.thread.move.Move;
 
 import hr.fer.zemris.thread.query.Query;
@@ -116,53 +117,91 @@ public class MasterMethod {
 		{
 			System.out.print(String.format("%d. %s%n", i+1, "iteration"));
 			double rand = MasterMethod.rand.nextDouble();
+			long tQueryStart = 0, tQueryEnd = 0, tMoveStart = 0, tMoveEnd = 0;
 			
+			if(parametars.structureType == StructureType.BUCKET)
+				System.err.print("Bucket ");
+			else
+				System.err.print("BBT ");
+			System.err.printf("%d ",parametars.bucketSize);
+			System.err.printf("%d ",workersAddress.length);
+			System.err.print(parametars.move + " ");
 			if(rand < parametars.queryFactor)
 			{
+				tQueryStart = System.currentTimeMillis();
 				double min = -40;
 				double max = +40;
-				int size = query.performQuery(min, max).size();
+				List<MyInteger> list = query.performQuery(min, max);
+				int size = list.size();
 				System.out.println("Result: " + size);
-				
+				tQueryEnd = System.currentTimeMillis();
 			}
+			System.err.print((tQueryEnd-tQueryStart) + " ");
 			if(rand < parametars.moveFactor)
 			{
 				moveFinish = 0;
 				System.out.println("move");
-				for(int j=0;j<workersAddress.length;++j) {
-					moveThreads[j].STATUS = 1;
-					synchronized (moveThreads[j]) {
-						try {
-							moveThreads[j].notify();
-						} catch(IllegalMonitorStateException ex) {System.out.println(ex.getMessage());}
-					}
-					synchronized (this) {
-						System.out.println("waiting.");
-						this.wait();
-						System.out.println("waiting exit..");
-					}
-				}
+				System.out.println("I will perform move operation.");
 				
+				long t1 = System.currentTimeMillis();
+				int moveNum = 0;
+				int relocNum = 0;
+				switch(parametars.structureType) {
+					case BUCKET:
+						//query = new QueryBucket(parametars, workersAddress, port);
+						moveNum = 3;
+						relocNum = 16;
+						break;
+					case BINARY_TREE:
+						//query = new QueryBinary(parametars, workersAddress, port);
+						moveNum = 15;
+						relocNum = 16;
+						break;
+				}
+				this.moveThreads = new Move[this.workersAddress.length];
+				for(int ia = 0;ia < workersAddress.length; ++ia) {
+					moveThreads[ia] = new Move(this.workersAddress[ia], port, portMaster, moveNum, relocNum,this);
+					moveThreads[ia].start();
+				}
+				for(int ia=0;ia<this.workersAddress.length;++ia) {
+					moveThreads[ia].join();
+				}
+				long t2 = System.currentTimeMillis();
+
+				System.out.printf("Move operation completed. %d milisec%n", t2 - t1);
+				System.err.printf("%d ", t2 - t1); 
 				
 				System.out.println("Done.");
-				moveFinish = 0;
-				for(int j=0;j<workersAddress.length;++j) {
-					moveThreads[j].STATUS = 2;
-					synchronized (moveThreads[j]) {
-						try {
-							moveThreads[j].notify();
-						} catch(IllegalMonitorStateException ex) {System.out.println(ex.getMessage());}
-					}
-					synchronized (this) {
-						System.out.println("waiting.");
-						this.wait();
-						System.out.println("waiting exit..");
-					}
-				}
 				
-				System.out.println("Done.");
+				System.out.println("I will perform relocation operation.");
+				
+				long t1a = System.currentTimeMillis();
+				for(int j=0;j<workersAddress.length;++j) {
+					try {
+						Socket S = new Socket(workersAddress[j], port);
+						OutputStream oos = new ObjectOutputStream(S.getOutputStream());
+						oos.write(16);
+						oos.flush();
+						InputStream ois = new ObjectInputStream(S.getInputStream());
+						int val = ois.read();
+						if(val==1) 
+						{
+							S.close();
+						}
+						S.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					//Thread.sleep(5000);
+					System.out.println("PUstam dalje ...");
+				}
+				long t2a = System.currentTimeMillis();
+				System.out.printf("Relocation operation completed. %d milisec%n", t2a - t1a);
+				System.err.printf("%d ", t2a - t1a);
 			}
 			
+			
+			System.err.println();
 		}
 		long tMainEnd = System.currentTimeMillis();
 		System.out.println("Total time: "+(tMainEnd-tMain));
@@ -208,25 +247,15 @@ public class MasterMethod {
 	{
 		System.out.println("Sending parametars ...");
 		System.out.println(parametars);
-		int moveNum = 0;
-		int relocNum = 0;
-		switch(parametars.structureType) {
-			case BUCKET:
-				query = new QueryBucket(parametars, workersAddress, port);
-				moveNum = 3;
-				relocNum = 16;
-				break;
-			case BINARY_TREE:
-				query = new QueryBinary(parametars, workersAddress, port);
-				moveNum = 15;
-				relocNum = 16;
-				break;
-		}
 		
-		this.moveThreads = new Move[this.workersAddress.length];
-		for(int i = 0;i < workersAddress.length; ++i) {
-			moveThreads[i] = new Move(this.workersAddress[i], port, portMaster, moveNum, relocNum,this);
-			moveThreads[i].start();
+		
+		switch(parametars.structureType) {
+		case BUCKET:
+			query = new QueryBucket(parametars, workersAddress, port);
+			break;
+		case BINARY_TREE:
+			query = new QueryBinary(parametars, workersAddress, port);
+			break;
 		}
 		for(int i=0;i<workers.length;++i)
 		{
@@ -291,13 +320,14 @@ public class MasterMethod {
 					maxValues[i][k] = minValues[i][k] + each;
 				}
 				else if(i == workers.length - 1){
-					minValues[i][k] = maxValues[i][k] - each;
+					minValues[i][k] = maxValues[i][k];
 					maxValues[i][k] = parametars.maxValues[k];
 				}
 				else {
 					minValues[i][k] = maxValues[i-1][k];
 					maxValues[i][k] = minValues[i][k] + each;
 				}
+				System.out.println("PAR "+i +" " +k +" "+minValues[i][k] + maxValues[i][k]);
 			}
 		}
 	}
@@ -325,7 +355,7 @@ public class MasterMethod {
 			//picture.addDot(dot);
 			sendDot(dot, port);
 			if(numOfLine % 1000000 == 0){
-				System.out.println(numOfLine + " / ");
+				
 				sendsDot();
 			}
 		}

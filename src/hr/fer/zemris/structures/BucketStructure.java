@@ -45,8 +45,9 @@ public class BucketStructure /*implements Iterable<Pair>*/ {
 	public int getBucket(double value)
 	{
 		int val = (int)(Math.abs(value - this.minValue) / sizePerBucket);
-		if(val == numOfBuckets) System.out.println(val);
-		if(val == numOfBuckets) return val-1;
+		if(val >= numOfBuckets) {
+			return numOfBuckets-1;
+		}
 		return val;
 	}
 	

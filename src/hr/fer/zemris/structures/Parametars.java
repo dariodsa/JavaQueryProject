@@ -21,6 +21,7 @@ public class Parametars implements Serializable{
 	
 	public double[] minMove;
 	public double[] maxMove;
+	public MOVES move;
 	
 	@Override
 	public String toString()
