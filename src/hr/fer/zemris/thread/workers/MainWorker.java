@@ -273,7 +273,6 @@ public class MainWorker {
 					break;
 				
 				case 14:  //query
-					
 					double minValue = ois.readDouble();
 					double maxValue = ois.readDouble();
 					int componentValue = ois.read();
@@ -309,7 +308,7 @@ public class MainWorker {
 							} catch(Exception ex) {ex.printStackTrace();}
 						}
 					}
-					results.clear();
+					//results.clear();
 					oos14.writeInt(-1);
 					/*oos14.writeInt(listInt.size());
 					for(int res : listInt) {
@@ -326,6 +325,7 @@ public class MainWorker {
 					{
 						System.out.println("Move component => " + k);
 						
+						System.out.println("VELICINA " +binaryTree[k].size());
 						List<Node>nodes = new ArrayList<>(binaryTree[k].size());
 						for(Node _P : binaryTree[k])
 						{
@@ -340,6 +340,7 @@ public class MainWorker {
 								double newValue = move(oldValue,parametars.minMove[k],parametars.maxMove[k],parametars.minValues[k],parametars.maxValues[k]);
 								if(newValue < binaryTree[k].minValue || newValue > binaryTree[k].maxValue)
 								{
+									System.out.println("wrong value " + newValue);
 									wrongDots.add(new DotCache(P.getId(),k,newValue));
 								}
 								else
@@ -353,7 +354,7 @@ public class MainWorker {
 						}
 						binaryTree[k].clear();
 						for(Node n : nodes) binaryTree[k].add(n);
-						
+						System.out.println("VELICINA " +binaryTree[k].size() +" "+nodes.size() + " "  +wrongDots.size());
 						
 					}
 					ObjectOutputStream os15 = new ObjectOutputStream(client.getOutputStream());
@@ -363,6 +364,7 @@ public class MainWorker {
 					break;
 				case 16:
 					//relocate Structure
+					
 					List<DotCache>[] listToMove = new ArrayList[workers.length];
 					for(int i = 0; i < workers.length; ++i) {
 						listToMove[i] = new ArrayList<>();
@@ -390,6 +392,7 @@ public class MainWorker {
 						}
 					}
 					System.out.println("Sve dretve gotove");
+					
 					/*for(int i=0;i<workers.length; ++i) {
 						if(!listToMove[i].isEmpty()) {
 							
